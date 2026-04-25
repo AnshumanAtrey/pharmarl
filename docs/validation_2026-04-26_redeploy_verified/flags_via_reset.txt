@@ -1,0 +1,14 @@
+=== Flags via HTTP /reset (issue #9 fix) ===
+
+Locally — verify that /reset accepts critic_enabled / schema_drift_enabled / oversight_enabled.
+Found local copy...
+2026-04-26 03:13:36,016 [INFO] server.oracles.docking_mpro: Using classifier oracle DRD2 for binding component (docking unavailable — install pyscreener+Vina to enable docking).
+2026-04-26 03:13:36,017 [INFO] httpx: HTTP Request: POST http://testserver/reset "HTTP/1.1 200 OK"
+2026-04-26 03:13:36,020 [INFO] httpx: HTTP Request: POST http://testserver/step "HTTP/1.1 200 OK"
+reset status: 200
+observation keys: ['active_constraints', 'available_fragments', 'critique', 'difficulty', 'drift_warning', 'episode_id', 'last_action_valid', 'message', 'oversight', 'properties', 'selfies', 'smiles', 'steps_remaining', 'target', 'truncated', 'valid_actions']
+critique populated: True
+drift_profile in metadata: None
+
+after step status: 200
+step observation has critique: True

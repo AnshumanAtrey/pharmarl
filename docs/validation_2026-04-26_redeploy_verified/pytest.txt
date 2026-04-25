@@ -1,0 +1,142 @@
+=== pytest ===
+Command: .venv/bin/python -m pytest tests/ -v --tb=short
+Started: Sat Apr 25 21:43:14 UTC 2026
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.6, pytest-9.0.3, pluggy-1.6.0 -- /Users/atrey/Desktop/code/side-claude-income/sst-hack/round2/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/atrey/Desktop/code/side-claude-income/sst-hack/round2
+configfile: pyproject.toml
+plugins: cov-7.1.0, zarr-3.1.5, anyio-4.13.0
+collecting ... collected 98 items
+
+tests/test_action_normalization.py::test_canonical_action_type_passes_through_unchanged PASSED [  1%]
+tests/test_action_normalization.py::test_uppercase_action_key_is_remapped PASSED [  2%]
+tests/test_action_normalization.py::test_lowercase_action_key_is_remapped PASSED [  3%]
+tests/test_action_normalization.py::test_verbose_llm_output_strips_noise PASSED [  4%]
+tests/test_action_normalization.py::test_substitute_atom_param_keys_remapped PASSED [  5%]
+tests/test_action_normalization.py::test_non_dict_input_passed_through PASSED [  6%]
+tests/test_action_normalization.py::test_action_already_canonical_with_extras_keeps_only_known PASSED [  7%]
+tests/test_critic.py::test_critic_rejects_invalid_smiles PASSED          [  8%]
+tests/test_critic.py::test_critic_warns_about_high_mw PASSED             [  9%]
+tests/test_critic.py::test_critic_approves_drug_like_molecule PASSED     [ 10%]
+tests/test_critic.py::test_critic_flags_pains_pattern PASSED             [ 11%]
+tests/test_critic.py::test_critic_is_deterministic PASSED                [ 12%]
+tests/test_critic.py::test_critic_too_small_flag PASSED                  [ 13%]
+tests/test_critic.py::test_critic_disabled_by_default PASSED             [ 14%]
+tests/test_critic.py::test_critic_enabled_populates_observation PASSED   [ 15%]
+tests/test_cross_family.py::test_amlodipine_mpo_in_known_targets PASSED  [ 16%]
+tests/test_cross_family.py::test_secondary_held_out_default_is_none PASSED [ 17%]
+tests/test_cross_family.py::test_secondary_held_out_can_be_configured PASSED [ 18%]
+tests/test_cross_family.py::test_cross_family_oracle_returns_in_range PASSED [ 19%]
+tests/test_cross_family.py::test_cross_family_distinct_from_kinase PASSED [ 20%]
+tests/test_cross_family.py::test_unknown_target_still_safe PASSED        [ 21%]
+tests/test_env.py::test_reset_returns_observation_with_smiles PASSED     [ 22%]
+tests/test_env.py::test_step_advances_step_count PASSED                  [ 23%]
+tests/test_env.py::test_invalid_fragment_marked_invalid PASSED           [ 24%]
+tests/test_env.py::test_terminate_too_early_penalized PASSED             [ 25%]
+tests/test_env.py::test_terminate_after_edit_completes PASSED            [ 26%]
+tests/test_env.py::test_max_steps_truncates_episode PASSED               [ 27%]
+tests/test_env.py::test_state_property_returns_valid_state PASSED        [ 28%]
+tests/test_http_serialization.py::test_critique_is_top_level_field_in_http_response PASSED [ 29%]
+tests/test_http_serialization.py::test_oversight_is_top_level_field_in_http_response PASSED [ 30%]
+tests/test_http_serialization.py::test_reset_accepts_critic_enabled_flag PASSED [ 31%]
+tests/test_http_serialization.py::test_reset_accepts_schema_drift_enabled_flag PASSED [ 32%]
+tests/test_http_serialization.py::test_reset_accepts_oversight_enabled_flag_without_calling_llm PASSED [ 33%]
+tests/test_http_serialization.py::test_reset_with_no_flags_keeps_defaults_off PASSED [ 34%]
+tests/test_http_serialization.py::test_reset_unknown_extra_field_is_ignored PASSED [ 35%]
+tests/test_oracles.py::test_qed_aspirin_in_range PASSED                  [ 36%]
+tests/test_oracles.py::test_qed_invalid_returns_zero PASSED              [ 37%]
+tests/test_oracles.py::test_sa_returns_in_range PASSED                   [ 38%]
+tests/test_oracles.py::test_toxicity_returns_in_range PASSED             [ 39%]
+tests/test_oracles.py::test_docking_returns_in_range PASSED              [ 40%]
+tests/test_oracles.py::test_invalid_smiles_safe_for_all_oracles PASSED   [ 41%]
+tests/test_oracles.py::test_multi_target_oracles_return_in_range PASSED  [ 42%]
+tests/test_oracles.py::test_unknown_target_returns_zero PASSED           [ 43%]
+tests/test_oracles.py::test_drd2_haloperidol_scores_high PASSED          [ 44%]
+tests/test_oversight.py::test_parse_clean_json_response PASSED           [ 45%]
+tests/test_oversight.py::test_parse_response_without_json_returns_unknown PASSED [ 46%]
+tests/test_oversight.py::test_parse_response_with_invalid_json_returns_unknown PASSED [ 47%]
+tests/test_oversight.py::test_parse_response_clamps_invalid_risk_level PASSED [ 48%]
+tests/test_oversight.py::test_parse_response_coerces_non_list_flags PASSED [ 50%]
+tests/test_oversight.py::test_is_available_false_without_key PASSED      [ 51%]
+tests/test_oversight.py::test_is_available_true_with_key PASSED          [ 52%]
+tests/test_oversight.py::test_analyze_without_key_returns_unknown_not_crash PASSED [ 53%]
+tests/test_oversight.py::test_analyze_handles_request_failure PASSED     [ 54%]
+tests/test_oversight.py::test_analyze_with_mocked_success PASSED         [ 55%]
+tests/test_oversight.py::test_user_prompt_includes_target_and_history PASSED [ 56%]
+tests/test_oversight.py::test_user_prompt_caps_history_at_20_steps PASSED [ 57%]
+tests/test_oversight.py::test_env_oversight_disabled_by_default PASSED   [ 58%]
+tests/test_oversight.py::test_env_oversight_only_runs_at_done PASSED     [ 59%]
+tests/test_reward_redteam.py::test_single_carbon_does_not_max_score PASSED [ 60%]
+tests/test_reward_redteam.py::test_methane_alone_does_not_pass_lipinski_gate PASSED [ 61%]
+tests/test_reward_redteam.py::test_aromatic_ring_blob_is_lipinski_failed PASSED [ 62%]
+tests/test_reward_redteam.py::test_invalid_smiles_returns_zero PASSED    [ 63%]
+tests/test_reward_redteam.py::test_empty_string_does_not_crash PASSED    [ 64%]
+tests/test_reward_redteam.py::test_haloperidol_scores_high_on_drd2 PASSED [ 65%]
+tests/test_reward_redteam.py::test_aspirin_scores_low_on_drd2 PASSED     [ 66%]
+tests/test_reward_redteam.py::test_terminal_reward_in_known_range PASSED [ 67%]
+tests/test_reward_redteam.py::test_haloperidol_drd2_higher_than_jnk3 PASSED [ 68%]
+tests/test_reward_redteam.py::test_oversized_multifragment_molecule_fails_lipinski PASSED [ 69%]
+tests/test_reward_redteam.py::test_disconnected_fragments_handled_safely PASSED [ 70%]
+tests/test_reward_redteam.py::test_charged_species_scored_safely PASSED  [ 71%]
+tests/test_reward_redteam.py::test_qed_only_component_does_not_max_terminal_reward PASSED [ 72%]
+tests/test_reward_redteam.py::test_known_pains_thiocarbonyl_does_not_dominate PASSED [ 73%]
+tests/test_rubrics.py::test_qed_rubric_matches_oracle PASSED             [ 74%]
+tests/test_rubrics.py::test_sa_rubric_matches_oracle PASSED              [ 75%]
+tests/test_rubrics.py::test_toxicity_rubric_is_inverted PASSED           [ 76%]
+tests/test_rubrics.py::test_binding_rubric_takes_target PASSED           [ 77%]
+tests/test_rubrics.py::test_weighted_rubric_scales_score PASSED          [ 78%]
+tests/test_rubrics.py::test_sum_rubric_adds_components PASSED            [ 79%]
+tests/test_rubrics.py::test_weighted_sum_combines PASSED                 [ 80%]
+tests/test_rubrics.py::test_sum_associative PASSED                       [ 81%]
+tests/test_rubrics.py::test_rmul_supports_left_scalar PASSED             [ 82%]
+tests/test_rubrics.py::test_composite_for_target_matches_legacy_terminal_reward PASSED [ 83%]
+tests/test_rubrics.py::test_terminal_reward_haloperidol_pinned PASSED    [ 84%]
+tests/test_schema_drift.py::test_drift_disabled_by_default_means_static_weights PASSED [ 85%]
+tests/test_schema_drift.py::test_early_admet_drift_changes_weights_at_drift_step PASSED [ 86%]
+tests/test_schema_drift.py::test_late_potency_drift_changes_weights_at_drift_step PASSED [ 87%]
+tests/test_schema_drift.py::test_unknown_profile_falls_back_to_static PASSED [ 88%]
+tests/test_schema_drift.py::test_terminal_reward_accepts_dynamic_weights PASSED [ 89%]
+tests/test_schema_drift.py::test_terminal_reward_weights_none_is_backwards_compat PASSED [ 90%]
+tests/test_schema_drift.py::test_env_reset_default_config_uses_static_profile PASSED [ 91%]
+tests/test_schema_drift.py::test_env_reset_with_drift_enabled_can_pick_non_static PASSED [ 92%]
+tests/test_schema_drift.py::test_env_observation_includes_drift_metadata PASSED [ 93%]
+tests/test_schema_drift.py::test_env_drift_warning_fires_on_drift_step PASSED [ 94%]
+tests/test_validation.py::test_aspirin_passes_lipinski PASSED            [ 95%]
+tests/test_validation.py::test_invalid_smiles_returns_none PASSED        [ 96%]
+tests/test_validation.py::test_canonicalize_normalizes PASSED            [ 97%]
+tests/test_validation.py::test_selfies_roundtrip PASSED                  [ 98%]
+tests/test_validation.py::test_oversize_molecule_fails_lipinski PASSED   [100%]
+
+=============================== warnings summary ===============================
+tests/test_cross_family.py::test_cross_family_distinct_from_kinase
+  /Users/atrey/Desktop/code/side-claude-income/sst-hack/round2/.venv/lib/python3.12/site-packages/sklearn/base.py:318: UserWarning: Trying to unpickle estimator SVC from version 0.23.0 when using version 1.2.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+  https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+    warnings.warn(
+
+tests/test_cross_family.py: 1 warning
+tests/test_env.py: 2 warnings
+tests/test_oracles.py: 3 warnings
+tests/test_reward_redteam.py: 39 warnings
+tests/test_rubrics.py: 12 warnings
+tests/test_schema_drift.py: 8 warnings
+  /Users/atrey/Desktop/code/side-claude-income/sst-hack/round2/.venv/lib/python3.12/site-packages/tdc/chem_utils/oracle/oracle.py:507: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+    drd_score = float(score)
+
+tests/test_oracles.py::test_multi_target_oracles_return_in_range
+tests/test_oracles.py::test_multi_target_oracles_return_in_range
+  /Users/atrey/Desktop/code/side-claude-income/sst-hack/round2/.venv/lib/python3.12/site-packages/sklearn/base.py:318: UserWarning: Trying to unpickle estimator DecisionTreeClassifier from version 0.23.0 when using version 1.2.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+  https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+    warnings.warn(
+
+tests/test_oracles.py::test_multi_target_oracles_return_in_range
+tests/test_oracles.py::test_multi_target_oracles_return_in_range
+  /Users/atrey/Desktop/code/side-claude-income/sst-hack/round2/.venv/lib/python3.12/site-packages/sklearn/base.py:318: UserWarning: Trying to unpickle estimator RandomForestClassifier from version 0.23.0 when using version 1.2.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+  https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 98 passed, 70 warnings in 5.60s ========================
+
+Exit: 0

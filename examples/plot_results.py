@@ -116,7 +116,7 @@ def plot_distribution_box(evals: List[Dict[str, Any]], output: str) -> None:
     for j, target in enumerate(targets):
         data = [ev["results"][target]["episodes"] for ev in evals]
         labels = [ev["policy"] for ev in evals]
-        axes[j].boxplot(data, labels=labels, showmeans=True, meanline=True)
+        axes[j].boxplot(data, tick_labels=labels, showmeans=True, meanline=True)
         axes[j].set_title(f"{target}")
         axes[j].grid(True, axis="y", alpha=0.3)
         axes[j].tick_params(axis="x", labelrotation=30)

@@ -1,0 +1,24 @@
+=== Top-level critique / oversight in HTTP response (issue #8 fix) ===
+
+Local server check — does observation include critique + oversight as top-level keys?
+Found local copy...
+Keys present in serialized HTTP response:
+  - active_constraints
+  - available_fragments
+  - critique
+  - difficulty
+  - drift_warning
+  - last_action_valid
+  - message
+  - oversight
+  - properties
+  - selfies
+  - smiles
+  - steps_remaining
+  - target
+  - truncated
+  - valid_actions
+
+  critique present: True
+  oversight present: True
+  drift_warning present: True

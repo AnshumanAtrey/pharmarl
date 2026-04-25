@@ -128,6 +128,24 @@ class MoleculeObservation(Observation):
         ),
     )
 
+    critique: Optional[Dict] = Field(
+        default=None,
+        description=(
+            "Halluminate sub-theme — populated when CurriculumConfig.critic_enabled. "
+            "Structured medicinal-chemist critique: {overall, issues, summary}. "
+            "Top-level field (not metadata) so it survives HTTP serialization."
+        ),
+    )
+
+    oversight: Optional[Dict] = Field(
+        default=None,
+        description=(
+            "Fleet AI sub-theme — populated at episode end when "
+            "CurriculumConfig.oversight_enabled. Structured oversight report: "
+            "{strategy_summary, risk_flags, risk_level, explanation, model_name}."
+        ),
+    )
+
 
 class MoleculeState(State):
     """Full episode state. Persists across step calls within one episode."""

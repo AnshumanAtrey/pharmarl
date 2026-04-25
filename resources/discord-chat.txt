@@ -1,0 +1,249 @@
+Atrey
+anshumanatrey
+⚡ Being Immortal
+This channel is for OpenEnv Hackathon_Round 2 participants to stay updated on all important announcements, resources, and guidelines shared by the SST team.
+
+bhaskar raj — 19/04/2026, 17:00
+You can choose any problem statement. You can pick any problem as long as it fits the hackathon themes.
+
+If your Round 1 problem already matches the themes, you are free to continue with that too.
+bhaskar raj — 19/04/2026, 17:50
+form closes at 7 pm, no more queries relating to this will be addressed beyond that.
+bhaskar raj — 20/04/2026, 22:48
+Those who did not get RSVP emails despite filling both forms, will receive their emails by tomorrow.
+bhaskar raj — 20/04/2026, 23:02
+We will not entertain more quries around this.
+bhaskar raj — 21/04/2026, 12:00
+Heyy folks, pls go through the doc carefully that has been shared with you guys with the RSVP confirmation email.
+It covers most of your doubts.
+For those asking about sponsor tracks, there’s no such thing.
+
+If I am missing anything here, please feel free to DM me.
+bhaskar raj — 21/04/2026, 12:15
+You will be submitting your Github repository + HF Space URL + the points mentioned on the doc that was shared with you.
+
+We can't share it here, so pls go through that doc.
+bhaskar raj — 21/04/2026, 12:41
+We won't be providing Google colab credits.
+bhaskar raj — 21/04/2026, 21:09
+Emails have been sent.
+bhaskar raj — 22/04/2026, 17:57
+https://youtu.be/Jew4lhAiqnw?si=hMEbn7dsTCYWS0_v
+
+Pls go through this learning resource, would be really helpful for the hackathon.
+bhaskar raj — 22/04/2026, 18:04
+https://openenv-india-apr-2026.lovable.app/
+Time stamps for specific topics/chapters.
+Wild card theme is for participants who have an extremely high understanding of RL environments and hence they can come with a use-case that is highly impactful and a use-case today's models do poorly.
+
+If they don't fall in this category then would suggest them to stick to the other given themes.
+We got a query saying Hey everyone! Quick question — the submission requires a mini-blog on HuggingFace but publishing articles there needs a Pro account. Is there an alternative accepted format (neglecting the YouTube video)? Can we post it as our Space README or submit it via email instead?
+
+
+For this, you will be given Hugging Face credits for Pro version. Along with the Hugging Face blog, you are also free to add it in codebase README.md and any other readme.
+bhaskar raj — 22/04/2026, 21:07
+Important Resources: https://docs.google.com/document/d/1m4EEBkomp3UJ4Wc-ydRjITDfdzLWPyFqNx11ERvggPM/edit?usp=sharing
+
+
+FAQs
+https://docs.google.com/document/d/1duGaDyNnrUa0XCG1wc13YXHQ5QMVDdU1HM51Iu9EbXw/edit?usp=sharing
+
+
+Help Guide
+https://docs.google.com/document/d/1lGOb5w8LGSbYd7_L-L-zAD9moThrMQZpUyIb0wDj2o4/edit?usp=sharing
+For solo folks, if you already formed a team with another solo participants (who also qualified), that will be taken care of on campus.
+bhaskar raj — 22/04/2026, 23:23
+We understand your concerns, and we will address all of them. However, the current tone and disrespectful behaviour in the server are not acceptable.
+
+Please maintain basic decorum while raising issues. If this continues, we will have no choice but to take strict action, including banning individuals who do not comply.
+
+We are here to listen and resolve things, but it has to be done respectfully.
+bhaskar raj — 23/04/2026, 00:34
+Hey everyone, over the last few weeks the team has worked incredibly hard to put this event together & we’re super excited about the upcoming finale. Over the past hour or so, we’ve paused messages so we could take the time to look at the existing comments, bucket them into Qs & then answer them comprehensively.
+
+We will open the group for messages shortly.
+bhaskar raj — 23/04/2026, 01:45
+We have completed set 1 & have answered them here: https://docs.google.com/document/d/1N6OOu4cJCthHHGjh6NltP2KUoRnx9TRf9usguw9kHns/edit?usp=sharing
+Google Docs
+FAQs on Discord
+A message from the team | Meta PyTorch OpenEnv Hackathon x Scaler School of Technology We want to start by saying something that we mean genuinely: thank you. Over the past few weeks, you showed up. In numbers we did not fully anticipate. With submissions, energy, questions, and expectations that...
+Image
+bhaskar raj — 23/04/2026, 02:02
+Hey everyone, we will be reopening the channels in the morning.
+
+In the meantime, please go through the document once, the raised queries have been addressed there. We’ll continue updating it if similar questions come up.
+
+We understand there have been concerns, and we appreciate your patience and cooperation while we work through them.
+bhaskar raj — 23/04/2026, 12:25
+https://forms.gle/ZDZoN4d25yxDikU9A
+
+Please use this form to submit your queries. Select only one query type per submission, and feel free to submit multiple entries if you have different queries. This will help us track and address them more efficiently. The form will remain open, and all queries will be addressed during the live Q&A. We will also be taking queries live during the session.
+Google Docs
+OpenEnv_Hackathon_Round 2_Queries
+Image
+Pls use this only for queries.
+bhaskar raj — 23/04/2026, 14:42
+Given that global tech leaders and executives are present here, we want to ensure the highest level of professionalism and decorum is maintained. We also want to ensure that the incredible talent in this community is represented in the best possible way.
+
+To support this, we have outlined a set of Do’s and Don’ts, please make sure to read and adhere to them.
+
+✅ Do’s
+
+Stay respectful and professional in all interactions
+Follow the designated channel ⁠🔈-round-2-announcements for announcements
+Use the designated channel ⁠round-2-queries or DMs to @bhaskar raj (admin) for queries
+Be patient all queries will be addressed by the team
+Follow instructions shared by moderators/admins during live sessions and     announcements
+Keep messages relevant, clear, and concise
+
+❌ Don’ts
+
+Do not spam or repeat the same questions across channels
+Do not use abusive, disrespectful, or aggressive language
+Do not spread misinformation or create unnecessary panic
+Do not interrupt or disrupt live Q&A sessions
+Do not make assumptions or present unverified claims as facts
+Do not provoke or encourage protests, negativity, or disruption
+Do not engage in harassment, hate speech, or racist remarks
+Do not spam DMs to organizers or participants
+Do not share irrelevant content, links, PDFs, or images
+
+🚨 Important
+
+Failure to follow these guidelines will lead to strict action, including temporary or permanent bans from the server, and may impact your participation in the hackathon.
+
+We are here to support you and will address all concerns, your cooperation helps us do that effectively.
+bhaskar raj — 23/04/2026, 15:07
+guys pls do fill this form for your queries.
+bhaskar raj — 23/04/2026, 18:43
+Hey guys the live QnA will start at 8 pm on Discord, pls join the round-2-live-QnA stage under India-OpenEnv-Hackathon.
+bhaskar raj — 23/04/2026, 20:00
+We are starting in 2 mins, pls join
+guys pls join
+bhaskar raj — 23/04/2026, 21:27
+Was the live QnA helpful in solving your doubts?
+👍
+Yes
+
+53 votes
+93%
+👎
+No
+
+4 votes
+7%
+
+57 votes
+Poll closed
+bhaskar raj — 23/04/2026, 22:37
+https://docs.google.com/document/d/1Odznuzwtb1ecDOm2t6ToZd4MuMXXfO6vWUGcxbC6mFs/edit?usp=sharing
+
+Hey guys, this doc contains the themes and judging criteria.
+Google Docs
+[External] Apr ‘26 OpenEnv Hackathon Themes & Judging Criteria
+Theme #1 - Multi-Agent Interactions Environments for this theme involve cooperation, competition, negotiation, and coalition formation. Learning from these environments will enable agents to model the beliefs and incentives of others in partially observable settings. This drives theory-of-mind re...
+Image
+For submissions, a Google Form will be shared on campus, where you will be required to submit the following:
+
+Hugging Face Space URL
+Colab Notebook link
+Code repository link
+YouTube video URL or Hugging Face blog post URL
+
+An update: All urls and links should be included in your README file (a must)
+Pls do note that this doesn't mean you can take part remotely.
+bhaskar raj — Yesterday at 00:08
+After submission we can update our project for 5 more days?
+
+We will share more details around these queries async tomorrow.
+We would ask to not assume anything for now.
+We will make a clear announcement regarding this.
+bhaskar raj
+’s poll Was the live QnA helpful in solving your doubts? has closed. — Yesterday at 01:27
+👍
+Yes
+Winning answer • 93%
+
+View Poll
+bhaskar raj — Yesterday at 12:38
+Please note that reporting starts at 7:00 AM, and entry to the campus will not be allowed before that. Kindly plan your arrival and stay arrangements accordingly if you intend to come earlier.
+bhaskar raj — Yesterday at 12:49
+Important points to refer from the live QnA
+
+What the automated round checks
+These are the items the validation pass looks for. If any is missing or broken at the deadline, the submission won't make it to a human judge; regardless of how strong the underlying idea is. Verify each one explicitly before you submit.
+
+Public, cloneable Hugging Face Space at the submitted URL. Test from a logged-out browser. Private spaces, dead links, or 404s are an automatic out.
+Valid OpenEnv structure: proper Environment / MCPEnvironment base class, Gym-style reset / step / state, and a parseable openenv.yaml.
+Training evidence committed to the repo as image files (.png / .jpg): At minimum a loss curve and a reward curve. Wandb-only links and plots that live only in a Colab cell don't count: they may not be reachable when validation runs.
+A runnable training script (Unsloth, HF TRL, or other frameworks), preferably linked as a Colab notebook so it can be re-executed end to end (Python script is acceptable as well).
+A README that links every deliverable: HF Space, training notebook, and your writeup (blog / video / slides), with the key plots embedded inline. If validation can't reach a deliverable from the README, it counts as missing.
+bhaskar raj — Yesterday at 12:51
+guys, pls also take note of this
+bhaskar raj — Yesterday at 12:58
+https://docs.google.com/document/d/1Odznuzwtb1ecDOm2t6ToZd4MuMXXfO6vWUGcxbC6mFs/edit?tab=t.0#bookmark=kix.2dz0x0nie3me
+
+Do go through this too, it was shared by Ali
+bhaskar raj — Yesterday at 13:01
+All participants are required to strictly follow the do’s and don’ts and maintain proper decorum at all times. Any queries or concerns must be raised respectfully through the designated channels only.
+bhaskar raj — Yesterday at 13:20
+Few tips on Hugging Face Blog posts and Colab links,
+
+For writing Hugging Face blog posts, you can write a markdown article and place it in your environment code repository.
+For training run notebook, please ensure that is runnable and doesn't contain errors. You can either share the codebase link to training script's ipynb or add the publicly accessible Google Colab notebook link to your README.
+bhaskar raj — Yesterday at 13:53
+We have clear confirmation from the team: submissions will close at 5:00 PM on April 26, and no submissions will be accepted after this deadline under any circumstances. There will be no extensions.
+bhaskar raj — Yesterday at 17:13
+https://docs.google.com/presentation/d/1cTgk_BHVCMGHvFuVe-lrKT0eUYfS7BvQlKJNrNLLTfg/edit?usp=sharing
+
+This PPT can be used as a reference for the overall event flow, judging process, and submission guidelines. Please note that timings during the day may vary slightly since this is an on-ground event, however, the overall flow will remain the same.
+
+Any remaining details will be covered during the opening ceremony, including instructions on how to claim credits for Cursor and Hugging Face.
+
+Also some key imp docs
+
+Important Resources https://docs.google.com/document/d/1m4EEBkomp3UJ4Wc-ydRjITDfdzLWPyFqNx11ERvggPM/edit?usp=sharing
+
+FAQs
+https://docs.google.com/document/d/1duGaDyNnrUa0XCG1wc13YXHQ5QMVDdU1HM51Iu9EbXw/edit?usp=sharing
+
+Help Guide
+https://docs.google.com/document/d/1lGOb5w8LGSbYd7_L-L-zAD9moThrMQZpUyIb0wDj2o4/edit?usp=sharing
+
+Themes and judging Criteria https://docs.google.com/document/d/1Odznuzwtb1ecDOm2t6ToZd4MuMXXfO6vWUGcxbC6mFs/edit?usp=sharing
+bhaskar raj — Yesterday at 22:02
+Reporting time is 7 am.
+bhaskar raj — Yesterday at 22:03
+Pls go through the ppt to understand event flow.
+bhaskar raj — Yesterday at 22:43
+Breakfast is available for early arrivals:
+Until 9:00 AM only
+Distributed in classroom areas after verification
+No breakfast will be provided after 9:00 AM
+bhaskar raj — 00:50
+https://docs.google.com/document/d/1M5HD8G-PjBBq6_Ceom-J87uM1ecjUPCd7yqZZ62RjTQ/edit?usp=sharing
+
+Please go through the registration guide carefully. Registrations will strictly close at 11:00 AM. The official reporting time remains 10:30 AM, any accommodation until 11:00 AM is a buffer.
+
+Participants are strongly expected to arrive on campus by 10:00 AM, as the opening sessions will begin around that time, as previously shared in the presentation.
+
+Anyone arriving after 11:00 AM can expect delays in registration due to logistics.
+Google Docs
+Participant Registration Guide
+Participant Registration Guide Welcome to the Meta PyTorch OpenEnv Hackathon x Scaler School of Technology.Please read this guide carefully to ensure a smooth and hassle-free check-in experience. ⚠️ Only participants who are registered will be allowed entry. Parents, friends, mentors, or exter...
+Image
+bhaskar raj — 10:22
+We will start the session at 10:30 am.
+https://www.youtube.com/live/F0bjCZaOVdA?si=5A-H7B9GQ6oFW4di
+
+Hey, you can also join the live stream here.
+YouTube
+Scaler School of Technology
+Scaler School of Technology
+Image
+bhaskar raj — 10:48
+guys, we are starting in few mins
+bhaskar raj — 10:51
+We are live.
+bhaskar raj — 11:11
+You will get your goodies/merch by the end of the day.

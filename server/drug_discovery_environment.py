@@ -129,6 +129,8 @@ class DrugDiscoveryEnvironment(Environment):
         # Short routing name for the binding oracle (DRD2/GSK3B/JNK3). Resolved
         # at /reset; the human-readable full name lives in self._state.target.
         self._target_short: str = DEFAULT_TARGET
+        # Lazy-constructed Fleet AI oversight LLM client (None until first use).
+        self._oversight = None
 
     # ─── reset / step ───────────────────────────────────────────────────
 
@@ -142,7 +144,24 @@ class DrugDiscoveryEnvironment(Environment):
           - ``drift_profile`` (str): force a specific schema-drift profile
             (``static`` / ``early_admet`` / ``late_potency``); useful for the
             demo rollouts that compare profiles head-to-head.
+          - ``critic_enabled`` / ``schema_drift_enabled`` / ``oversight_enabled``
+            (bool): per-episode mechanic flag overrides — re-binds self._config
+            via ``dataclasses.replace()`` for this episode and onward. Lets HTTP
+            clients (trained model on HF Space, baseline runners) toggle the
+            sub-theme demos without restarting the server (issue #9 fix).
         """
+        # Per-episode config overrides — applied BEFORE any other reset logic
+        # so curriculum decisions, drift profile sampling, etc. see the new
+        # config. Mutates self._config in place; once reset, subsequent steps
+        # in this episode use the overridden flags.
+        from dataclasses import replace as _replace
+        overrides: dict = {}
+        for flag in ("critic_enabled", "schema_drift_enabled", "oversight_enabled"):
+            if flag in kwargs and kwargs[flag] is not None:
+                overrides[flag] = bool(kwargs.pop(flag))
+        if overrides:
+            self._config = _replace(self._config, **overrides)
+
         difficulty: Optional[DifficultyTier] = kwargs.get("difficulty")
         training_step: Optional[int] = kwargs.get("training_step")
         target: Optional[str] = kwargs.get("target")
@@ -437,9 +456,47 @@ class DrugDiscoveryEnvironment(Environment):
         # rules-based medicinal-chemist critic) inspects the current molecule
         # and emits structured feedback that the policy can integrate or ignore
         # on its next turn (via REMOVE_FRAGMENT / SUBSTITUTE_ATOM).
+        #
+        # Stored as a TOP-LEVEL field (not metadata) so it survives OpenEnv's
+        # HTTP serialization layer — addresses issue #8.
+        critique_payload = None
         if self._config.critic_enabled and last_action_valid and self._state.smiles:
             critique = default_critic.critique(self._state.smiles)
-            metadata["critique"] = critique_to_dict(critique)
+            critique_payload = critique_to_dict(critique)
+            metadata["critique"] = critique_payload  # legacy duplicate for in-process callers
+
+        # Oversight agent (Fleet AI sub-theme). Default OFF — gated by
+        # config.oversight_enabled. ONE LLM call per episode at TERMINATE
+        # only. Backward-looking analysis: reads the full action history
+        # and emits a structured report (strategy, risk flags, level).
+        oversight_payload = None
+        if (
+            self._config.oversight_enabled
+            and done
+            and not truncated
+            and len(self._edit_history_full) > 0
+        ):
+            try:
+                from .oversight import LLMOversight
+            except ImportError:
+                from server.oversight import LLMOversight  # type: ignore
+            if self._oversight is None:
+                self._oversight = LLMOversight(
+                    provider=self._config.oversight_provider,
+                    model_name=self._config.oversight_model,
+                )
+            lipinski = check_lipinski(self._state.smiles)
+            lipinski_ok = lipinski is not None and lipinski.passes
+            report = self._oversight.analyze(
+                target=self._target_short,
+                starting_smiles=self._state.starting_smiles,
+                final_smiles=self._state.smiles,
+                action_history=self._edit_history_full,
+                final_reward=float(reward),
+                lipinski_passes=lipinski_ok,
+            )
+            oversight_payload = report.to_dict()
+            metadata["oversight"] = oversight_payload  # legacy duplicate for in-process callers
 
         return MoleculeObservation(
             smiles=self._state.smiles,
@@ -457,5 +514,7 @@ class DrugDiscoveryEnvironment(Environment):
             reward=float(reward),
             active_constraints=active_constraints,
             drift_warning=drift_warning,
+            critique=critique_payload,
+            oversight=oversight_payload,
             metadata=metadata,
         )

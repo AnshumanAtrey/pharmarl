@@ -94,6 +94,7 @@ Multi-step episode state is keyed by `episode_id` — pass the same `episode_id`
 - **RLVE compliance** — adaptive 3-tier curriculum, procedurally seeded scaffolds, algorithmic reward verification (TDC oracles, not LLM judges).
 - **Patronus AI sub-theme** (consumer workflows with schema drift) — see *Novel mechanics* below.
 - **Halluminate sub-theme** (multi-actor environments) — see *Novel mechanics* below.
+- **Fleet AI sub-theme** (oversight agents monitoring other AI agents) — see *Novel mechanics* below.
 
 ## Novel mechanics (opt-in, flag-gated)
 
@@ -104,6 +105,9 @@ Real medicinal-chemistry projects have shifting constraints — early-stage pote
 
 ### Multi-actor critic (Halluminate sub-theme)
 Enable `CurriculumConfig.critic_enabled` and a separate logical agent — a deterministic rules-based medicinal chemist — examines each post-edit molecule and emits structured feedback (PAINS substructures, MW/LogP warnings, reactive group flags). The critique is appended to the next observation's metadata; the policy can integrate or ignore it. Rules-based not LLM-based: deterministic, ms latency, no API cost. The env contract has a clean seam — a frozen LLM critic could be swapped in here as future work.
+
+### Pure-LLM oversight (Fleet AI sub-theme)
+Enable `CurriculumConfig.oversight_enabled` and at episode end a separate LLM — Gemini 2.5 Flash by default — examines the full action trajectory and emits a structured report: `strategy_summary`, `risk_flags`, `risk_level` (low/medium/high), `explanation`. **Backward-looking** counterpart to the critic. ONE LLM call per episode, only at TERMINATE — no API quota burn during training. The env supports OpenRouter as an alternate provider. Set `GEMINI_API_KEY` (or `OPENROUTER_API_KEY`) and pass `oversight_enabled=True` in the config to demo. See `colab/train_pharmarl.ipynb` cell 14.
 
 ## Baseline spectrum — what we measured before training
 

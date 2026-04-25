@@ -1,0 +1,11 @@
+{
+  "commit_full": "30260ee9ee6577da5c6563b111a58c3f09b3056b",
+  "commit_short": "30260ee",
+  "dirty": false,
+  "branch": "main",
+  "timestamp_utc": "2026-04-25T21-43-14Z",
+  "python": "Python 3.12.6",
+  "host": "Darwin 25.3.0 arm64",
+  "openrouter_key_set": true,
+  "gemini_key_set": true
+}

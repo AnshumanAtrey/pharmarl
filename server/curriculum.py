@@ -76,6 +76,20 @@ class CurriculumConfig:
     # training run is unaffected.
     critic_enabled: bool = False                        # MASTER FLAG, default OFF
 
+    # ─── Oversight agent (Fleet AI sub-theme) ──────────────────────────────
+    # Pure-LLM oversight agent — at episode end, an LLM analyzes the full
+    # action trajectory and emits a structured report (strategy summary,
+    # risk flags, risk level, explanation). Backward-looking counterpart to
+    # the critic. Default OFF: makes ONE LLM call per episode at TERMINATE,
+    # so it must never run during the headline GRPO training (would burn
+    # API quota on thousands of rollouts).
+    oversight_enabled: bool = False                     # MASTER FLAG, default OFF
+    oversight_provider: str = "gemini"                  # "gemini" | "openrouter"
+    # Gemini 2.5 Flash with thinking disabled — fast, reliable, ~$0.001/call.
+    # OpenRouter free tier (meta-llama/llama-3.2-3b-instruct:free) works but
+    # rate-limits aggressively (~20/min) which hurts demo reliability.
+    oversight_model: str = "gemini-2.5-flash"
+
 
 DEFAULT_CONFIG = CurriculumConfig()
 

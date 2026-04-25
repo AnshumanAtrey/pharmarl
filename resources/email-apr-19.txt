@@ -1,0 +1,354 @@
+Original Message
+Message ID	<x5MhSusPTQeT3d67cVKgYg@geopod-ismtpd-96>
+Created at:	Sun, Apr 19, 2026 at 2:03 PM (Delivered after 2 seconds)
+From:	Meta Hackathon x Scaler <hello@scaler.com>
+To:	anshumanatrey@gmail.com
+Subject:	[Important] You’re Heading to the Finale 🚀
+SPF:	PASS with IP 149.72.211.206 Learn more
+DKIM:	'PASS' with domain scaler.com Learn more
+DMARC:	'PASS' Learn more
+
+
+Download Original	Copy to clipboard
+Delivered-To: anshumanatrey@gmail.com
+Received: by 2002:a05:6a11:cf85:b0:6cb:f206:1b2b with SMTP id ol5csp1057308pxc;
+        Sun, 19 Apr 2026 01:33:53 -0700 (PDT)
+X-Received: by 2002:a05:622a:1110:b0:50d:a8f5:d51f with SMTP id d75a77b69052e-50e36c5861dmr138361631cf.45.1776587633484;
+        Sun, 19 Apr 2026 01:33:53 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776587633; cv=none;
+        d=google.com; s=arc-20240605;
+        b=KivtXyt4V7LPBsYY9XIK0Pm/QM93Zbmmzaimxz6zzymultxlGnpPInInoxbx8f4Y+e
+         nuptLfeSPnldAwEqeXWKW1KdPk72yRywr4rM4rs4MH08o1MayCA1mTzIlX8jyhyjo2Z0
+         XN1+p5UmoQSq5y70YTfKxnWuo67OJ0/F2htCdNRM0m0hsVA99cfC4hBdJl3AmLI0PcTk
+         jnYbFbLyTWTgoZXlNB3tc4Q9Wo3IIJ+jj70ng+gogFfhfSOGgHkxZUk1ZZj8J8riRANk
+         1hvyiTLTtCs04DdHov1Uk/rDSSfLptBOzHpJWLWJK6Ny/Ccp0f4KxqthqokrdpoYI2Mp
+         5UsA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=to:list-unsubscribe-post:list-unsubscribe:subject:message-id
+         :mime-version:from:date:content-transfer-encoding:dkim-signature
+         :dkim-signature;
+        bh=iTctP3HxBVTWRYusfPFdMZBXTzWyr8xY4MpLhJfP69g=;
+        fh=MbQwNjHcsriKVeqJk16XnSYgkby/Jeaz/9U6wNt+XHc=;
+        b=Rp0/P82CqtLDtc88uPocJBVFo9JbBtr7A09ZZvM0Zp7Q6ar/embsQ+JYs3kHkO//5b
+         RCJCqhH7cuQifLm3sF0Q5IBV6Nm4uSLh08hqSJRnys0YFVt1lygTWT9KqnXjopa2cWZH
+         8hZE+LGNtnnAfC2sVRqFFeAo1rdoDjifRDzC2uXC7yO40ajBGVmjniioaB5uNINazw5k
+         ba4ma+9wn1gTm4EVsfGGXgWcwDtXAc29rmMHPIKOW9gqVUApUjeliejBGipOjxhem/NL
+         2Npzv4hpoUmlE1KuF5Lu5Nz18vUmFcppjfAX4hwMAQqgY6kAKQ00qid4+OyD7HEvQuZo
+         B5Pw==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@scaler.com header.s=s1 header.b=mPB+zuBP;
+       dkim=pass header.i=@sendgrid.info header.s=smtpapi header.b="W/fRTu4u";
+       spf=pass (google.com: domain of bounces+1753636-c4b7-anshumanatrey=gmail.com@em6553.scaler.com designates 149.72.211.206 as permitted sender) smtp.mailfrom="bounces+1753636-c4b7-anshumanatrey=gmail.com@em6553.scaler.com";
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=scaler.com
+Return-Path: <bounces+1753636-c4b7-anshumanatrey=gmail.com@em6553.scaler.com>
+Received: from wrqvdpcz.outbound-mail.sendgrid.net (wrqvdpcz.outbound-mail.sendgrid.net. [149.72.211.206])
+        by mx.google.com with ESMTPS id d75a77b69052e-50e3f2cf645si66150521cf.153.2026.04.19.01.33.52
+        for <anshumanatrey@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 19 Apr 2026 01:33:53 -0700 (PDT)
+Received-SPF: pass (google.com: domain of bounces+1753636-c4b7-anshumanatrey=gmail.com@em6553.scaler.com designates 149.72.211.206 as permitted sender) client-ip=149.72.211.206;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@scaler.com header.s=s1 header.b=mPB+zuBP;
+       dkim=pass header.i=@sendgrid.info header.s=smtpapi header.b="W/fRTu4u";
+       spf=pass (google.com: domain of bounces+1753636-c4b7-anshumanatrey=gmail.com@em6553.scaler.com designates 149.72.211.206 as permitted sender) smtp.mailfrom="bounces+1753636-c4b7-anshumanatrey=gmail.com@em6553.scaler.com";
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=scaler.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=scaler.com; h=content-transfer-encoding:content-type:date:from:mime-version:subject: list-unsubscribe:list-unsubscribe-post:to:cc:content-type:date:feedback-id:from: subject:to; s=s1; t=1776587631; bh=iTctP3HxBVTWRYusfPFdMZBXTzWyr8xY4MpLhJfP69g=; b=mPB+zuBPNkq/EK5HHLaEEnrGEDfiQZHcND/m/iZGV6ri+yHzI4ihkHZifkgpBoWSEz6s JVsz3CMxDOXPDBnJ6GAGgZQ53+xvyLSqJVfrEALVtJaoE3ac2tPoJlXExC35SdjYM9LCLF oeKDuEF7ZyL0Wi2Y75GDUJ3+e66KoYosYjNHbXTVyQoP3fp6lkDs3woX7H84/IKy4PDaXn F9QbvDmLjEcLwdB3ItqSD0Wo5b0USnM8pzLtvXB63+3SUpjvj3gJO6QIiBOs15d2OaiIVD q7gtLK1PblpA4qfbisCwI0cJEcMcNKCQ/LQn5IiMKzpYHBD2WT+mNcIFHPesvsXA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sendgrid.info; h=content-transfer-encoding:content-type:date:from:mime-version:subject: list-unsubscribe:list-unsubscribe-post:to:cc:content-type:date:feedback-id:from: subject:to; s=smtpapi; t=1776587631; bh=iTctP3HxBVTWRYusfPFdMZBXTzWyr8xY4MpLhJfP69g=; b=W/fRTu4uG/oR+OYXxv4Syn3lMe39235wXT85edsSkVjSs0wtz+ot345vA4MY+N6MKyq1 pRS5YoWyzC1DresU5CacEpgBEvI8aDTgpCv/7cAwu+RojJ7H4M8vxHWojqmb7NIJvBUbSL oXbeLfvbV/cXB4jILWnjOHG/N6eolEn18=
+Received: by recvd-6597c4f8d6-tljpt with SMTP id recvd-6597c4f8d6-tljpt-1-69E4936F-10 2026-04-19 08:33:51.49889448 +0000 UTC m=+747004.336863562
+Received: from MTc1MzYzNg (unknown) by geopod-ismtpd-96 (SG) with HTTP id x5MhSusPTQeT3d67cVKgYg Sun, 19 Apr 2026 08:33:51.471 +0000 (UTC)
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=utf-8
+Date: Sun, 19 Apr 2026 08:33:51 +0000 (UTC)
+From: Meta Hackathon x Scaler <hello@scaler.com>
+Mime-Version: 1.0
+Message-ID: <x5MhSusPTQeT3d67cVKgYg@geopod-ismtpd-96>
+Subject: [Important] You’re Heading to the Finale 🚀
+List-Unsubscribe: <https://api.webengage.com/lw/g1?p=eyJsYyI6In4xMzQxMDVhNjAiLCJsIjoiM2FkYTUzOTA0NGZiY2FjNjgyMTUwYWVjMGZjMDJkYTliMzU2YjJiMCIsImMiOiJhbnNodW1hbmF0cmV5QGdtYWlsLmNvbSIsImVtIjoiYW5zaHVtYW5hdHJleUBnbWFpbC5jb20iLCJlIjoiMTNjbzllMiIsInYiOiJ%2BNjg2OTEzcCIsInMiOiJ%2BOGZpOGVoY2dmYmc0ZWJfNWZlM2M1NjQtNTY2NS00OWUwLWEyNGItZDczNjczMmMwNDExOjE3NzY1ODc2MTI4NTQiLCJldmVudCI6ImVtYWlsX3Vuc3Vic2NyaWJlIiwiY3RhIjoiJXMifQ%3D%3D&e=eu>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+X-SG-EID: u001.3xezYO/OMvP5DRSyh8UTrXjzglKcqD6Ta3b2iWvtgjsvjQAPfFQ2pm8pyV73MWSQfGvSzRFQvQB7bqziOIM5Y2h1vZHNXOlTgprE8He44Tm32WYsuSZ0T/lpUtSjDgthQ8F14fImm+OeisxbpLFY4T7Ey3aIi5w6jnkmGo8ItJinhe0wVc8Qa5YGbhMnUuy5fpZikYddXRmkaGkeeaJTUtdyDEJpaD3ZXIiRUQKMylGlGprfGulXkHPIlDrXpics
+X-SG-ID: u001.SdBcvi+Evd/bQef8eZF3BpTL9BgbK5wfSJMJGMsmprDWrRWSe2BiONZXznMdtTYcSCxnCIYpNOjuRhYTisdpIy+SvzP32/0C0Z4zjRNEhhZQDJXUdtz7e4+cvF7mCQWO1LU8rjJAKnGvpol5kq5441yMKsj+vfDrsDJwO8E8xcA4jFn+6j0dVq2cgn8euMfcrJOm0cKUa4vYklxkOD/tIRQ1YafVO67OJvn+BZ3PviCl/hn9r0wH+x2rsuy+QPQqQ0MtSAc5LxQWWekrqSe3AYPftu1aCf9znzArUsjd7vu+CSiDDsi6hVX3j16Z5BoguXP0hwJYMG3IK9Ex+XIzflhzLj0jlC/ofo6HQblmaQe6DEJlvS+QQEe3GVCPZBF0dPQqG/Ge/HI5dfqb0VoKDuNCeVSxE6S6czH+xYmxAiC74J+XHpAyVOkFsYOHDNchC8QPJajO83inTJ4CnZWBZfW6JQEN36tDbyZ0K/wdCiofog8E1ZS5cPl5gYjFUw1yCAMBtSDw2AfoCt4go/JgqQ==
+To: anshumanatrey@gmail.com
+X-Entity-ID: u001.UjPZM+1csTq6hc9Hh9vyyg==
+
+<!doctype html><html><head>
+<meta charset=3D"utf-8">
+<meta name=3D"viewport" content=3D"width=3Ddevice-width,initial-scale=3D1 u=
+ser-scalable=3Dyes">
+<meta name=3D"format-detection" content=3D"telephone=3Dno, date=3Dno, addre=
+ss=3Dno, email=3Dno, url=3Dno">
+<meta name=3D"x-apple-disable-message-reformatting">
+<link rel=3D"preconnect" href=3D"https://fonts.googleapis.com">
+<link rel=3D"preconnect" href=3D"https://fonts.gstatic.com" crossorigin>
+<link href=3D"https://fonts.googleapis.com/css2?family=3DMontserrat:wght@10=
+0;200;300;400;500;600;700;800;900&amp;display=3Dswap" rel=3D"stylesheet">
+<title>Scaler</title>
+<!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+
+<style>
+p {
+    font-family: 'Montserrat', sans-serif!important;
+    font-size: 13px!important;
+    line-height: 20px!important;
+    color: #000000!important;
+    padding-bottom: 20px!important;
+    font-weight: 400!important;
+    padding-top: 0px!important;
+    margin-bottom: 0!important;
+    margin-top: 0!important;
+}
+ul, ol {
+    padding-left: 15px!important;
+    padding-top: 0!important;
+    padding-bottom: 0!important;
+    margin-bottom: 0!important;
+    margin-top: 0!important;
+}
+ul li, ol li {
+    font-family: 'Montserrat', sans-serif!important;
+    font-size: 13px!important;
+    line-height: 20px!important;
+    color: #000000!important;
+    padding-bottom: 10px!important;
+    font-weight: 400!important;
+    padding-top: 0px!important;
+    margin-bottom: 0!important;
+    margin-top: 0!important;
+}
+.hightxt {
+    font-family: 'Montserrat', sans-serif!important;
+    font-size: 13px!important;
+    line-height: 20px!important;
+    color: #0101a4!important;
+    padding-bottom: 0px!important;
+    font-weight: bold!important;
+    padding-top: 0px!important;
+    margin-bottom: 0!important;
+    margin-top: 0!important;
+}
+strong {
+    font-weight: bold!important
+}
+
+@media screen and (max-width: 599px) {
+.twocolomn {
+    min-width: 300px!important;
+    max-width: 100%!important
+}
+.Mail_inner_img {
+    max-width: 300px!important
+}
+}
+</style>
+</head>
+<body width=3D"100%" bgcolor=3D"#FFFFFF" style=3D"margin: 0;"><div style=3D=
+"display:none; visibility:hidden; font-size:1px; color:#ffffff; line-height=
+:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;"><p> View =
+team info, entry rules, and next steps =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF=
+  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=
+=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=
+=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =
+=EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87=
+ =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=
+=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=
+=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =
+=E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C=
+ =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=
+=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=
+=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =
+=E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F=
+ =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=
+=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =
+=CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF =
+ =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF=
+  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=
+=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=
+=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =
+=EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87 =EF=BB=BF  =CD=8F =E2=80=8C =E2=80=87=
+ =EF=BB=BF  </p></div>
+<center style=3D"width: 100%; background: #FFFFFF;"><div style=3D"max-width=
+: 600px; margin: auto;"><center style=3D"width: 100%; background: #FFFFFF;"=
+><div style=3D"max-width: 600px; margin: auto; border: 1px solid #ebebeb;">=
+<!-- Email Body : BEGIN --><table cellspacing=3D"0" cellpadding=3D"0" borde=
+r=3D"0" align=3D"center" bgcolor=3D"#ffffff" width=3D"100%" style=3D"max-wi=
+dth: 600px;" role=3D"presentation"><tbody><tr><td style=3D"padding-bottom: =
+0px; padding-top: 0px; font-size: 0; line-height: 0;" align=3D"center"><a h=
+ref=3D"#" we-wk-cta-id=3D"4a0eb900"><img src=3D"https://afiles.webengage.co=
+m/~134105a60/02336a95-d9a2-4f20-bbb4-ae62a7216f09.png" alt=3D"Scaler Logo" =
+border=3D"0" style=3D"max-width: 100%; border-width: 0px; border-style: sol=
+id;" width=3D"600" data-mce-style=3D"max-width: 100%; border-width: 0px; bo=
+rder-style: solid;"></a></td></tr><tr><td bgcolor=3D"#ffffff" align=3D"cent=
+er" height=3D"100%" valign=3D"top" width=3D"100%" style=3D"background: #fff=
+fff;"><!-- [if mso]> <table border=3D"0" cellspacing=3D"0" cellpadding=3D"0=
+" align=3D"center" width=3D"600"> <tr> <td align=3D"center" valign=3D"top" =
+width=3D"600"> <![endif]--><table border=3D"0" cellpadding=3D"0" cellspacin=
+g=3D"0" align=3D"center" width=3D"100%" style=3D"max-width: 500px; text-ali=
+gn: center;" role=3D"presentation"><tbody><tr><td align=3D"center" valign=
+=3D"top" style=3D"font-size: 0; text-align: center;"><!-- [if mso]> <table =
+border=3D"0" cellspacing=3D"0" cellpadding=3D"0" align=3D"center" width=3D"=
+540"> <tr> <td align=3D"center" valign=3D"top" width=3D"540"> <![endif]--><=
+div style=3D"display: inline-block; margin: 0 0px; max-width: 540px; min-wi=
+dth: 540px; vertical-align: top; padding-top: 00px;" class=3D"stack-column2=
+ twocolomn"><table width=3D"100%" border=3D"0" cellspacing=3D"0" cellpaddin=
+g=3D"0" role=3D"presentation"><tbody><tr><td style=3D"line-height: 0; heigh=
+t: 0; font-size: 0;" class width=3D"10"><img src=3D"https://d2beiqkhq929f0.=
+cloudfront.net/public_assets/assets/000/003/691/original/spacer.gif?1651483=
+099" width=3D"10" height=3D"10" alt></td><td valign=3D"top"><table width=3D=
+"100%" border=3D"0" cellspacing=3D"0" cellpadding=3D"0" role=3D"presentatio=
+n"><tbody><tr><td style=3D"font-family: 'Montserrat',sans-serif; font-size:=
+ 13px; line-height: 20px; color: #000000; text-align: left; padding-bottom:=
+ 20px; font-weight: 400; padding-top: 30px;" class=3D"body-text" height><p>=
+Hi Anshuman Atrey,</p><p>You=E2=80=99re in. Your solo/team=E2=80=99s spot a=
+t the <strong>Meta PyTorch OpenEnv Hackathon =C3=97&nbsp;</strong><strong>S=
+caler School of Technology - Grand Finale</strong> is officially confirmed.=
+</p><p>This email will serve as your <strong>official team ticket</strong> =
+to the finale.</p><p>=F0=9F=93=85 25=E2=80=9326 April 2026<br>=F0=9F=93=8D =
+Scaler School of Technology, Electronic City, Bangalore</p><p>Participation=
+ Category: Team of 3<br><br>Team Member 1 (Team Leader)<br>Name: Anshuman A=
+trey<br>Email: anshumanatrey@gmail.com</p><p>Team Member 2<br>Name:&nbsp;Sa=
+hil Shah<br>Email:&nbsp;ss9656484@gmail.com</p><p>Team Member 3<br>Name:&nb=
+sp;Vijay kota<br>Email:&nbsp;vijaykota2776@gmail.com<br></p><p><span style=
+=3D"font-size: 12pt;"><strong>What to do right now</strong></span></p><p><s=
+trong>Join the private Discord (MANDATORY): <a href=3D"https://c.webengage.=
+com/lw/g1.jpg?p=3DeyJsYyI6In4xMzQxMDVhNjAiLCJsIjoiM2FkYTUzOTA0NGZiY2FjNjgyM=
+TUwYWVjMGZjMDJkYTliMzU2YjJiMCIsImMiOiJhbnNodW1hbmF0cmV5QGdtYWlsLmNvbSIsImVt=
+IjoiYW5zaHVtYW5hdHJleUBnbWFpbC5jb20iLCJlIjoiMTNjbzllMiIsInYiOiJ%2BNjg2OTEzc=
+CIsInMiOiJ%2BOGZpOGVoY2dmYmc0ZWJfNWZlM2M1NjQtNTY2NS00OWUwLWEyNGItZDczNjczMm=
+MwNDExOjE3NzY1ODc2MTI4NTQiLCJldmVudCI6ImVtYWlsX2NsaWNrIiwiY3RhIjoiMjRhYjFlN=
+DYiLCJ0b1VSTCI6Imh0dHBzOi8vZGlzY29yZC5nZy9QakRBNXNXalk0In0%3D">Join here</a=
+></strong><br>All major updates and announcements will be shared here first=
+.</p><p><strong>Check the travel guide: <a href=3D"https://c.webengage.com/=
+lw/g1.jpg?p=3DeyJsYyI6In4xMzQxMDVhNjAiLCJsIjoiM2FkYTUzOTA0NGZiY2FjNjgyMTUwY=
+WVjMGZjMDJkYTliMzU2YjJiMCIsImMiOiJhbnNodW1hbmF0cmV5QGdtYWlsLmNvbSIsImVtIjoi=
+YW5zaHVtYW5hdHJleUBnbWFpbC5jb20iLCJlIjoiMTNjbzllMiIsInYiOiJ%2BNjg2OTEzcCIsI=
+nMiOiJ%2BOGZpOGVoY2dmYmc0ZWJfNWZlM2M1NjQtNTY2NS00OWUwLWEyNGItZDczNjczMmMwND=
+ExOjE3NzY1ODc2MTI4NTQiLCJldmVudCI6ImVtYWlsX2NsaWNrIiwiY3RhIjoiMzE3NzUyN2UiL=
+CJ0b1VSTCI6Imh0dHBzOi8vZG9jcy5nb29nbGUuY29tL2RvY3VtZW50L2QvMWtrYVVOUURiWGJ5=
+NWF1YTloOFJsQlZXQnJPbXNKOTBwL2VkaXQ%2FdXNwPXNoYXJpbmcmb3VpZD0xMDI4ODg0OTk4O=
+TQ5MTI5NTc3MDUmcnRwb2Y9dHJ1ZSZzZD10cnVlIn0%3D">Read Here</a></strong><br>In=
+cludes venue details, directions, and nearby stay options.</p><p><span styl=
+e=3D"font-size: 12pt;"><strong>Important - Entry to Campus</strong></span><=
+/p><p>=E2=9A=A0=EF=B8=8F You must present this email at entry.<br>Teams/Par=
+ticpcipants without this email will not be allowed on campus.</p><p>Going f=
+orward, all communication will be shared <strong>only with the team leader<=
+/strong>.</p><p>Please carry the following for verification:</p><ul><li>A v=
+alid <strong>government-issued ID</strong></li><li>Your <strong>college/com=
+pany ID</strong> used during registration</li></ul><p><br>Entry will not be=
+ permitted if the details do not match your registration.</p><p>All team me=
+mbers must be <strong>individually registered in the system</strong>. New o=
+r unregistered members added to the Travel details form will not be allowed=
+ on campus.</p><p><strong>The organisers reserve the right to deny entry if=
+ verification criteria are not met.</strong></p><p><span style=3D"font-size=
+: 12pt;"><strong>=F0=9F=9A=80 Now for the big reveal</strong></span></p><p>=
+We=E2=80=99re excited to share the <strong>core problem themes for Round 2<=
+/strong> - the foundation your solutions will be built on.</p><p>These incl=
+ude:</p><ul><li>Multi-Agent Interactions</li><li>Long-Horizon Planning &amp=
+; Instruction Following</li><li>World Modeling across professional and pers=
+onal tasks</li><li>Self-Improving agent systems</li></ul><p><br>These theme=
+s reflect the direction of <strong>real-world AI environments and agent beh=
+avior</strong> that this hackathon is designed to evaluate.</p><p>Your task=
+ is to <strong>choose any one (or more) of these themes and design your own=
+ problem statement</strong> around it. The goal is to simulate realistic sc=
+enarios, enable meaningful agent interaction, and support measurable outcom=
+es.</p><p>As part of your submission, you are expected to clearly define:</=
+p><p>The <strong>**problem statement**</strong><br>The <strong>**environmen=
+t**</strong> in which the agent(s) will operate<br>The <strong>**capabiliti=
+es**</strong> of the agent(s)<br>The <strong>**tasks**</strong> to be perfo=
+rmed<br>The <strong>**reward model/evaluation logic**</strong><br>The <stro=
+ng>**post-training or self-improvement strategy**</strong></p><p>We've also=
+ included the <strong>detailed judging criteria</strong> for this round in =
+the attached document here: <strong><a href=3D"https://c.webengage.com/lw/g=
+1.jpg?p=3DeyJsYyI6In4xMzQxMDVhNjAiLCJsIjoiM2FkYTUzOTA0NGZiY2FjNjgyMTUwYWVjM=
+GZjMDJkYTliMzU2YjJiMCIsImMiOiJhbnNodW1hbmF0cmV5QGdtYWlsLmNvbSIsImVtIjoiYW5z=
+aHVtYW5hdHJleUBnbWFpbC5jb20iLCJlIjoiMTNjbzllMiIsInYiOiJ%2BNjg2OTEzcCIsInMiO=
+iJ%2BOGZpOGVoY2dmYmc0ZWJfNWZlM2M1NjQtNTY2NS00OWUwLWEyNGItZDczNjczMmMwNDExOj=
+E3NzY1ODc2MTI4NTQiLCJldmVudCI6ImVtYWlsX2NsaWNrIiwiY3RhIjoiYjIzYTdjNSIsInRvV=
+VJMIjoiaHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vZG9jdW1lbnQvZC8xT2R6bnV6d3RiMWVjRE9t=
+MnQ2VG9aZDRNdU1YWGZPNnZXVUdjeGJDNm1Gcy9lZGl0P3VzcD1zaGFyaW5nIn0%3D">Read He=
+re</a></strong></p><p>We strongly recommend reviewing it carefully- high-sc=
+oring submissions will not just match a theme, but will also:</p><ul><li>De=
+fine clear, structured tasks and environments</li><li>Incorporate robust ev=
+aluation and reward mechanisms</li><li>Reflect real-world complexity aligne=
+d with OpenEnv principles</li></ul><p><br>You can begin working on your pro=
+blem statement right away. The <strong>training and implementation phase wi=
+ll take place during the on-site hackathon</strong>, where you will be prov=
+ided with compute credits.</p><p>Use this time to thoughtfully refine both =
+the design and evaluation aspects of your solution.</p><p>All the Best,</p>=
+<p>See you in Bangalore.</p><p>Team Scaler<br></p></td></tr></tbody></table=
+></td><td style=3D"line-height: 0; height: 0; font-size: 0;" class width=3D=
+"10"><br><img src=3D"https://d2beiqkhq929f0.cloudfront.net/public_assets/as=
+sets/000/003/691/original/spacer.gif?1651483099" width=3D"10" height=3D"10"=
+ alt></td></tr></tbody></table></div><!-- [if mso]> </td> </tr> </table> <!=
+[endif]--></td></tr></tbody></table></td></tr><tr><td style=3D"padding-bott=
+om: 0px; padding-top: 0px; font-size: 0; line-height: 0;" align=3D"center">=
+<a href=3D"#" we-wk-cta-id=3D"17dedb0d"><img src=3D"https://d2beiqkhq929f0.=
+cloudfront.net/public_assets/assets/000/184/699/original/footer.jpg?1773671=
+124" alt=3D"Scaler Logo" border=3D"0" style=3D"max-width: 100%; border-widt=
+h: 0px; border-style: solid;" width=3D"600" data-mce-style=3D"max-width: 10=
+0%; border-width: 0px; border-style: solid;"></a></td></tr><tr><td bgcolor=
+=3D"#ffffff" align=3D"center" height=3D"100%" valign=3D"top" width=3D"100%"=
+ style=3D"background: #ffffff;"><!-- [if mso]> <table border=3D"0" cellspac=
+ing=3D"0" cellpadding=3D"0" align=3D"center" width=3D"600"> <tr> <td align=
+=3D"center" valign=3D"top" width=3D"600"> <![endif]--><table border=3D"0" c=
+ellpadding=3D"0" cellspacing=3D"0" align=3D"center" width=3D"100%" style=3D=
+"max-width: 500px; text-align: center;" role=3D"presentation"><tbody><tr><t=
+d align=3D"center" valign=3D"top" style=3D"font-size: 0; text-align: center=
+;"><!-- [if mso]> <table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" a=
+lign=3D"center" width=3D"540"> <tr> <td align=3D"center" valign=3D"top" wid=
+th=3D"540"> <![endif]--><div style=3D"display: inline-block; margin: 0 0px;=
+ max-width: 540px; min-width: 540px; vertical-align: top; padding-top: 00px=
+;" class=3D"stack-column2 twocolomn"><table width=3D"100%" border=3D"0" cel=
+lspacing=3D"0" cellpadding=3D"0" role=3D"presentation"><tbody><tr><td style=
+=3D"line-height: 0; height: 0; font-size: 0;" class width=3D"20"><img src=
+=3D"https://d2beiqkhq929f0.cloudfront.net/public_assets/assets/000/003/691/=
+original/spacer.gif?1651483099" width=3D"20" height=3D"10" alt></td><td val=
+ign=3D"top"><table width=3D"100%" border=3D"0" cellspacing=3D"0" cellpaddin=
+g=3D"0" role=3D"presentation"><tbody><tr><td style=3D"font-family: 'Montser=
+rat',Arial, sans-serif; font-size: 10px; line-height: 16px; color: #000000;=
+ text-align: center; padding-bottom: 20px; font-weight: 400; padding-top: 1=
+5px;" class=3D"foot-text">Copyright =C2=A9 2026 Scaler.com. To stop receivi=
+ng these mails click- <strong><a style=3D"text-decoration: none; color: #02=
+44b9;" href=3D"https://dashboard.webengage.com/users/emails/unsubscribe.htm=
+l?p=3DeyJsYyI6In4xMzQxMDVhNjAiLCJsIjoiM2FkYTUzOTA0NGZiY2FjNjgyMTUwYWVjMGZjM=
+DJkYTliMzU2YjJiMCIsImMiOiJhbnNodW1hbmF0cmV5QGdtYWlsLmNvbSIsImVtIjoiYW5zaHVt=
+YW5hdHJleUBnbWFpbC5jb20iLCJlIjoiMTNjbzllMiIsInYiOiJ%2BNjg2OTEzcCIsInMiOiJ%2=
+BOGZpOGVoY2dmYmc0ZWJfNWZlM2M1NjQtNTY2NS00OWUwLWEyNGItZDczNjczMmMwNDExOjE3Nz=
+Y1ODc2MTI4NTQiLCJldmVudCI6ImVtYWlsX3Vuc3Vic2NyaWJlIiwiY3RhIjoiYmIxYWE4MWMif=
+Q%3D%3D" target=3D"_blank" rel=3D"noopener">Unsubscribe</a></strong></td></=
+tr></tbody></table></td><td style=3D"line-height: 0; height: 0; font-size: =
+0;" class width=3D"20"><img src=3D"https://d2beiqkhq929f0.cloudfront.net/pu=
+blic_assets/assets/000/003/691/original/spacer.gif?1651483099" width=3D"20"=
+ height=3D"10" alt></td></tr></tbody></table></div><!-- [if mso]> </td> </t=
+r> </table> <![endif]--></td></tr></tbody></table></td></tr></tbody></table=
+></div></center><!-- Email Body : END --> <!-- [if mso]> </td> </tr> </tabl=
+e> <![endif]--></div></center>
+<img height=3D"0" width=3D"0" alt=3D" " src=3D"https://c.webengage.com/lw/g=
+1.jpg?p=3DeyJsYyI6In4xMzQxMDVhNjAiLCJsIjoiM2FkYTUzOTA0NGZiY2FjNjgyMTUwYWVjM=
+GZjMDJkYTliMzU2YjJiMCIsImMiOiJhbnNodW1hbmF0cmV5QGdtYWlsLmNvbSIsImVtIjoiYW5z=
+aHVtYW5hdHJleUBnbWFpbC5jb20iLCJlIjoiMTNjbzllMiIsInYiOiJ%2BNjg2OTEzcCIsInMiO=
+iJ%2BOGZpOGVoY2dmYmc0ZWJfNWZlM2M1NjQtNTY2NS00OWUwLWEyNGItZDczNjczMmMwNDExOj=
+E3NzY1ODc2MTI4NTQiLCJldmVudCI6ImVtYWlsX29wZW4ifQ%3D%3D"><img src=3D"http://=
+url2196.scaler.com/wf/open?upn=3Du001.CnWDx-2FBHF7Nsl-2F-2BCKyo-2FvVXKiUZo0=
+i2GJq2W9gXVttxqWTrRxa2hmuOaXOSe-2F9Ge-2FGCxXvfeAOOl-2FdPRvU1xXX-2F5QJDEzn5D=
+e-2FOdfRzC94PKwtSp25R-2BikE71U-2FfeAxbSJstPfFqnWRCZ37jqF04gF-2Budwt3g4cKKIc=
+Ik3PcCRDcqVV9-2FW2Et2hEJq9kTMGC4Z6dUfp4YZWmQ-2Fxe5tHPsAkZPmdeane1hOxloeXCH4=
+xItM8jPoVOkZveOPajo3b6LdUg0-2FhF3rjSLYe6rDEAcZJEXy0OLKqr9rhxnBTu6ZBRbXrkw16=
+94l85CkkM87BXZT0QRhd1nDzow54DK9In1DGpgNMcSX5sbpfhODLvDjIC18TqhrDDYeI2A8xxV-=
+2BZRnxckHQj-2FKqRcQvAi1-2Bv9si2RsISZcvxxrk7291lokB8vLmajRH8Q4gAr5oLDSfg-2FI=
+OQCAB6X1wgk2lXqBduaH1-2BoM19kP8j0MIxuuKtF7YZGVuZuSKhfN1xER-2BNHUR2-2F3JuCQC=
+NaraP7W51skeBVNzHKbPLSyoLJrj8xFBj-2FEsSoEbEzg3BhA7YxggMHfx-2BCe6-2FCF3RitCt=
+8VbBSccCsheKLvMmOG12ulug-2Fm56BccFmjfk0v-2BtZfG2TwGpVJrxVGNlL9V023PJkE-2BGM=
+Hm4TLyXZmCr55vvYJodjL1-2BTR01BP64Y4B8lFSv-2B0h5807EdrR1Zs-2BkH75cByzh8l8KPp=
+A-3D-3D" alt=3D"" width=3D"1" height=3D"1" border=3D"0" style=3D"height:1px=
+ !important;width:1px !important;border-width:0 !important;margin-top:0 !im=
+portant;margin-bottom:0 !important;margin-right:0 !important;margin-left:0 =
+!important;padding-top:0 !important;padding-bottom:0 !important;padding-rig=
+ht:0 !important;padding-left:0 !important;"/></body></html>

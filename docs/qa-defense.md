@@ -168,6 +168,21 @@ This is the benchmark to beat with our trained 1.5B Qwen.
 
 ---
 
+## Q20. What's the Fleet AI oversight mechanic and why pure-LLM (not rules-based)?
+
+**"After each episode ends, an oversight LLM examines the full action trajectory and emits a structured report: strategy summary, risk flags, risk level (low/medium/high), and an explanation. It's the backward-looking counterpart to the critic agent — critic gives the policy advice mid-episode (forward), oversight reads the policy's behavior backward and explains it."**
+
+Why pure LLM and not rules-based:
+1. **Fleet AI's brief is about AI agent oversight, not rule engines.** The sub-theme verbatim says *"train oversight agents to monitor, analyze, and explain other AI agents."* A frozen LLM with structured prompting is the canonical scalable-oversight approach — see Constitutional AI, debate, etc.
+2. **Explanation quality.** A rules engine can flag "MW > 500" but can't say "the agent stacked aromatic rings to game the binding component, then tried to terminate before Lipinski could catch it." The LLM gives natural-language explanations that are themselves training data for further oversight work.
+3. **Single call per episode, not per step.** The oversight LLM runs only at TERMINATE — one inference call per rollout. That keeps cost (~$0.001 per episode on Gemini 2.5 Flash) and latency bounded.
+
+If pressed on cost during training: **"Default OFF. The headline GRPO training run never makes oversight calls. The mechanic is for the demo + post-hoc analysis, not for the reward loop. If a future paper wanted to train the oversight LLM itself on these trajectories, the env's structured action history is exactly the supervision signal needed."**
+
+If pressed on which model: **"We default to Gemini 2.5 Flash with thinking disabled — fast, ~$0.001/call, reliable. The env supports OpenRouter as an alternate provider; we hit OpenRouter free-tier rate limits during baseline runs, so we recommend Gemini for live demos."**
+
+---
+
 ## Q19. So what stops an agent from gaming your reward?
 
 **"Three stacked defenses, validated empirically. (1) Composite oracle: any single component that gets gamed gets diluted by the other three. (2) Lipinski gate: violating Rule of 5 halves the terminal reward. (3) Anti-degenerate guards: zero-atom Mol → 0.0; parse failure → -0.5; cannot terminate on step 1. Plus 9 redteam tests covering empty SMILES, polyaromatic blobs, single carbon, action repetition, disconnected fragments. The empirical proof: when we ran Llama 70B on the env, it tried capacity-greedy strategies (over-substituted multi-fragment molecules) and scored worse than random uniform. The reward signal isn't just hard to game in theory; we have data showing a frontier-class LLM can't game it."**
