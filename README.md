@@ -33,12 +33,13 @@ Stage 2 requires a chemistry stack that does not pip-install cleanly in stock HF
 
 | Resource | URL |
 |----------|-----|
-| Code repository | `https://github.com/AnshumanAtrey/pharmarl` |
-| HF Space (deployed env) | `<TODO>` |
-| Colab notebook (training) | `<TODO>` |
-| Pitch video (90s) | `<TODO>` |
-| W&B training run | `<TODO>` |
-| Trained model on HF Hub | `<TODO>` |
+| Code repository | https://github.com/AnshumanAtrey/pharmarl |
+| HF Space (deployed env) | https://huggingface.co/spaces/anshumanatrey/pharmarl |
+| Colab notebook (training) | `<TODO — Sahil paste share URL>` |
+| Pitch video (90s) | `<TODO — Vijay paste YouTube URL>` |
+| HF blog post | `<TODO — Vijay paste URL after publish>` |
+| W&B training run | `<TODO — Sahil paste URL>` |
+| Trained model on HF Hub | `<TODO — Sahil paste URL after push>` |
 
 ---
 
@@ -91,6 +92,46 @@ Multi-step episode state is keyed by `episode_id` — pass the same `episode_id`
 
 - **Theme 3.1 Professional Tasks** — a scientific workflow loop (SELFIES editing → oracle scoring → reward-shaped optimization) directly mapping to the medicinal-chemistry hit-finding pipeline.
 - **RLVE compliance** — adaptive 3-tier curriculum, procedurally seeded scaffolds, algorithmic reward verification (TDC oracles, not LLM judges).
+- **Patronus AI sub-theme** (consumer workflows with schema drift) — see *Novel mechanics* below.
+- **Halluminate sub-theme** (multi-actor environments) — see *Novel mechanics* below.
+
+## Novel mechanics (opt-in, flag-gated)
+
+Both default OFF — the headline training run uses static reward against a single composite. Each mechanic has a dedicated demo cell in `colab/train_pharmarl.ipynb` and Q&A defense in `docs/qa-defense.md`.
+
+### Mid-episode schema drift (Patronus AI sub-theme)
+Real medicinal-chemistry projects have shifting constraints — early-stage potency push uncovers an ADMET liability, synthesizability tightens before scale-up. We model this directly: enable `CurriculumConfig.schema_drift_enabled` and the reward weights flip mid-episode, with the agent receiving a `drift_warning` in observation when constraints change. To our knowledge, no prior molecular RL env has dynamic reward weights.
+
+### Multi-actor critic (Halluminate sub-theme)
+Enable `CurriculumConfig.critic_enabled` and a separate logical agent — a deterministic rules-based medicinal chemist — examines each post-edit molecule and emits structured feedback (PAINS substructures, MW/LogP warnings, reactive group flags). The critique is appended to the next observation's metadata; the policy can integrate or ignore it. Rules-based not LLM-based: deterministic, ms latency, no API cost. The env contract has a clean seam — a frozen LLM critic could be swapped in here as future work.
+
+## Baseline spectrum — what we measured before training
+
+We probed 6 policies on the same eval (9 episodes per target × 3 targets):
+
+| Source | DRD2 | GSK3B | JNK3 | Mean | Cost |
+|---|---|---|---|---|---|
+| Random uniform | +2.78 | +2.33 | +1.78 | +2.30 | $0 |
+| Scripted (4-step) | +2.90 | +3.04 | +2.50 | +2.81 | $0 |
+| Llama 3.2 3B | +1.80 | +1.99 | +1.22 | +1.67 | $0.001 |
+| Gemini 2.5 Flash | +2.18 | +1.10 | +2.15 | +1.81 | $0.026 |
+| Llama 3.1 8B | +2.52 | +2.57 | +2.27 | **+2.45** | $0.001 |
+| Llama 3.3 70B | +1.65 | +0.79 | +1.14 | +1.19 | $0.007 |
+| Gemini 2.5 Pro | +4.74 | +3.40 | +2.91 | +3.68 | $0.123 |
+
+**Inverted scaling**: 70B (+1.19) < 8B (+2.45) > 3B (+1.67), and 70B falls *below* random uniform. 70B's failure mode: it tries multi-fragment over-substituted molecules in one turn that fail Lipinski + the env's chemistry validator (parse rate also slips to 97%). In this constrained action space, raw model capacity is anti-correlated with performance past a sweet spot — *discipline beats capacity*. This is the empirical proof that the env's reward function isn't trivially gameable by raw scale.
+
+Random and scripted policies beat 3 of the 4 LLMs we tested. Only Gemini 2.5 Pro clears the scripted baseline cleanly. Total probe spend: **$0.158**. Full table + reproducing instructions in `docs/baselines.md`.
+
+## Reward hacking defenses
+
+Judges explicitly look for this. Three stacked defenses, validated empirically:
+
+1. **Composite oracle** — any single component getting gamed gets diluted by the other three (binding 0.40 / QED 0.25 / SA 0.15 / 1-tox 0.20).
+2. **Lipinski gate** — terminal reward halved if the final molecule fails Rule of 5.
+3. **Anti-degenerate guards** — zero-atom Mol → 0.0; parse failure → -0.5; cannot terminate on step 1.
+
+14 redteam tests pin this surface: `tests/test_reward_redteam.py` covers empty SMILES, polyaromatic blobs, single carbon, action repetition, disconnected fragments, charged species, the exact failure-mode molecules Llama 70B produced, and PAINS-pattern detection. **Empirical proof:** when frontier-class Llama 70B was given this env, it tried capacity-greedy strategies and scored *worse than random uniform*. The reward signal isn't just hard to game in theory — we have data.
 
 ## Held-out generalization test
 
