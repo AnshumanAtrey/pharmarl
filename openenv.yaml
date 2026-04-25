@@ -1,0 +1,39 @@
+spec_version: 1
+name: pharmarl
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+description: >
+  PharmaRL — multi-step molecular drug discovery environment for OpenEnv.
+  Stage 1 targets SARS-CoV-2 Mpro inhibitor design via TDC oracles + RDKit
+  validity checks. The agent edits SELFIES strings across 15-20 steps,
+  scored by a composite reward (binding affinity, drug-likeness,
+  synthesizability, Lipinski compliance).
+version: "0.1.0"
+tasks:
+  - id: trivial
+    name: Single-Property Optimization
+    difficulty: trivial
+    max_steps: 10
+    description: "Start from a known scaffold. Optimize QED only. 5-fragment vocabulary. Guaranteed learnable in <100 GRPO steps."
+  - id: easy
+    name: Two-Property Optimization
+    difficulty: easy
+    max_steps: 15
+    description: "Start from a scaffold. Optimize QED + binding affinity. 15-fragment vocabulary."
+  - id: hard
+    name: De Novo Design
+    difficulty: hard
+    max_steps: 20
+    description: "Start from a single carbon. Full 4-component reward (affinity, QED, SA, toxicity). 50-fragment vocabulary. TERMINATE action required."
+actions:
+  - ADD_FRAGMENT
+  - REMOVE_FRAGMENT
+  - SUBSTITUTE_ATOM
+  - TERMINATE
+oracles:
+  - tdc_mpro_docking
+  - rdkit_qed
+  - rdkit_sa
+  - tdc_cyp_toxicity
