@@ -40,6 +40,28 @@ class CurriculumConfig:
     training_targets: tuple = ("DRD2", "GSK3B")
     held_out_target: str = "JNK3"
 
+    # ─── Schema drift (Patronus AI sub-theme) ──────────────────────────────
+    # Mid-episode reward weight changes, modeling the real medicinal-chemistry
+    # workflow where a project starts optimizing one objective and the
+    # constraints shift mid-development (e.g. potency push uncovers an ADMET
+    # liability, synthesizability tightens before scale-up).
+    #
+    # Default OFF — flagging this on is opt-in via reset(schema_drift=True)
+    # or by constructing the env with a config that has schema_drift_enabled=True.
+    schema_drift_enabled: bool = False                  # MASTER FLAG, default OFF
+    drift_profiles: tuple = (                            # sampled per-episode when enabled
+        "static",                                        # no drift (control)
+        "early_admet",                                   # ADMET kicks in mid-episode
+        "late_potency",                                  # potency requirement added mid-episode
+    )
+    drift_step: int = 8                                  # step at which the drift fires
+    # (w_docking, w_qed, w_sa, w_tox)
+    weights_static: tuple = (0.40, 0.25, 0.15, 0.20)               # current default
+    weights_early_admet_pre: tuple = (0.60, 0.40, 0.00, 0.00)      # binding+drug-like only
+    weights_early_admet_post: tuple = (0.30, 0.20, 0.25, 0.25)     # SA + tox activate
+    weights_late_potency_pre: tuple = (0.10, 0.40, 0.30, 0.20)     # drug-like + ADMET focus
+    weights_late_potency_post: tuple = (0.45, 0.20, 0.20, 0.15)    # potency now matters
+
 
 DEFAULT_CONFIG = CurriculumConfig()
 
@@ -89,3 +111,48 @@ def reward_components_for(
         "easy": config.easy_components,
         "hard": config.hard_components,
     }[difficulty]
+
+
+# ─── Schema drift helpers (Patronus AI sub-theme) ──────────────────────────
+
+
+def pick_drift_profile(
+    rng: random.Random | None = None,
+    config: CurriculumConfig = DEFAULT_CONFIG,
+) -> str:
+    """Pick the drift profile for the next episode.
+
+    Returns ``"static"`` (no drift) when schema drift is disabled — guarantees
+    the headline training run is unaffected unless the master flag is on.
+    """
+    if not config.schema_drift_enabled:
+        return "static"
+    rng = rng or random.Random()
+    return rng.choice(config.drift_profiles)
+
+
+def weights_for(
+    profile: str,
+    step_count: int,
+    drift_step: int,
+    config: CurriculumConfig = DEFAULT_CONFIG,
+) -> tuple:
+    """Return ``(w_docking, w_qed, w_sa, w_tox)`` for the current step.
+
+    - ``static`` always returns ``config.weights_static``.
+    - ``early_admet`` / ``late_potency`` return their ``pre`` weights for
+      ``step_count < drift_step`` and ``post`` weights once the drift fires.
+
+    Unknown profiles fall back to the static weights — defensive default that
+    keeps the headline run safe if a typo slips into a config.
+    """
+    if profile == "early_admet":
+        if step_count < drift_step:
+            return config.weights_early_admet_pre
+        return config.weights_early_admet_post
+    if profile == "late_potency":
+        if step_count < drift_step:
+            return config.weights_late_potency_pre
+        return config.weights_late_potency_post
+    # "static" or unknown -> static
+    return config.weights_static
