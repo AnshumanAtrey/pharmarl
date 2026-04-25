@@ -102,6 +102,8 @@ class DrugDiscoveryEnvironment(Environment):
         self._state = MoleculeState()
         self._edit_history_full: List[dict] = []
         self._final_oracle_scores: Optional[dict] = None
+        # Last step's reward attribution (per-component, for trainer W&B logging)
+        self._last_reward_breakdown: dict = {}
 
     # ─── reset / step ───────────────────────────────────────────────────
 
@@ -137,6 +139,7 @@ class DrugDiscoveryEnvironment(Environment):
         )
         self._edit_history_full = []
         self._final_oracle_scores = None
+        self._last_reward_breakdown = {}
 
         return self._build_observation(
             reward=0.0,
@@ -175,6 +178,12 @@ class DrugDiscoveryEnvironment(Environment):
             self._final_oracle_scores = tr.components
             self._state.final_oracle_scores = tr.components
             self._state.cumulative_reward += tr.reward
+            self._last_reward_breakdown = {
+                "phase": "terminal",
+                "composite": tr.composite,
+                "lipinski_passes": tr.lipinski_passes,
+                **{f"component_{k}": v for k, v in tr.components.items()},
+            }
             return self._build_observation(
                 reward=tr.reward,
                 done=True,
@@ -232,6 +241,11 @@ class DrugDiscoveryEnvironment(Environment):
         sr = step_shaping_reward(self._state.smiles, action_was_valid=last_action_valid)
         reward = sr.reward
         self._state.cumulative_reward += reward
+        self._last_reward_breakdown = {
+            "phase": "step",
+            "shaping": sr.reward,
+            **{f"shape_{k}": v for k, v in sr.breakdown.items()},
+        }
 
         # ─── Truncation ──────────────────────────────────────────────────
         truncated = self._state.step_count >= self._state.max_steps
@@ -245,6 +259,13 @@ class DrugDiscoveryEnvironment(Environment):
             self._state.final_oracle_scores = tr.components
             reward += tr.reward
             self._state.cumulative_reward += tr.reward
+            self._last_reward_breakdown = {
+                "phase": "truncated_terminal",
+                "shaping": sr.reward,
+                "composite": tr.composite,
+                "lipinski_passes": tr.lipinski_passes,
+                **{f"component_{k}": v for k, v in tr.components.items()},
+            }
             message += f" [TRUNCATED — auto-terminal composite={tr.composite:.3f}]"
 
         return self._build_observation(
@@ -306,5 +327,6 @@ class DrugDiscoveryEnvironment(Environment):
             metadata={
                 "cumulative_reward": self._state.cumulative_reward,
                 "final_oracle_scores": self._final_oracle_scores,
+                "reward_breakdown": dict(self._last_reward_breakdown),
             },
         )
