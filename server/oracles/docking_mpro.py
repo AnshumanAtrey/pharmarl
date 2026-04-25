@@ -60,8 +60,20 @@ _CLASSIFIER_FALLBACKS = [
 ]
 
 # Targets the env knows how to route to — short names accepted by /reset.
-KNOWN_TARGETS = ("DRD2", "GSK3B", "JNK3")
+KNOWN_TARGETS = ("DRD2", "GSK3B", "JNK3", "AMLODIPINE_MPO")
 DEFAULT_TARGET = "DRD2"
+
+# Maps short target names to TDC Oracle registry names. Most targets share
+# the short form (DRD2 → "drd2"); the cross-family secondary held-out maps
+# to a TDC MPO oracle that scores similarity-to-amlodipine + drug-likeness.
+# Amlodipine is an L-type calcium channel blocker — orthogonal pharmacology
+# to the Ser/Thr + MAP kinases used for primary training and held-out.
+_TDC_ORACLE_NAME = {
+    "DRD2": "DRD2",
+    "GSK3B": "GSK3B",
+    "JNK3": "JNK3",
+    "AMLODIPINE_MPO": "amlodipine_mpo",
+}
 
 
 def _lazy_init() -> None:
@@ -127,10 +139,11 @@ def _load_target_oracle(target: str) -> Any:
         logger.warning("PyTDC not installed — target %s disabled.", target)
         return None
 
+    tdc_name = _TDC_ORACLE_NAME.get(target, target)
     try:
-        oracle = Oracle(name=target)
+        oracle = Oracle(name=tdc_name)
         _TARGET_CACHE[target] = oracle
-        logger.info("Loaded per-target oracle %s.", target)
+        logger.info("Loaded per-target oracle %s (TDC=%s).", target, tdc_name)
         return oracle
     except Exception as e:
         logger.warning("Failed to load oracle for target %s: %s", target, e)
@@ -194,6 +207,7 @@ _ORACLE_TO_TARGET_NAME = {
     "DRD2": "DRD2_dopamine_D2_receptor",
     "GSK3B": "GSK3B_glycogen_synthase_kinase_3_beta",
     "JNK3": "JNK3_c-Jun_N-terminal_kinase_3",
+    "AMLODIPINE_MPO": "amlodipine_MPO_L-type_calcium_channel_proxy",
     "7l11_docking_normalize": "SARS-CoV-2_NSP15_endoribonuclease",
     "2rgp_docking_normalize": "EGFR_T790M_kinase",
     "1iep_docking_normalize": "ABL_kinase",
