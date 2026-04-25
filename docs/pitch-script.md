@@ -50,7 +50,13 @@ The pitch leads with **policy-class novelty**, not chemistry. The chemistry is t
 
 ---
 
-### 1:00 — 1:20 · PROOF — including the held-out generalization test
+### 1:00 — 1:20 · PROOF — baselines + held-out generalization test
+
+[switch to baseline table on screen]
+
+> "Before training, we ran six policies on the same eval. Random uniform: +2.30. Hand-coded scripted heuristic: +2.81. Llama 3B Instruct: +1.67. Llama 8B: +2.45 — that's the sweet spot. Llama 70B: **+1.19. Worse than random.** It tries multi-fragment over-substituted molecules; the env's chemistry validator rejects them. Inverted scaling. Only Gemini 2.5 Pro at +3.68 cleanly beats the scripted baseline."
+
+> "Capacity isn't the bottleneck. Discipline is. That's why we trained a 1.5B model with targeted RL."
 
 [switch to W&B graph]
 

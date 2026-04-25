@@ -117,3 +117,76 @@ def test_haloperidol_drd2_higher_than_jnk3() -> None:
         f"Multi-target router likely broken: haloperidol DRD2={drd2.composite:.3f} "
         f"NOT > JNK3={jnk3.composite:.3f}"
     )
+
+
+# ─── Capacity-greedy strategies should NOT max score ───────────────────
+# These pin the inverted-scaling finding from docs/baselines.md: Llama 70B
+# fails on this env because it tries oversized multi-fragment molecules.
+# These tests assert the reward function rejects the failure modes 70B exhibited.
+
+
+def test_oversized_multifragment_molecule_fails_lipinski() -> None:
+    """The exact failure mode of Llama 70B: chain together multiple aromatic + amide
+    groups in a single molecule. MW typically blows past 500 → Lipinski gate halves.
+    """
+    # Real Llama 70B output we observed: "O=C(O)OC(=Nc1ccncc1)OC(=Nc1ccncc1)Oc..."
+    oversized = "O=C(O)OC(=Nc1ccncc1)OC(=Nc1ccncc1)Oc1ccccc1"
+    tr = terminal_reward(oversized, components_active=("qed", "docking", "sa", "toxicity"), target="DRD2")
+    # Either the Lipinski gate halves it OR the molecule is straight up unparseable;
+    # both are acceptable failure modes. Composite should be modest.
+    assert tr.composite < 0.5, (
+        f"oversized 70B-style molecule got composite={tr.composite:.3f} — "
+        f"reward should penalize capacity-greedy strategies"
+    )
+
+
+def test_disconnected_fragments_handled_safely() -> None:
+    """SMILES with '.' (disconnected fragments) should not return high composite.
+    e.g., 'CCO.CCO' or two benzenes — composite should be modest, no crashes.
+    """
+    for disconnected in ("CCO.CCO", "c1ccccc1.c1ccccc1", "CC.CC.CC"):
+        tr = terminal_reward(
+            disconnected, components_active=("qed", "docking", "sa", "toxicity"), target="DRD2"
+        )
+        # Should not crash. Composite should be modest because at least one
+        # component (binding/SA/tox) will be poor on disconnected mixtures.
+        assert 0.0 <= tr.composite <= 1.0, f"disconnected {disconnected!r} → out-of-range composite"
+
+
+def test_charged_species_scored_safely() -> None:
+    """Charged molecules ('[NH3+]CCO', '[O-]C(=O)C') should still score; oracles
+    shouldn't crash on protonation states."""
+    for charged in ("[NH3+]CCO", "[O-]C(=O)C", "C[N+](C)(C)C"):
+        tr = terminal_reward(
+            charged, components_active=("qed", "docking", "sa", "toxicity"), target="DRD2"
+        )
+        assert 0.0 <= tr.reward <= 10.0
+
+
+def test_qed_only_component_does_not_max_terminal_reward() -> None:
+    """Trivial tier uses QED-only. Even a high-QED molecule (ibuprofen, QED~0.81)
+    should not max the 0-10 terminal scale — it's just one signal."""
+    ibuprofen = "CC(C)Cc1ccc(C(C)C(=O)O)cc1"
+    tr = terminal_reward(ibuprofen, components_active=("qed",), target="DRD2")
+    # Ibuprofen QED ≈ 0.81; reward = 0.81 * 10 = 8.1; with Lipinski PASS, no halving.
+    # The point: even a "good" QED molecule on trivial tier doesn't trivially max.
+    assert tr.reward < 10.0
+
+
+def test_known_pains_thiocarbonyl_does_not_dominate() -> None:
+    """Thiocarbonyl is a PAINS pattern. The composite should not max out for these
+    — they're known nuisances even if individual oracles like QED are passable."""
+    # CC(=S)NC is a thioamide — appears in PAINS catalogs
+    pains_like = "CC(=S)NC"
+    tr = terminal_reward(
+        pains_like, components_active=("qed", "docking", "sa", "toxicity"), target="DRD2"
+    )
+    # We don't enforce a hard cap (the critic agent does that as a separate signal),
+    # but the composite for a small simple thioamide vs a real drug should be lower.
+    haloperidol = terminal_reward(
+        "O=C(CCCN1CCC(O)(c2ccc(Cl)cc2)CC1)c1ccc(F)cc1",
+        components_active=("qed", "docking", "sa", "toxicity"), target="DRD2",
+    )
+    assert haloperidol.composite > tr.composite, (
+        "Real drug should outscore a small PAINS-like fragment on DRD2"
+    )

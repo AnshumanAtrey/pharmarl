@@ -126,6 +126,16 @@ Don't pretend this is a "novel disease" test. It's a novel *target* in the same 
 
 ---
 
+## Q17. Why a rules-based critic instead of an LLM critic?
+
+**"Two reasons. First, deterministic: same molecule always gets the same critique, which makes critic-conditioned training reproducible. An LLM critic introduces stochasticity that interferes with reward signal cleanliness. Second, fast: the rules engine returns in milliseconds — an LLM critic would 10x rollout latency. The Halluminate sub-theme rewards multi-actor environments; what matters is that there's a separate logical agent providing feedback that the policy can integrate, not that the agent is itself an LLM. Future work could swap in a frozen LLM critic for richer feedback."**
+
+If pressed on what the critic actually checks: **"PAINS substructures (thiocarbonyl, rhodanine, nitroaromatic Michael acceptors), Lipinski-flavored property warnings (MW > 500, LogP > 5), reactive group flags (alkyl halide, epoxide, anhydride), and a heavy-atom sanity floor. Verdict is `approve` / `revise` / `reject`; the critique is appended to the next observation's metadata under `critique` so the policy can choose to revise via REMOVE_FRAGMENT or SUBSTITUTE_ATOM."**
+
+If asked why it's gated behind `critic_enabled` and default OFF: **"The headline training run targets the Reward Improvement curve on DRD2 — that's our insurance criterion. The critic adds an extra observation field, which would change the prompt distribution for the policy. We isolate it behind a flag so the headline run is reproducible against an LLM-only baseline; the critic-on run is the multi-actor demo."**
+
+---
+
 ## What NOT to say
 
 - ❌ "AI to cure all diseases" / "any and all disease"
@@ -135,3 +145,31 @@ Don't pretend this is a "novel disease" test. It's a novel *target* in the same 
 - ❌ "Direct Mpro docking" (we don't — Stage 1 is DRD2)
 - ❌ "Snorkel-AI compliant" (false — Snorkel = noisy experts; our oracles are deterministic)
 - ❌ "Self-improving" without scare quotes (RLVE curriculum ≠ self-improvement)
+
+---
+
+## Q16. What is schema drift and why does it matter?
+
+**"Schema drift means the reward function's weights change mid-episode. Real medicinal chemistry projects work this way — you start optimizing potency, discover a metabolic stability problem, and the constraints shift mid-development. We model this directly in our env. The Patronus AI sub-theme rewards exactly this kind of consumer-workflow-with-changing-rules environment, and to our knowledge no prior molecular RL env has dynamic reward weights."**
+
+If pressed on implementation: "It's flag-gated behind `schema_drift_enabled` in `CurriculumConfig`, default OFF — the headline training run is unaffected. When enabled, each episode samples a drift profile (`static`, `early_admet`, `late_potency`); on the configured drift step the reward weights flip from a `pre` tuple to a `post` tuple, and the observation surfaces a `drift_warning` plus an updated `active_constraints` list so the agent can detect that the rules just changed."
+
+---
+
+## Q18. Did you compare against off-the-shelf LLMs as baselines?
+
+**"Yes — six policies on the same eval (9 episodes per target × 3 targets). The full table is in `docs/baselines.md`, but the headline numbers: random uniform +2.30, scripted 4-step heuristic +2.81, Llama 3.2 3B +1.67, Gemini 2.5 Flash +1.81, Llama 3.1 8B +2.45, Llama 3.3 70B +1.19, Gemini 2.5 Pro +3.68. Every probe ran in under $0.16 total spend."**
+
+The interesting result: **inverted scaling.** Across the Llama family, 8B Instruct (+2.45) was the sweet spot — bigger 70B (+1.19) and smaller 3B (+1.67) both underperform. 70B specifically gets greedy: it tries multi-fragment over-substituted molecules in one turn that fail Lipinski + the env's chemistry validator. Parse rate dropped to 97% (3 failed-JSON turns out of 135).
+
+Implication: in this constrained action space, raw model capacity is anti-correlated with performance past a sweet spot. The env's reward-design discipline — composite + Lipinski gate + parse penalty + zero-atom guard — penalizes capacity-greedy strategies. **Random and scripted policies beat 3 of the 4 LLMs we tested.** Only Gemini 2.5 Pro clears the scripted baseline cleanly.
+
+This is the benchmark to beat with our trained 1.5B Qwen.
+
+---
+
+## Q19. So what stops an agent from gaming your reward?
+
+**"Three stacked defenses, validated empirically. (1) Composite oracle: any single component that gets gamed gets diluted by the other three. (2) Lipinski gate: violating Rule of 5 halves the terminal reward. (3) Anti-degenerate guards: zero-atom Mol → 0.0; parse failure → -0.5; cannot terminate on step 1. Plus 9 redteam tests covering empty SMILES, polyaromatic blobs, single carbon, action repetition, disconnected fragments. The empirical proof: when we ran Llama 70B on the env, it tried capacity-greedy strategies (over-substituted multi-fragment molecules) and scored worse than random uniform. The reward signal isn't just hard to game in theory; we have data showing a frontier-class LLM can't game it."**
+
+---

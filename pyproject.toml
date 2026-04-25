@@ -41,3 +41,11 @@ server = "pharmarl.server.app:main"
 include-package-data = true
 packages = ["pharmarl", "pharmarl.server", "pharmarl.server.molecule_engine", "pharmarl.server.oracles"]
 package-dir = { "pharmarl" = ".", "pharmarl.server" = "server", "pharmarl.server.molecule_engine" = "server/molecule_engine", "pharmarl.server.oracles" = "server/oracles" }
+
+[tool.pytest.ini_options]
+# Without --confcutdir=tests, pytest walks up from tests/__init__.py and tries to import
+# the project-root __init__.py (which uses relative imports and fails under direct
+# script-style execution). Setting confcutdir confines collection to tests/.
+testpaths = ["tests"]
+addopts = "--confcutdir=tests"
+norecursedirs = [".git", ".venv", "build", "dist", "server", "scripts", "examples", "colab", "docs"]
