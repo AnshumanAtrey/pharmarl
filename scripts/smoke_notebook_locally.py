@@ -84,6 +84,41 @@ def stub_action(obs: Dict[str, Any]) -> Dict[str, Any]:
     return {"action_type": "TERMINATE"}
 
 
+def rollout_episode_with_target(env_url: str, target: str, difficulty: str = "easy", max_safety: int = 30):
+    """Single-episode rollout against a specified target — exercises the multi-target path."""
+    import time
+    import uuid
+    episode_id = str(uuid.uuid4())
+    r = SESSION.post(
+        f"{env_url}/reset",
+        json={"difficulty": difficulty, "episode_id": episode_id, "target": target},
+    ).json()
+    obs = r["observation"]
+    reported_target = obs.get("target", "<missing>")
+    actions, rewards = [], []
+    cumulative = 0.0
+    for _ in range(max_safety):
+        action = stub_action(obs)
+        step = SESSION.post(
+            f"{env_url}/step",
+            json={"action": action, "episode_id": episode_id},
+            timeout=60,
+        ).json()
+        actions.append(action)
+        rewards.append(step["reward"])
+        cumulative += step["reward"]
+        obs = step["observation"]
+        if step["done"]:
+            break
+    return {
+        "actions": actions,
+        "rewards": rewards,
+        "cumulative": cumulative,
+        "final_smiles": obs["smiles"],
+        "reported_target": reported_target,
+    }
+
+
 def rollout_episode(env_url: str, difficulty: str = "trivial", verbose: bool = False, max_safety: int = 50):
     """Mirrors notebook cell 12 — uses episode_id to keep state across HTTP calls.
 
@@ -216,7 +251,7 @@ def main() -> int:
     print(f"[OK]  reward_env: {re_}")
 
     # Full rollout — 5 episodes
-    print("\n--- 5-episode random-action baseline ---", flush=True)
+    print("\n--- 5-episode random-action baseline (default target) ---", flush=True)
     import time
     eps = []
     for i in range(5):
@@ -230,6 +265,27 @@ def main() -> int:
         )
     avg = statistics.mean(e["cumulative"] for e in eps)
     print(f"\n  avg cumulative reward: {avg:+.3f}")
+
+    # Multi-target rollout (the held-out generalization test setup)
+    print("\n--- Multi-target probe: DRD2 / GSK3B / JNK3 ---", flush=True)
+    for tgt in ("DRD2", "GSK3B", "JNK3"):
+        ep = rollout_episode_with_target(ENV_URL, tgt, "easy")
+        print(
+            f"  target={tgt:6s} steps={len(ep['actions'])} cum={ep['cumulative']:+.3f} "
+            f"final={ep['final_smiles']} reported_target={ep['reported_target']}",
+            flush=True,
+        )
+
+    # Unknown target should be rejected with a clean 400
+    bad = SESSION.post(
+        f"{ENV_URL}/reset",
+        json={"difficulty": "easy", "episode_id": "bad-target-probe", "target": "NOT_A_TARGET"},
+    )
+    if bad.status_code == 400:
+        print(f"  [OK]    /reset rejects unknown target with 400")
+    else:
+        print(f"  [FAIL]  /reset accepted unknown target ({bad.status_code}: {bad.text[:120]})")
+        return 1
 
     # Sanity: cumulative reward should not be NaN; at least one episode terminated
     if any(e["cumulative"] != e["cumulative"] for e in eps):  # NaN check

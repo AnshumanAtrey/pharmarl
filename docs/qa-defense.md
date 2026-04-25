@@ -76,13 +76,31 @@ This is the answer that *gains* credibility. Don't run from the limitation; own 
 
 ## Q11. Would a researcher write a paper about training on this?
 
-**"On the chemistry side, no — DRD2 has been benchmarked to death since 2017. On the *policy class* side, yes: nobody has published an OpenEnv-native LLM-as-policy result on DRD2 with reward-shaping discipline. That's the missing data point. PharmaRL is the env that lets that experiment happen reproducibly."**
+**"On the chemistry side, no — DRD2 has been benchmarked to death since 2017. On the *policy class* side, yes: nobody has published an OpenEnv-native LLM-as-policy result on DRD2 with reward-shaping discipline. That's the missing data point. PharmaRL is the env that lets that experiment happen reproducibly. We also ran a held-out target generalization test, which most molRL papers don't — see Q13."**
 
 ---
 
 ## Q12. Why these four reward components specifically?
 
 **"Three properties. One: independent — docking is orthogonal to drug-likeness, which is orthogonal to synthesizability, which is orthogonal to toxicity. Two: non-gameable — each is a published, validated scientific oracle, TDC = Harvard/MIT, RDKit = open-source standard. Three: visually distinguishable — judges can watch four W&B curves climb together. A single docking score is reward-hackable; the composite plus Lipinski gate prevents stacking aromatic rings to a non-drug-like blob."**
+
+---
+
+## Q13. Does training on one target transfer to a different target?
+
+**"We tested that explicitly. We trained on two targets, DRD2 and GSK3B, and reserved a third — JNK3, a kinase the model never saw during training — for evaluation. Untrained Qwen scores [BEFORE] on JNK3; trained Qwen scores [AFTER]. Delta of [DELTA]. That's a held-out generalization measurement most molecular RL papers don't run. The agent has learned [if positive: 'medicinal-chemistry primitives — basic-amine plus aromatic scaffolds — that transfer between kinase targets' / if neutral: 'drug-like scaffold construction but not target-specific pharmacophore — exactly what you'd expect from a model that hasn't seen the target']."**
+
+Replace the bracket placeholders with actual numbers from the W&B run before pitching. **If transfer is null, frame it neutrally — null result is still a result.** Don't claim transfer if the data doesn't support it.
+
+If pressed: "Why JNK3 specifically? It's a MAP kinase, distinct binding site from GSK3B (Ser/Thr) and DRD2 (GPCR). Similar pharmacophore vocabulary at the basic-amine-plus-aromatic level, but different target geometry. Reasonable test of whether the agent learned the chemistry primitives or just the targets."
+
+If pressed harder: "We're not claiming this generalizes to *any* disease. The transfer signal we measured is between three TDC classifiers — same protein family signal, different specific protein. Real cross-disease generalization (GPCR → enzyme, e.g.) is harder and not what we tested."
+
+---
+
+## Q14. Why DRD2 + GSK3B as training targets and JNK3 as held-out, not other combinations?
+
+**"All three are TDC classifiers — pure Python, no native chemistry deps, fast oracle calls. DRD2 is the canonical molRL benchmark. GSK3B and JNK3 are kinase classifiers — they share basic pharmacophore vocabulary with each other but have distinct binding sites. So the held-out experiment is controlled: same target *family*, different specific *protein*. Cleaner signal than 'GPCR vs protease vs kinase' which would be too dissimilar to transfer at all."**
 
 ---
 

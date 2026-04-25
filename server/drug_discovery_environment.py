@@ -58,7 +58,12 @@ try:
         get_vocab_for_difficulty,
         smiles_to_selfies,
     )
-    from .oracles import get_active_target_name
+    from .oracles import (
+        DEFAULT_TARGET,
+        KNOWN_TARGETS,
+        get_active_target_name,
+        get_target_full_name,
+    )
     from .scenarios import sample_starting_molecule
 except ImportError:
     from server.curriculum import (  # type: ignore
@@ -83,7 +88,12 @@ except ImportError:
         get_vocab_for_difficulty,
         smiles_to_selfies,
     )
-    from server.oracles import get_active_target_name  # type: ignore
+    from server.oracles import (  # type: ignore
+        DEFAULT_TARGET,
+        KNOWN_TARGETS,
+        get_active_target_name,
+        get_target_full_name,
+    )
     from server.scenarios import sample_starting_molecule  # type: ignore
 
 logger = logging.getLogger(__name__)
@@ -110,18 +120,37 @@ class DrugDiscoveryEnvironment(Environment):
         self._state = MoleculeState()
         self._edit_history_full: List[dict] = []
         self._final_oracle_scores: Optional[dict] = None
+        # Short routing name for the binding oracle (DRD2/GSK3B/JNK3). Resolved
+        # at /reset; the human-readable full name lives in self._state.target.
+        self._target_short: str = DEFAULT_TARGET
 
     # ─── reset / step ───────────────────────────────────────────────────
 
     def reset(self, seed: Optional[int] = None, episode_id: Optional[str] = None, **kwargs: Any) -> MoleculeObservation:
-        """Start a new episode. Optional kwargs: difficulty, training_step."""
+        """Start a new episode. Optional kwargs: difficulty, training_step, target."""
         difficulty: Optional[DifficultyTier] = kwargs.get("difficulty")
         training_step: Optional[int] = kwargs.get("training_step")
+        target: Optional[str] = kwargs.get("target")
         if seed is not None:
             self._rng = random.Random(seed)
 
         if difficulty is None:
             difficulty = pick_difficulty(training_step, self._config, self._rng)
+
+        # Resolve target: explicit kwarg wins; otherwise default Stage 1 (DRD2).
+        # If the host has Stage 2 docking enabled, the full-name resolver picks up
+        # the actually-active oracle so observations stay honest.
+        if target is None:
+            self._target_short = DEFAULT_TARGET
+            full_name = get_active_target_name()
+        else:
+            if target not in KNOWN_TARGETS:
+                raise ValueError(
+                    f"unknown target {target!r}; must be one of {KNOWN_TARGETS} "
+                    f"(or omit to use the default {DEFAULT_TARGET})."
+                )
+            self._target_short = target
+            full_name = get_target_full_name(target)
 
         max_steps = max_steps_for(difficulty, self._config)
 
@@ -130,11 +159,10 @@ class DrugDiscoveryEnvironment(Environment):
         selfies = smiles_to_selfies(canonical) or "[C]"
 
         eid = episode_id or str(uuid4())
-        active_target = get_active_target_name()
         self._state = MoleculeState(
             episode_id=eid,
             step_count=0,
-            target=active_target,
+            target=full_name,
             difficulty=difficulty,
             max_steps=max_steps,
             smiles=canonical,
@@ -153,7 +181,7 @@ class DrugDiscoveryEnvironment(Environment):
             last_action_valid=True,
             message=(
                 f"Episode {eid[:8]} started @ {difficulty}. "
-                f"Scaffold = {canonical}. Optimizing binding to {active_target}."
+                f"Scaffold = {canonical}. Optimizing binding to {full_name}."
             ),
             truncated=False,
         )
@@ -180,6 +208,7 @@ class DrugDiscoveryEnvironment(Environment):
             tr = terminal_reward(
                 self._state.smiles,
                 components_active=reward_components_for(self._state.difficulty, self._config),
+                target=self._target_short,
             )
             self._final_oracle_scores = tr.components
             self._state.final_oracle_scores = tr.components
@@ -189,7 +218,8 @@ class DrugDiscoveryEnvironment(Environment):
                 done=True,
                 last_action_valid=True,
                 message=(
-                    f"TERMINATED. Composite={tr.composite:.3f}, "
+                    f"TERMINATED. Target={self._target_short} "
+                    f"composite={tr.composite:.3f}, "
                     f"Lipinski={'PASS' if tr.lipinski_passes else 'FAIL'}, "
                     f"final SMILES={self._state.smiles}"
                 ),
@@ -249,6 +279,7 @@ class DrugDiscoveryEnvironment(Environment):
             tr = terminal_reward(
                 self._state.smiles,
                 components_active=reward_components_for(self._state.difficulty, self._config),
+                target=self._target_short,
             )
             self._final_oracle_scores = tr.components
             self._state.final_oracle_scores = tr.components

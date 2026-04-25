@@ -33,8 +33,24 @@ class CurriculumConfig:
     easy_components: tuple = ("qed", "docking")
     hard_components: tuple = ("qed", "docking", "sa", "toxicity")
 
+    # Multi-target setup for the held-out generalization test.
+    # We train on `training_targets` (rotating per episode) and reserve
+    # `held_out_target` for the final eval — measures whether learned
+    # medicinal-chemistry primitives transfer to a target the model never saw.
+    training_targets: tuple = ("DRD2", "GSK3B")
+    held_out_target: str = "JNK3"
+
 
 DEFAULT_CONFIG = CurriculumConfig()
+
+
+def pick_training_target(
+    rng: random.Random | None = None,
+    config: CurriculumConfig = DEFAULT_CONFIG,
+) -> str:
+    """Pick a training target (rotates through training_targets uniformly)."""
+    rng = rng or random.Random()
+    return rng.choice(config.training_targets)
 
 
 def pick_difficulty(

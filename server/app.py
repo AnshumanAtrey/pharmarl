@@ -77,6 +77,10 @@ class _ResetBody(BaseModel):
     seed: Optional[int] = Field(default=None, ge=0)
     difficulty: Optional[str] = None
     training_step: Optional[int] = None
+    target: Optional[str] = Field(
+        default=None,
+        description="Binding target: 'DRD2' | 'GSK3B' | 'JNK3'. Omit for the env's default.",
+    )
 
 
 class _StepBody(BaseModel):
@@ -123,9 +127,16 @@ async def reset_endpoint(body: _ResetBody = Body(default_factory=_ResetBody)):
         kwargs["difficulty"] = body.difficulty
     if body.training_step is not None:
         kwargs["training_step"] = body.training_step
+    if body.target is not None:
+        kwargs["target"] = body.target
     kwargs["episode_id"] = episode_id
 
-    observation = env.reset(**kwargs)
+    try:
+        observation = env.reset(**kwargs)
+    except ValueError as e:
+        # e.g. unknown target name
+        _drop_env(episode_id)
+        raise HTTPException(status_code=400, detail=str(e))
     payload = serialize_observation(observation)
     payload["observation"]["episode_id"] = episode_id
     return JSONResponse(payload)

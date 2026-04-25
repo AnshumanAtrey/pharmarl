@@ -81,6 +81,17 @@ Multi-step episode state is keyed by `episode_id` — pass the same `episode_id`
 - **Theme 3.1 Professional Tasks** — a scientific workflow loop (SELFIES editing → oracle scoring → reward-shaped optimization) directly mapping to the medicinal-chemistry hit-finding pipeline.
 - **RLVE compliance** — adaptive 3-tier curriculum, procedurally seeded scaffolds, algorithmic reward verification (TDC oracles, not LLM judges).
 
+## Held-out generalization test
+
+We train on **DRD2 + GSK3B** (target rotated per training step) and reserve **JNK3** for evaluation — a kinase the agent never sees during training. Untrained Qwen vs trained Qwen on JNK3 measures whether the learned medicinal-chemistry primitives (basic-amine + aromatic scaffolds) transfer to an unseen kinase target. Most molRL papers don't run this comparison.
+
+| Metric | Untrained baseline | After training |
+|--------|-------------------|----------------|
+| Mean cumulative reward on JNK3 | TBD | TBD |
+| Delta (transfer signal) | — | TBD |
+
+We report whatever the data shows. A null result is a null result — null > overclaim.
+
 ## Reward improvement (preview)
 
 | Stage | Steps | Avg reward (random baseline) | Avg reward (trained) |

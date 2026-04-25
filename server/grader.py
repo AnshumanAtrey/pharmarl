@@ -74,14 +74,22 @@ def parse_failure_reward() -> StepReward:
     return StepReward(reward=PARSE_FAIL_PENALTY, breakdown={"parse_fail": PARSE_FAIL_PENALTY})
 
 
-def terminal_reward(smiles: str, components_active: tuple[str, ...] = ("qed", "docking", "sa", "toxicity")) -> TerminalReward:
+def terminal_reward(
+    smiles: str,
+    components_active: tuple[str, ...] = ("qed", "docking", "sa", "toxicity"),
+    target: str | None = None,
+) -> TerminalReward:
     """Composite oracle reward issued on TERMINATE.
 
     `components_active` lets the curriculum select which oracles count
     (Trivial uses just QED; Hard uses all 4).
+
+    `target`, when provided, routes the binding component to a specific
+    classifier (DRD2 / GSK3B / JNK3) — enables multi-target training and
+    held-out evaluation. None falls back to the env's default oracle.
     """
     qed = score_qed(smiles)
-    docking = score_mpro_docking(smiles)
+    docking = score_mpro_docking(smiles, target=target)
     sa = score_sa(smiles)
     tox = score_toxicity(smiles)
 

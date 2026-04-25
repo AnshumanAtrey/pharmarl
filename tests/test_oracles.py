@@ -50,3 +50,28 @@ def test_invalid_smiles_safe_for_all_oracles() -> None:
     for fn in (score_qed, score_sa, score_toxicity, score_mpro_docking):
         out = fn(INVALID)
         assert isinstance(out, float)
+
+
+def test_multi_target_oracles_return_in_range() -> None:
+    """The DRD2 / GSK3B / JNK3 trio (used for the held-out generalization test)
+    must each return a number in [0, 1] without falling back to the default oracle."""
+    from server.oracles import KNOWN_TARGETS, score_mpro_docking
+    assert KNOWN_TARGETS == ("DRD2", "GSK3B", "JNK3")
+    for target in KNOWN_TARGETS:
+        score = score_mpro_docking(ASPIRIN, target=target)
+        assert 0.0 <= score <= 1.0, f"target={target!r} returned out-of-range {score}"
+
+
+def test_unknown_target_returns_zero() -> None:
+    """Unknown targets shouldn't crash — they fall back to 0.0 with a warning."""
+    from server.oracles import score_mpro_docking
+    assert score_mpro_docking(ASPIRIN, target="not_a_real_target") == 0.0
+
+
+def test_drd2_haloperidol_scores_high() -> None:
+    """Sanity: haloperidol (a known D2 antagonist drug) should score >0.9 on DRD2.
+    Catches model-cache corruption before training burns time."""
+    from server.oracles import score_mpro_docking
+    haloperidol = "O=C(CCCN1CCC(O)(c2ccc(Cl)cc2)CC1)c1ccc(F)cc1"
+    score = score_mpro_docking(haloperidol, target="DRD2")
+    assert score > 0.9, f"DRD2(haloperidol) = {score} — expected > 0.9; oracle likely corrupted"

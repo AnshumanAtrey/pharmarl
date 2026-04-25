@@ -50,15 +50,15 @@ The pitch leads with **policy-class novelty**, not chemistry. The chemistry is t
 
 ---
 
-### 1:00 — 1:20 · PROOF
+### 1:00 — 1:20 · PROOF — including the held-out generalization test
 
 [switch to W&B graph]
 
-> "We trained Qwen 2.5 1.5B with Unsloth and TRL's GRPO across [N] steps. **Mean group reward: from [BEFORE] to [AFTER]** — that's the curve you're seeing. **Same starting molecule, base model versus trained**: untrained terminal composite around 0.2; trained around [0.7+]. Held-out scaffolds confirm transfer, not memorization."
+> "We trained Qwen 2.5 1.5B with Unsloth and TRL's GRPO across [N] steps **on two targets — DRD2 and GSK3B**. Reward curve climbs from [BEFORE] to [AFTER]. But here's what most molecular RL papers don't do: we held out a third target — **JNK3**, a kinase the agent never saw during training — and ran the trained model on it cold."
 
-[on-screen: W&B reward-curve screenshot, then before/after molecule pair with composite scores annotated]
+[on-screen: split panel — left = W&B curve climbing across DRD2+GSK3B training; right = bar chart "untrained vs trained on held-out JNK3"]
 
-> "The four reward components are independent — docking is orthogonal to drug-likeness, which is orthogonal to synthesizability, which is orthogonal to toxicity. The agent has to satisfy all four to push composite over 0.7."
+> "Untrained Qwen scored [UNTRAINED_JNK3] on JNK3. Trained Qwen scored [TRAINED_JNK3]. Delta of [DELTA]. [If positive: 'That's transfer of medicinal-chemistry primitives to an unseen target — the basic-amine plus aromatic scaffolds the agent learned for DRD2 and GSK3B carry over to a different kinase.' / If null: 'Null result. The agent learned the training targets but didn't transfer to JNK3 — the data tells us the policy is target-specific, not generally drug-discovering.']"
 
 ---
 
@@ -93,9 +93,16 @@ These are blanks; they need to come from the actual training run:
 | `[N]` training steps | TBD | W&B run |
 | `[BEFORE]` mean group reward at step 0 | TBD (expect ~+5 random) | W&B run / smoke test |
 | `[AFTER]` mean group reward at end | TBD (need ≥+8 to call it learning) | W&B run |
-| Trained terminal composite | TBD (target ≥0.7) | before/after demo |
+| `[UNTRAINED_JNK3]` mean cum on held-out, untrained model | TBD | notebook cell 14 output |
+| `[TRAINED_JNK3]` mean cum on held-out, trained model | TBD | notebook cell 20 output |
+| `[DELTA]` `TRAINED_JNK3 - UNTRAINED_JNK3` | TBD | computed |
 
-If `[AFTER]` is not visibly higher than `[BEFORE]`, **we don't claim "the agent learned"** — we say "early training, here's the curve, here's the env, judges can extend the run."
+**Rule for held-out reporting**:
+- If `[DELTA]` > 0 and gap > ~50% of untrained: pitch the transfer story (positive result).
+- If `[DELTA]` is within noise (~|1.0|): pitch the null story neutrally — "we measured transfer; here's the measurement; the agent learned the training targets but didn't transfer to a held-out target."
+- If `[DELTA]` < 0: pitch as a controlled negative result — "we found that the agent's learning is target-specific, which has implications for how we'd design future molRL training pipelines."
+
+**Never overclaim.** Honest null beats fake positive in research-track judging.
 
 ---
 

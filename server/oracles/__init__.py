@@ -13,8 +13,11 @@ called by the grader and combined into a composite terminal reward.
 """
 
 from .docking_mpro import (
+    DEFAULT_TARGET,
+    KNOWN_TARGETS,
     get_active_oracle_name,
     get_active_target_name,
+    get_target_full_name,
     score_mpro_docking,
 )
 from .qed import score_qed
@@ -22,8 +25,11 @@ from .sa import score_sa
 from .toxicity import score_toxicity
 
 __all__ = [
+    "DEFAULT_TARGET",
+    "KNOWN_TARGETS",
     "get_active_oracle_name",
     "get_active_target_name",
+    "get_target_full_name",
     "score_mpro_docking",
     "score_qed",
     "score_sa",
