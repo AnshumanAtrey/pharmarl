@@ -516,5 +516,6 @@ class DrugDiscoveryEnvironment(Environment):
             drift_warning=drift_warning,
             critique=critique_payload,
             oversight=oversight_payload,
+            final_oracle_scores=self._final_oracle_scores,
             metadata=metadata,
         )

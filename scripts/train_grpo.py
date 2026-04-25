@@ -271,7 +271,13 @@ def run_grpo(model, tokenizer, env_url: str, *,
                 invalid += 1
             meta = step.get("metadata") or step_obs.get("metadata") or {}
             if step["done"]:
-                final_components = meta.get("final_oracle_scores") or {}
+                # Prefer the top-level Observation field (survives HTTP serialization);
+                # fall back to metadata dict for in-process callers.
+                final_components = (
+                    step_obs.get("final_oracle_scores")
+                    or meta.get("final_oracle_scores")
+                    or {}
+                )
                 final_smiles = step_obs.get("smiles", final_smiles)
                 # FAQ §17 — track truncation rate (auto-truncated vs proper TERMINATE)
                 episode_truncated = bool(step_obs.get("truncated", False))
