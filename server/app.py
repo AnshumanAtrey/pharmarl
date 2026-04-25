@@ -89,6 +89,55 @@ class _StepBody(BaseModel):
     episode_id: Optional[str] = Field(default=None, max_length=255)
 
 
+def _normalize_action_dict(raw: Dict) -> Dict:
+    """Lenient action-key normalization for the /step endpoint.
+
+    The canonical schema has ``action_type`` (lowercase). Trained LLMs in the wild
+    occasionally produce variants like ``ACTION``, ``Action``, ``action``, or wrap
+    the action in a verbose JSON object alongside other fields (e.g. SELFIES,
+    FRAGMENTS lists). We accept those rather than 422-ing — a tolerant input
+    boundary keeps demo rollouts running even when the agent's format discipline
+    slips, without changing the canonical schema.
+
+    Rules:
+      - If ``action_type`` already present, return as-is.
+      - Otherwise look for a single-action key (``ACTION`` / ``Action`` / ``action``)
+        whose value is a string, and remap to ``action_type``.
+      - Pass through other known fields (``fragment``, ``position``, ``new_atom``,
+        case-insensitive) so a verbose-output model still works.
+    """
+    if not isinstance(raw, dict):
+        return raw  # let Pydantic fail downstream with a clear error
+
+    out = dict(raw)
+    # Find the action key if action_type is missing
+    if "action_type" not in out:
+        for k in ("ACTION", "Action", "action", "action_name", "ACTION_TYPE", "actionType"):
+            if k in out and isinstance(out[k], str):
+                out["action_type"] = out.pop(k)
+                break
+
+    # Normalize parameter keys: keep canonical names if present, else map common variants.
+    for canonical, variants in (
+        ("fragment", ("FRAGMENT", "Fragment", "frag")),
+        ("position", ("POSITION", "Position", "pos", "index")),
+        ("new_atom", ("NEW_ATOM", "newAtom", "atom", "ATOM")),
+    ):
+        if canonical in out:
+            continue
+        for v in variants:
+            if v in out:
+                out[canonical] = out.pop(v)
+                break
+
+    # Drop verbose noise the LLM might have appended (SELFIES list, FRAGMENTS list,
+    # explanation strings) — those aren't part of the action schema.
+    keep = {"action_type", "fragment", "position", "new_atom"}
+    out = {k: v for k, v in out.items() if k in keep}
+
+    return out
+
+
 def _get_or_create_env(episode_id: str) -> DrugDiscoveryEnvironment:
     with _envs_lock:
         env = _envs.get(episode_id)
@@ -159,7 +208,7 @@ async def step_endpoint(body: _StepBody):
         )
 
     try:
-        action = MoleculeAction(**body.action)
+        action = MoleculeAction(**_normalize_action_dict(body.action))
     except Exception as e:  # pydantic ValidationError
         raise HTTPException(status_code=422, detail=str(e))
 
