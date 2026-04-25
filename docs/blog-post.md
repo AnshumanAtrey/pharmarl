@@ -56,11 +56,11 @@ Across the Llama family, **8B beats both 3B and 70B**. 70B specifically falls *b
 
 This isn't just a fun graph. It's empirical proof that the env's reward design penalizes capacity-greedy strategies, which is exactly what you want from an RL environment intended for actual training. **Random and scripted policies beat 3 of the 4 LLMs.** Only Gemini 2.5 Pro clears the scripted baseline cleanly. Total probe spend: $0.158.
 
-The thesis behind training a 1.5B Qwen with GRPO on this env follows directly: targeted reward optimization can outperform raw model capacity.
+The thesis behind training Llama-3.2-3B with GRPO on this env follows directly: targeted reward optimization can outperform raw model capacity.
 
-## Headline result — trained Qwen 1.5B
+## Headline result — trained Llama-3.2-3B
 
-We trained Qwen 2.5 1.5B with Unsloth + TRL's GRPO across `[N]` steps on two targets (DRD2 + GSK3B), with JNK3 held out for transfer evaluation.
+We trained Llama-3.2-3B-Instruct with Unsloth + TRL's GRPO across `[N]` steps on two targets (DRD2 + GSK3B), with JNK3 held out for transfer evaluation.
 
 **Training curve**: `<EMBED docs/plots/training_curve.png>`
 
@@ -68,7 +68,7 @@ We trained Qwen 2.5 1.5B with Unsloth + TRL's GRPO across `[N]` steps on two tar
 
 **Distribution per target**: `<EMBED docs/plots/distribution_box.png>`
 
-`[FILL] Trained Qwen mean cumulative: +X.XX` — comparing against the baseline table above:
+`[FILL] Trained Llama-3.2-3B mean cumulative: +X.XX` — comparing against the baseline table above:
 
 - Beats random uniform (+2.30)? **`[YES/NO]`**
 - Beats scripted heuristic (+2.81) — *the "agent learned" floor*? **`[YES/NO]`**
@@ -81,7 +81,7 @@ We trained Qwen 2.5 1.5B with Unsloth + TRL's GRPO across `[N]` steps on two tar
 
 Most molRL papers don't run a held-out target measurement at all. We do:
 
-| | Untrained Qwen on JNK3 | Trained Qwen on JNK3 |
+| | Untrained Llama-3.2-3B on JNK3 | Trained Llama-3.2-3B on JNK3 |
 |---|---|---|
 | Mean cumulative | `[BEFORE]` | `[AFTER]` |
 | Std | `[BEFORE_STD]` | `[AFTER_STD]` |

@@ -410,7 +410,7 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="PharmaRL standalone GRPO trainer")
     p.add_argument("--env-url", required=True,
                    help="URL of deployed PharmaRL env (e.g. https://YOUR-USER-pharmarl.hf.space)")
-    p.add_argument("--model", default="unsloth/Llama-3.2-1B-Instruct",
+    p.add_argument("--model", default="unsloth/Llama-3.2-3B-Instruct",
                    help="HF model id (Unsloth-supported)")
     p.add_argument("--max-seq-len", type=int, default=1024)
     p.add_argument("--lora-rank", type=int, default=16)
@@ -427,7 +427,7 @@ def main(argv=None) -> int:
     p.add_argument("--max-episode-steps", type=int, default=20)
     p.add_argument("--gen-temp", type=float, default=0.7)
     p.add_argument("--gen-top-p", type=float, default=0.95)
-    p.add_argument("--save-every", type=int, default=100)
+    p.add_argument("--save-every", type=int, default=25)
     p.add_argument("--audit-every", type=int, default=25)
     p.add_argument("--output-dir", default="./trained")
     p.add_argument("--no-adaptive-curriculum", action="store_true",

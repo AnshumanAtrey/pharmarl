@@ -135,7 +135,7 @@ Judges explicitly look for this. Three stacked defenses, validated empirically:
 
 ## Held-out generalization test
 
-We train on **DRD2 + GSK3B** (target rotated per training step) and reserve **JNK3** for evaluation — a kinase the agent never sees during training. Untrained Qwen vs trained Qwen on JNK3 measures whether the learned medicinal-chemistry primitives (basic-amine + aromatic scaffolds) transfer to an unseen kinase target. Most molRL papers don't run this comparison.
+We train on **DRD2 + GSK3B** (target rotated per training step) and reserve **JNK3** for evaluation — a kinase the agent never sees during training. Untrained Llama-3.2-3B vs trained Llama-3.2-3B on JNK3 measures whether the learned medicinal-chemistry primitives (basic-amine + aromatic scaffolds) transfer to an unseen kinase target. Most molRL papers don't run this comparison.
 
 | Metric | Untrained baseline | After training |
 |--------|-------------------|----------------|
