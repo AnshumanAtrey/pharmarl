@@ -1,6 +1,5 @@
 # ─── Strategy & private materials — never commit ──────────────────────
 research/
-resources/
 
 # ─── Python bytecode and packaging ─────────────────────────────────────
 __pycache__/
