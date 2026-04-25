@@ -126,6 +126,16 @@ Don't pretend this is a "novel disease" test. It's a novel *target* in the same 
 
 ---
 
+## Q17. Why a rules-based critic instead of an LLM critic?
+
+**"Two reasons. First, deterministic: same molecule always gets the same critique, which makes critic-conditioned training reproducible. An LLM critic introduces stochasticity that interferes with reward signal cleanliness. Second, fast: the rules engine returns in milliseconds — an LLM critic would 10x rollout latency. The Halluminate sub-theme rewards multi-actor environments; what matters is that there's a separate logical agent providing feedback that the policy can integrate, not that the agent is itself an LLM. Future work could swap in a frozen LLM critic for richer feedback."**
+
+If pressed on what the critic actually checks: **"PAINS substructures (thiocarbonyl, rhodanine, nitroaromatic Michael acceptors), Lipinski-flavored property warnings (MW > 500, LogP > 5), reactive group flags (alkyl halide, epoxide, anhydride), and a heavy-atom sanity floor. Verdict is `approve` / `revise` / `reject`; the critique is appended to the next observation's metadata under `critique` so the policy can choose to revise via REMOVE_FRAGMENT or SUBSTITUTE_ATOM."**
+
+If asked why it's gated behind `critic_enabled` and default OFF: **"The headline training run targets the Reward Improvement curve on DRD2 — that's our insurance criterion. The critic adds an extra observation field, which would change the prompt distribution for the policy. We isolate it behind a flag so the headline run is reproducible against an LLM-only baseline; the critic-on run is the multi-actor demo."**
+
+---
+
 ## What NOT to say
 
 - ❌ "AI to cure all diseases" / "any and all disease"

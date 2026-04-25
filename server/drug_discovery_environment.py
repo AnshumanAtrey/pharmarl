@@ -36,6 +36,7 @@ except ImportError:
     )
 
 try:
+    from .critic import critique_to_dict, default_critic
     from .curriculum import (
         CurriculumConfig,
         DEFAULT_CONFIG,
@@ -68,6 +69,7 @@ try:
     )
     from .scenarios import sample_starting_molecule
 except ImportError:
+    from server.critic import critique_to_dict, default_critic  # type: ignore
     from server.curriculum import (  # type: ignore
         CurriculumConfig,
         DEFAULT_CONFIG,
@@ -422,6 +424,23 @@ class DrugDiscoveryEnvironment(Environment):
         active_constraints = self._active_constraints(weights_now)
         drift_warning = self._drift_warning(weights_now, weights_prev)
 
+        metadata: dict = {
+            "cumulative_reward": self._state.cumulative_reward,
+            "final_oracle_scores": self._final_oracle_scores,
+            "drift_profile": self._state.drift_profile,
+            "drift_step": self._state.drift_step,
+            "weights": list(weights_now),
+        }
+
+        # Multi-actor critic (Halluminate sub-theme). Default OFF — gated by
+        # config.critic_enabled. When ON, a separate logical agent (the
+        # rules-based medicinal-chemist critic) inspects the current molecule
+        # and emits structured feedback that the policy can integrate or ignore
+        # on its next turn (via REMOVE_FRAGMENT / SUBSTITUTE_ATOM).
+        if self._config.critic_enabled and last_action_valid and self._state.smiles:
+            critique = default_critic.critique(self._state.smiles)
+            metadata["critique"] = critique_to_dict(critique)
+
         return MoleculeObservation(
             smiles=self._state.smiles,
             selfies=self._state.selfies,
@@ -438,11 +457,5 @@ class DrugDiscoveryEnvironment(Environment):
             reward=float(reward),
             active_constraints=active_constraints,
             drift_warning=drift_warning,
-            metadata={
-                "cumulative_reward": self._state.cumulative_reward,
-                "final_oracle_scores": self._final_oracle_scores,
-                "drift_profile": self._state.drift_profile,
-                "drift_step": self._state.drift_step,
-                "weights": list(weights_now),
-            },
+            metadata=metadata,
         )

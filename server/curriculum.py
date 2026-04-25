@@ -62,6 +62,13 @@ class CurriculumConfig:
     weights_late_potency_pre: tuple = (0.10, 0.40, 0.30, 0.20)     # drug-like + ADMET focus
     weights_late_potency_post: tuple = (0.45, 0.20, 0.20, 0.15)    # potency now matters
 
+    # ─── Multi-actor critic (Halluminate sub-theme) ────────────────────────
+    # Rules-based medicinal-chemist critic inspects each post-edit molecule
+    # and the critique is appended to the next observation's metadata. The
+    # agent can integrate or ignore the feedback. Default OFF so the headline
+    # training run is unaffected.
+    critic_enabled: bool = False                        # MASTER FLAG, default OFF
+
 
 DEFAULT_CONFIG = CurriculumConfig()
 
