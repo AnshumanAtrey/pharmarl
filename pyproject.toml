@@ -17,6 +17,9 @@ dependencies = [
     "rdkit>=2023.9.5",
     "numpy>=1.24",
     "openai>=1.0.0",
+    # PyTDC imports `pkg_resources`, removed in setuptools 81+. Pin until
+    # PyTDC migrates to importlib.metadata. Issue #12.
+    "setuptools<81",
 ]
 
 [project.optional-dependencies]

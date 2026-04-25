@@ -295,9 +295,6 @@ def main() -> int:
     print("\n" + "=" * 60)
     print("ALL CHECKS PASSED")
     print("=" * 60)
-    print("\nKnown notebook issue to fix before Colab run:")
-    print("  cell 12: requests.post(f'{env_url}/step', json=action)")
-    print("  must be: requests.post(f'{env_url}/step', json={'action': action})")
     return 0
 
 

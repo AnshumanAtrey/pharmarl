@@ -81,6 +81,26 @@ class _ResetBody(BaseModel):
         default=None,
         description="Binding target: 'DRD2' | 'GSK3B' | 'JNK3'. Omit for the env's default.",
     )
+    drift_profile: Optional[str] = Field(
+        default=None,
+        description="Force a schema-drift profile for this episode (static / early_admet / late_potency).",
+    )
+    # ─── Per-episode mechanic flags (issue #9 fix) ─────────────────────
+    # External clients (trained model on HF Space, OpenRouter / Gemini agents)
+    # toggle these per /reset call. Each value, if present, mutates the env's
+    # config for the next episode via dataclasses.replace().
+    critic_enabled: Optional[bool] = Field(
+        default=None,
+        description="Halluminate sub-theme — enable rules-based medicinal-chemist critic.",
+    )
+    schema_drift_enabled: Optional[bool] = Field(
+        default=None,
+        description="Patronus AI sub-theme — enable mid-episode reward weight drift.",
+    )
+    oversight_enabled: Optional[bool] = Field(
+        default=None,
+        description="Fleet AI sub-theme — enable LLM oversight at episode end.",
+    )
 
 
 class _StepBody(BaseModel):
@@ -178,6 +198,13 @@ async def reset_endpoint(body: _ResetBody = Body(default_factory=_ResetBody)):
         kwargs["training_step"] = body.training_step
     if body.target is not None:
         kwargs["target"] = body.target
+    if body.drift_profile is not None:
+        kwargs["drift_profile"] = body.drift_profile
+    # Per-episode mechanic flag overrides — env will dataclasses.replace its config.
+    for flag in ("critic_enabled", "schema_drift_enabled", "oversight_enabled"):
+        v = getattr(body, flag, None)
+        if v is not None:
+            kwargs[flag] = v
     kwargs["episode_id"] = episode_id
 
     try:

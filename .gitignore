@@ -117,3 +117,6 @@ docking/
 *.tmp
 *.swap
 demo_results.json
+
+# Validation logs (per-run, timestamped, contain API responses)
+logs/
