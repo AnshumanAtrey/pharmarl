@@ -53,7 +53,7 @@ import requests
 # ─── Utilities (duplicated from notebook for self-containment) ────────────
 
 SYSTEM = (
-    "You design SARS-CoV-2 Mpro / kinase inhibitors by editing SMILES molecules. "
+    "You design drug-like molecules against the active binding target by editing SMILES. "
     "Respond with ONE JSON action per turn. Allowed: ADD_FRAGMENT, "
     "REMOVE_FRAGMENT, SUBSTITUTE_ATOM, TERMINATE."
 )
