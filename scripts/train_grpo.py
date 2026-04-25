@@ -450,7 +450,7 @@ def main(argv=None) -> int:
         model_name=args.model,
         max_seq_length=args.max_seq_len,
         load_in_4bit=True,
-        fast_inference=True,
+        fast_inference=False,  # vLLM is heavy and unnecessary for 200-step run; ~2x slower rollouts but deps stay clean on Kaggle/Colab
     )
     model = FastLanguageModel.get_peft_model(
         model, r=args.lora_rank,
