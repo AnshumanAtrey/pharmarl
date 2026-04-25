@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pharmarl"
 version = "0.1.0"
-description = "PharmaRL — multi-step molecular drug discovery OpenEnv environment (Stage 1: SARS-CoV-2 Mpro)"
+description = "PharmaRL — first OpenEnv-native LLM-as-policy environment for iterative molecular optimization (Stage 1: DRD2 binding)"
 requires-python = ">=3.10"
 dependencies = [
     "openenv-core[core]>=0.2.3",

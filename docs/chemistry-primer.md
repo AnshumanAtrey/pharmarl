@@ -129,6 +129,6 @@ The before/after demo:
 - Same starting molecule
 - Same target
 - **Base model**: random fragment additions, terminal composite ≈ 0.2 (poor)
-- **Trained model**: structured edits matching known Mpro pharmacophores, terminal composite ≈ 0.7+ (lead-like)
+- **Trained model**: structured edits matching DRD2-active pharmacophores (basic amine + aromatic pocket), terminal composite ≈ 0.7+ (lead-like)
 
 Plus the W&B reward curve climbing across training steps. Plus held-out scaffolds (model trained on starting pool A, evaluated on pool B) showing transfer, not memorization.

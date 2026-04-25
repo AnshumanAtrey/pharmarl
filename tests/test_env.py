@@ -67,4 +67,6 @@ def test_state_property_returns_valid_state(env: DrugDiscoveryEnvironment) -> No
     env.reset(difficulty="trivial")
     state = env.state
     assert state.episode_id is not None
-    assert state.target == "SARS-CoV-2_Mpro"
+    # Default Stage 1 target = DRD2 classifier (canonical MOSES/GuacaMol benchmark).
+    # Stage 2 (PHARMARL_ENABLE_DOCKING=1 + pyscreener+Vina) substitutes a docking target.
+    assert state.target == "DRD2_dopamine_D2_receptor"

@@ -1,6 +1,8 @@
-"""PharmaRL — multi-step molecular drug discovery OpenEnv environment.
+"""PharmaRL — first OpenEnv-native LLM-as-policy environment for iterative molecular optimization.
 
-Stage 1: SARS-CoV-2 Mpro inhibitor design.
+Stage 1: DRD2 (canonical MOSES/GuacaMol molecular RL benchmark) — pure-Python deps.
+Stage 2: pyscreener-backed docking (NSP15/EGFR/ABL/BACE1) when PHARMARL_ENABLE_DOCKING=1
+         and OpenBabel + AutoDock Vina are available on the host.
 """
 
 from .client import PharmaRLEnv

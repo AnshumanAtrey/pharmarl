@@ -1,24 +1,25 @@
-"""Gate 1 validation script — run BEFORE writing any env code.
+"""Gate 1 validation script — runs BEFORE any training to confirm the stack is healthy.
 
 Checks:
-  1. PyTDC installs and imports
-  2. RDKit installs and imports
-  3. SELFIES installs and imports
-  4. TDC oracles load and return numeric scores for aspirin
-  5. SARS-CoV-2 Mpro docking oracle availability (multiple candidate names)
-  6. SELFIES round-trip works for a known molecule
+  1. PyTDC, RDKit, SELFIES installed and importing
+  2. Standard oracles return numeric scores for aspirin (QED, SA, DRD2, CYP3A4)
+  3. Stage 2 docking oracle availability (only if PHARMARL_ENABLE_DOCKING=1)
+  4. SELFIES round-trip works
+  5. RDKit Lipinski calculation works
 
 Usage:
     python scripts/validate_stack.py
+    PHARMARL_ENABLE_DOCKING=1 python scripts/validate_stack.py   # also probe pyscreener docking
 
 Exit codes:
-    0 — all green, build PharmaRL multi-target
-    1 — Mpro oracle missing but other oracles work — fall back to DRD2 base
-    2 — major failures — pivot to AISHA
+    0 — Stage 1 stack ready (DRD2 + QED + SA + CYP3A4 all working)
+    1 — Stage 2 probe enabled but no docking oracle loaded — Stage 1 still works
+    2 — Stage 1 broken (missing core deps) — must be fixed before training
 """
 
 from __future__ import annotations
 
+import os
 import sys
 import traceback
 
@@ -41,9 +42,10 @@ def check_imports() -> dict[str, bool]:
     return results
 
 
-def check_oracles() -> dict[str, float | None]:
+def check_standard_oracles() -> dict[str, float | None]:
     header("2. TDC oracles on aspirin (CC(=O)Oc1ccccc1C(=O)O)")
     aspirin = "CC(=O)Oc1ccccc1C(=O)O"
+    haloperidol = "O=C(CCCN1CCC(O)(c2ccc(Cl)cc2)CC1)c1ccc(F)cc1"
     scores: dict[str, float | None] = {}
     try:
         from tdc import Oracle
@@ -51,48 +53,63 @@ def check_oracles() -> dict[str, float | None]:
         print(f"  [FAIL]  cannot import tdc.Oracle -- {e}")
         return scores
 
-    standard_oracles = ["QED", "SA", "DRD2", "GSK3B", "JNK3", "LogP"]
-    for name in standard_oracles:
+    # The ones our env actually uses for the composite reward:
+    core_oracles = ["QED", "SA", "DRD2", "CYP3A4_Veith"]
+    for name in core_oracles:
         try:
             o = Oracle(name=name)
             score = o(aspirin)
             scores[name] = float(score)
-            print(f"  [OK]    {name:8s} = {score:.3f}")
+            print(f"  [OK]    {name:14s} aspirin = {score:.4f}")
         except Exception as e:
             scores[name] = None
-            print(f"  [FAIL]  {name:8s} -- {e}")
+            print(f"  [FAIL]  {name:14s} -- {e}")
+
+    # DRD2 sanity: haloperidol (a known D2 antagonist) should be near 1.0
+    if scores.get("DRD2") is not None:
+        try:
+            o = Oracle(name="DRD2")
+            halo = float(o(haloperidol))
+            verdict = "OK" if halo > 0.9 else "WEIRD"
+            print(f"  [{verdict}]    DRD2 sanity: haloperidol = {halo:.4f} (expect > 0.9)")
+        except Exception as e:
+            print(f"  [warn]  DRD2 sanity check failed: {e}")
     return scores
 
 
-def check_mpro_oracle() -> str | None:
-    header("3. SARS-CoV-2 Mpro docking oracle availability")
+def check_stage2_docking() -> str | None:
+    """Probes Stage 2 docking oracles. Only runs if PHARMARL_ENABLE_DOCKING=1."""
+    enabled = os.environ.get("PHARMARL_ENABLE_DOCKING", "").lower() in ("1", "true", "yes")
+    header("3. Stage 2 docking oracles (PHARMARL_ENABLE_DOCKING)")
+    if not enabled:
+        print("  [skip]  PHARMARL_ENABLE_DOCKING not set — Stage 1 (DRD2) is the active path.")
+        print("          To probe Stage 2: PHARMARL_ENABLE_DOCKING=1 python scripts/validate_stack.py")
+        return None
+
     try:
         from tdc import Oracle
     except Exception as e:
         print(f"  [FAIL]  cannot import tdc.Oracle -- {e}")
         return None
 
-    candidates = [
-        "SARS-CoV-2_3CLPro_Docking",
-        "SARS_CoV_2_3CLPro_Docking",
-        "3CLPro_Docking",
-        "SARS-CoV-2_Mpro",
-        "Mpro_docking",
-        "3pbl_docking",
-        "1iep_docking",
-    ]
     aspirin = "CC(=O)Oc1ccccc1C(=O)O"
+    candidates = [
+        "7l11_docking_normalize",   # SARS-CoV-2 NSP15
+        "2rgp_docking_normalize",   # EGFR T790M
+        "1iep_docking_normalize",   # ABL kinase
+        "4rlu_docking_normalize",   # BACE1
+    ]
     for name in candidates:
         try:
             o = Oracle(name=name)
             score = o(aspirin)
-            print(f"  [OK]    Oracle('{name}') = {score:.3f}")
+            print(f"  [OK]    Oracle('{name}') aspirin = {score:.3f}")
             return name
-        except Exception:
-            print(f"  [skip]  Oracle('{name}') not available")
-    print("  [WARN]  No Mpro docking oracle found via TDC.Oracle.")
-    print("          Mitigation: use DRD2 as scientific base (standard MOSES/GuacaMol benchmark)")
-    print("          Mpro narrative comes from scaffold framing, not direct docking.")
+        except Exception as e:
+            print(f"  [skip]  Oracle('{name}') unavailable -- {type(e).__name__}")
+    print("  [WARN]  PHARMARL_ENABLE_DOCKING=1 set but no docking oracle loaded.")
+    print("          Cause: pyscreener / OpenBabel / AutoDock Vina not installed.")
+    print("          Stage 1 (DRD2) will still work — the env falls back transparently.")
     return None
 
 
@@ -109,7 +126,7 @@ def check_selfies_roundtrip() -> bool:
         ok = decoded is not None and len(decoded) > 0
         print(f"  [{'OK' if ok else 'FAIL'}]    round-trip {'succeeded' if ok else 'failed'}")
         return ok
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return False
 
@@ -131,42 +148,48 @@ def check_rdkit_basics() -> bool:
         passes_lipinski = mw <= 500 and logp <= 5 and hbd <= 5 and hba <= 10
         print(f"  Lipinski: {'PASS' if passes_lipinski else 'FAIL'}")
         return True
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return False
 
 
 def main() -> int:
-    print("PharmaRL Gate 1 validation — checking dependency stack")
+    print("PharmaRL Gate 1 — stack validation")
 
     imports = check_imports()
     if not all(imports.values()):
         print("\n[ABORT] Required libraries missing. Install with:")
-        print("        pip install PyTDC selfies rdkit-pypi")
+        print("        pip install -e .")
         return 2
 
-    oracle_scores = check_oracles()
-    mpro_oracle = check_mpro_oracle()
+    oracle_scores = check_standard_oracles()
+    docking_name = check_stage2_docking()
     selfies_ok = check_selfies_roundtrip()
     rdkit_ok = check_rdkit_basics()
 
     header("Summary")
-    standard_count = sum(1 for v in oracle_scores.values() if v is not None)
-    print(f"  Standard oracles working:    {standard_count}/6")
-    print(f"  Mpro docking oracle name:    {mpro_oracle or 'NOT FOUND'}")
+    core_count = sum(1 for v in oracle_scores.values() if v is not None)
+    print(f"  Core oracles working:        {core_count}/4 (QED, SA, DRD2, CYP3A4)")
+    print(f"  Stage 2 docking oracle:      {docking_name or 'not active (Stage 1 = DRD2)'}")
     print(f"  SELFIES round-trip:          {'OK' if selfies_ok else 'FAIL'}")
     print(f"  RDKit basics:                {'OK' if rdkit_ok else 'FAIL'}")
 
-    if standard_count >= 4 and selfies_ok and rdkit_ok:
-        if mpro_oracle:
-            print("\n  [GREEN] Mpro oracle works. Build multi-target PharmaRL with Mpro as Stage 1.")
-        else:
-            print("\n  [YELLOW] Mpro oracle missing. Use DRD2 as scientific base oracle;")
-            print("           keep Mpro framing in pitch via known-scaffold curriculum.")
-        return 0 if mpro_oracle else 1
+    stage1_ready = core_count >= 3 and selfies_ok and rdkit_ok
+    if not stage1_ready:
+        print("\n  [RED] Stage 1 stack not ready. Fix imports/oracles before training.")
+        return 2
 
-    print("\n  [RED] Stack not ready. Pivot to AISHA-multi-agent.")
-    return 2
+    if docking_name:
+        print("\n  [GREEN] Both Stage 1 and Stage 2 working — full PharmaRL capabilities.")
+        return 0
+    enabled = os.environ.get("PHARMARL_ENABLE_DOCKING", "").lower() in ("1", "true", "yes")
+    if enabled:
+        print("\n  [YELLOW] Stage 2 probe enabled but failed (pyscreener/Vina/OpenBabel missing).")
+        print("           Stage 1 (DRD2) still works — the env falls back transparently.")
+        return 1
+    print("\n  [GREEN] Stage 1 stack ready. DRD2 active, training can proceed.")
+    print("           Stage 2 docking is opt-in (PHARMARL_ENABLE_DOCKING=1).")
+    return 0
 
 
 if __name__ == "__main__":

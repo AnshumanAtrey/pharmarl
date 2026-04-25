@@ -5,11 +5,14 @@ runtime: fastapi
 app: server.app:app
 port: 8000
 description: >
-  PharmaRL — multi-step molecular drug discovery environment for OpenEnv.
-  Stage 1 targets SARS-CoV-2 Mpro inhibitor design via TDC oracles + RDKit
-  validity checks. The agent edits SELFIES strings across 15-20 steps,
-  scored by a composite reward (binding affinity, drug-likeness,
-  synthesizability, Lipinski compliance).
+  PharmaRL — first OpenEnv-native LLM-as-policy environment for iterative
+  molecular optimization. Stage 1 scores against the DRD2 dopamine D2
+  receptor classifier (canonical MOSES/GuacaMol molRL benchmark) plus QED,
+  SA, and CYP3A4 toxicity. Agent edits SELFIES strings across 10-20 steps
+  with composite reward shaping (binding + drug-likeness + synthesizability
+  + toxicity penalty + Lipinski gate). Stage 2 (PHARMARL_ENABLE_DOCKING=1)
+  swaps the binding component for pyscreener-backed docking against
+  NSP15 / EGFR / ABL / BACE1 — requires OpenBabel + AutoDock Vina on host.
 version: "0.1.0"
 tasks:
   - id: trivial
@@ -33,7 +36,12 @@ actions:
   - SUBSTITUTE_ATOM
   - TERMINATE
 oracles:
-  - tdc_mpro_docking
+  - tdc_drd2_classifier  # default Stage 1 binding oracle
   - rdkit_qed
   - rdkit_sa
-  - tdc_cyp_toxicity
+  - tdc_cyp3a4_toxicity
+  # Stage 2 docking targets (require pyscreener + Vina + OpenBabel):
+  - tdc_7l11_docking_normalize  # SARS-CoV-2 NSP15
+  - tdc_2rgp_docking_normalize  # EGFR T790M
+  - tdc_1iep_docking_normalize  # ABL kinase
+  - tdc_4rlu_docking_normalize  # BACE1 (Alzheimer's)

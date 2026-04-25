@@ -43,8 +43,9 @@ EASY_FRAGMENTS: List[str] = TRIVIAL_FRAGMENTS + [
 
 
 # ─── Tier 3: Hard (50 fragments) ────────────────────────────────────────
-# Full medicinal-chemistry vocabulary — Mpro inhibitor pharmacophores
-# included (peptidomimetic warheads, P1/P2 substitutions, etc.).
+# Full medicinal-chemistry vocabulary — receptor- and kinase-relevant scaffolds
+# (basic amine + aromatic pocket = DRD2-active; warheads/P1 also useful for
+# Stage 2 docking targets).
 HARD_FRAGMENTS: List[str] = EASY_FRAGMENTS + [
     # Aromatics
     "c1ccc2ccccc2c1",     # naphthalene
@@ -62,7 +63,7 @@ HARD_FRAGMENTS: List[str] = EASY_FRAGMENTS + [
     "N1CCCC1=O",          # 2-pyrrolidinone
     "C1CCSC1",            # tetrahydrothiophene
 
-    # Mpro-relevant warheads / pharmacophores
+    # Warheads / pharmacophores (covalent-binder Stage 2 docking aids)
     "C(=O)C=O",           # alpha-ketoaldehyde (covalent warhead)
     "C(=O)C(F)(F)F",      # trifluoroacetyl
     "C(=O)N1CCCC1",       # pyrrolidine-amide (P1 surrogate)

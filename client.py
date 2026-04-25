@@ -37,7 +37,7 @@ class PharmaRLEnv(EnvClient[MoleculeAction, MoleculeObservation, MoleculeState])
         observation = MoleculeObservation(
             smiles=obs_data.get("smiles", ""),
             selfies=obs_data.get("selfies", ""),
-            target=obs_data.get("target", "SARS-CoV-2_Mpro"),
+            target=obs_data.get("target", "DRD2_dopamine_D2_receptor"),
             difficulty=obs_data.get("difficulty", "trivial"),
             properties=obs_data.get("properties", {}),
             valid_actions=obs_data.get("valid_actions", []),
@@ -60,7 +60,7 @@ class PharmaRLEnv(EnvClient[MoleculeAction, MoleculeObservation, MoleculeState])
         return MoleculeState(
             episode_id=payload.get("episode_id"),
             step_count=payload.get("step_count", 0),
-            target=payload.get("target", "SARS-CoV-2_Mpro"),
+            target=payload.get("target", "DRD2_dopamine_D2_receptor"),
             difficulty=payload.get("difficulty", "trivial"),
             max_steps=payload.get("max_steps", 10),
             smiles=payload.get("smiles", ""),

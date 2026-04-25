@@ -35,8 +35,9 @@ logger = logging.getLogger("inference")
 
 SYSTEM_PROMPT = """You are a medicinal chemist designing a small-molecule drug.
 
-You will edit a molecule across multiple steps to optimize it for binding to
-SARS-CoV-2 main protease (Mpro). Each step you may:
+You will edit a molecule across multiple steps to optimize it for the target
+reported in each observation's `target` field (Stage 1 default: DRD2 dopamine
+D2 receptor — a CNS-therapeutic-relevant target). Each step you may:
 
   1. ADD_FRAGMENT — attach a fragment from the available list at a heavy-atom position
   2. REMOVE_FRAGMENT — remove the heavy atom at a position (molecule must stay connected)

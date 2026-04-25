@@ -63,8 +63,13 @@ class MoleculeObservation(Observation):
     )
 
     target: str = Field(
-        default="SARS-CoV-2_Mpro",
-        description="Current docking target this episode is optimizing against.",
+        default="DRD2_dopamine_D2_receptor",
+        description=(
+            "Biological target the active oracle is scoring against. Defaults to "
+            "DRD2 (the canonical MOSES/GuacaMol classifier benchmark). With "
+            "PHARMARL_ENABLE_DOCKING=1 and pyscreener+Vina installed, "
+            "switches to a docking target (NSP15/EGFR/ABL/BACE1)."
+        ),
     )
 
     difficulty: DifficultyTier = Field(
@@ -111,7 +116,7 @@ class MoleculeObservation(Observation):
 class MoleculeState(State):
     """Full episode state. Persists across step calls within one episode."""
 
-    target: str = Field(default="SARS-CoV-2_Mpro")
+    target: str = Field(default="DRD2_dopamine_D2_receptor")
     difficulty: DifficultyTier = Field(default="trivial")
     max_steps: int = Field(default=10)
 

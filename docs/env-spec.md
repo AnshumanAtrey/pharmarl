@@ -12,7 +12,8 @@ Formal spec of state, action, and reward. Reference for judges and re-implemente
 | `name` | `pharmarl` |
 | `runtime` | `fastapi` |
 | `port` | `8000` |
-| `target` (Stage 1) | SARS-CoV-2 Mpro (3CLPro) |
+| `target` (Stage 1 default) | DRD2 dopamine D2 receptor (TDC classifier; canonical MOSES/GuacaMol benchmark) |
+| `target` (Stage 2 opt-in) | SARS-CoV-2 NSP15 / EGFR T790M / ABL kinase / BACE1 — requires PHARMARL_ENABLE_DOCKING=1 + pyscreener+Vina |
 
 ## State
 
@@ -22,7 +23,7 @@ Held internally per episode. Exposed via `GET /state`.
 MoleculeState {
     episode_id:        str          # uuid4
     step_count:        int          # 0..max_steps
-    target:            str          # "SARS-CoV-2_Mpro"
+    target:            str          # active oracle's target name, e.g. "DRD2_dopamine_D2_receptor"
     difficulty:        DifficultyTier  # trivial | easy | hard
     max_steps:         int          # 10 / 15 / 20
     smiles:            str          # current canonical SMILES
@@ -137,9 +138,14 @@ Each episode samples a starting molecule from a 200-molecule pool partitioned by
 
 ## HTTP contract
 
-| Endpoint | Method | Body / Query | Returns |
-|----------|--------|--------------|---------|
-| `/reset` | POST | `{difficulty?, training_step?, seed?}` | observation, episode_id |
-| `/step` | POST | `MoleculeAction` JSON | observation, reward, done |
+State is keyed by `episode_id`. Each rollout (e.g. each GRPO group member) generates its own UUID and passes it on every call. The server keeps one env instance per active episode.
+
+| Endpoint | Method | Body | Returns |
+|----------|--------|------|---------|
+| `/reset` | POST | `{episode_id?, difficulty?, training_step?, seed?}` (server generates `episode_id` if missing) | `{observation, reward, done}` — observation includes `episode_id` |
+| `/step` | POST | `{action: MoleculeAction, episode_id: str}` (episode_id REQUIRED) | `{observation, reward, done}` |
 | `/state` | GET | — | full `MoleculeState` |
-| `/health` | GET | — | `{status: "ok"}` |
+| `/health` | GET | — | `{status: "healthy"}` |
+| `/sessions` | GET | — | `{active_episodes: [...], count: N}` |
+| `/oracle_status` | GET | — | `{active_oracle, active_target}` |
+| `/tasks` | GET | — | `{tasks: [...], action_schema, target}` |

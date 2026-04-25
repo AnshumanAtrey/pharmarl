@@ -58,6 +58,7 @@ try:
         get_vocab_for_difficulty,
         smiles_to_selfies,
     )
+    from .oracles import get_active_target_name
     from .scenarios import sample_starting_molecule
 except ImportError:
     from server.curriculum import (  # type: ignore
@@ -82,15 +83,22 @@ except ImportError:
         get_vocab_for_difficulty,
         smiles_to_selfies,
     )
+    from server.oracles import get_active_target_name  # type: ignore
     from server.scenarios import sample_starting_molecule  # type: ignore
 
 logger = logging.getLogger(__name__)
 
 
 class DrugDiscoveryEnvironment(Environment):
-    """Multi-step molecular editing env (Stage 1: SARS-CoV-2 Mpro).
+    """Multi-step molecular editing env (Stage 1 default: DRD2 binding).
 
     State is held internally per episode. step() mutates that state.
+
+    The active target is determined dynamically by the oracles module — Stage 1
+    serves DRD2 (no native chemistry deps); with PHARMARL_ENABLE_DOCKING=1 plus
+    pyscreener+Vina installed, the binding oracle falls forward to a docking
+    target (NSP15/EGFR/ABL/BACE1) and every observation's `target` field is
+    updated accordingly.
     """
 
     SUPPORTS_CONCURRENT_SESSIONS: bool = True
@@ -122,10 +130,11 @@ class DrugDiscoveryEnvironment(Environment):
         selfies = smiles_to_selfies(canonical) or "[C]"
 
         eid = episode_id or str(uuid4())
+        active_target = get_active_target_name()
         self._state = MoleculeState(
             episode_id=eid,
             step_count=0,
-            target="SARS-CoV-2_Mpro",
+            target=active_target,
             difficulty=difficulty,
             max_steps=max_steps,
             smiles=canonical,
@@ -144,7 +153,7 @@ class DrugDiscoveryEnvironment(Environment):
             last_action_valid=True,
             message=(
                 f"Episode {eid[:8]} started @ {difficulty}. "
-                f"Scaffold = {canonical}. Optimize for SARS-CoV-2 Mpro."
+                f"Scaffold = {canonical}. Optimizing binding to {active_target}."
             ),
             truncated=False,
         )
