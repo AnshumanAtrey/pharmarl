@@ -129,6 +129,8 @@ class DrugDiscoveryEnvironment(Environment):
         # Short routing name for the binding oracle (DRD2/GSK3B/JNK3). Resolved
         # at /reset; the human-readable full name lives in self._state.target.
         self._target_short: str = DEFAULT_TARGET
+        # Lazy-constructed Fleet AI oversight LLM client (None until first use).
+        self._oversight = None
 
     # ─── reset / step ───────────────────────────────────────────────────
 
@@ -440,6 +442,37 @@ class DrugDiscoveryEnvironment(Environment):
         if self._config.critic_enabled and last_action_valid and self._state.smiles:
             critique = default_critic.critique(self._state.smiles)
             metadata["critique"] = critique_to_dict(critique)
+
+        # Oversight agent (Fleet AI sub-theme). Default OFF — gated by
+        # config.oversight_enabled. ONE LLM call per episode at TERMINATE
+        # only. Backward-looking analysis: reads the full action history
+        # and emits a structured report (strategy, risk flags, level).
+        if (
+            self._config.oversight_enabled
+            and done
+            and not truncated
+            and len(self._edit_history_full) > 0
+        ):
+            try:
+                from .oversight import LLMOversight
+            except ImportError:
+                from server.oversight import LLMOversight  # type: ignore
+            if self._oversight is None:
+                self._oversight = LLMOversight(
+                    provider=self._config.oversight_provider,
+                    model_name=self._config.oversight_model,
+                )
+            lipinski = check_lipinski(self._state.smiles)
+            lipinski_ok = lipinski is not None and lipinski.passes
+            report = self._oversight.analyze(
+                target=self._target_short,
+                starting_smiles=self._state.starting_smiles,
+                final_smiles=self._state.smiles,
+                action_history=self._edit_history_full,
+                final_reward=float(reward),
+                lipinski_passes=lipinski_ok,
+            )
+            metadata["oversight"] = report.to_dict()
 
         return MoleculeObservation(
             smiles=self._state.smiles,
