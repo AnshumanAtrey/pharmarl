@@ -39,6 +39,13 @@ class CurriculumConfig:
     # medicinal-chemistry primitives transfer to a target the model never saw.
     training_targets: tuple = ("DRD2", "GSK3B")
     held_out_target: str = "JNK3"
+    # Optional secondary held-out for a stronger transfer claim:
+    # the primary held-out (JNK3) is a kinase like the training targets, so it
+    # only demonstrates intra-family transfer. Setting this to a cross-family
+    # target — e.g. ``"AMLODIPINE_MPO"`` (L-type calcium-channel proxy via
+    # TDC's amlodipine_mpo oracle) — adds a true cross-pharmacology eval.
+    # Default ``None`` so the headline run is unaffected.
+    secondary_held_out_target: Optional[str] = None
 
     # ─── Schema drift (Patronus AI sub-theme) ──────────────────────────────
     # Mid-episode reward weight changes, modeling the real medicinal-chemistry

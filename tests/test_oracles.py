@@ -53,13 +53,16 @@ def test_invalid_smiles_safe_for_all_oracles() -> None:
 
 
 def test_multi_target_oracles_return_in_range() -> None:
-    """The DRD2 / GSK3B / JNK3 trio (used for the held-out generalization test)
-    must each return a number in [0, 1] without falling back to the default oracle."""
+    """The kinase trio (used for the held-out generalization test) must each
+    return a number in [0, 1] without falling back to the default oracle.
+    The optional cross-family ``AMLODIPINE_MPO`` target is also exposed but
+    only as an opt-in secondary held-out — see tests/test_cross_family.py."""
     from server.oracles import KNOWN_TARGETS, score_mpro_docking
-    assert KNOWN_TARGETS == ("DRD2", "GSK3B", "JNK3")
-    for target in KNOWN_TARGETS:
-        score = score_mpro_docking(ASPIRIN, target=target)
-        assert 0.0 <= score <= 1.0, f"target={target!r} returned out-of-range {score}"
+    # Primary kinase targets must all be present.
+    for kinase in ("DRD2", "GSK3B", "JNK3"):
+        assert kinase in KNOWN_TARGETS
+        score = score_mpro_docking(ASPIRIN, target=kinase)
+        assert 0.0 <= score <= 1.0, f"target={kinase!r} returned out-of-range {score}"
 
 
 def test_unknown_target_returns_zero() -> None:
