@@ -42,9 +42,13 @@ def _lazy_init() -> None:
 
 
 def score_sa(smiles: str) -> float:
-    """Returns 0-1 (higher is more synthesizable). 0.5 if unavailable."""
+    """Returns 0-1 (higher is more synthesizable). 0.5 if unavailable.
+
+    Empty / zero-atom Mols are rejected — they'd otherwise score 1.0 (max
+    synthesizability for nothing) which is a reward-hacking surface.
+    """
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
+    if mol is None or mol.GetNumAtoms() == 0:
         return 0.0
 
     _lazy_init()

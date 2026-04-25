@@ -1,3 +1,6 @@
+# PyTDC 0.4.x relies on pkg_resources which setuptools 81+ removed by default.
+# Must pin BEFORE PyTDC imports anything.
+setuptools<81
 openenv-core[core]>=0.2.3
 fastapi>=0.110.0
 uvicorn[standard]>=0.27.0

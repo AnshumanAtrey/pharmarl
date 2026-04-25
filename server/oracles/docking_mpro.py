@@ -158,7 +158,7 @@ def score_mpro_docking(smiles: str, target: Optional[str] = None) -> float:
       - DRD2/kinase classifier: probability 0..1 → use directly
     """
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
+    if mol is None or mol.GetNumAtoms() == 0:
         return 0.0
 
     if target is not None:

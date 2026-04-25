@@ -29,9 +29,12 @@ COPY server        /app/server
 ENV PORT=8000
 EXPOSE 8000
 
-# Pre-warm TDC oracles so the first request isn't a 30s download stall
+# Pre-warm ALL oracles (composite + multi-target trio) so the first request
+# isn't a 30s download stall. Each TDC classifier downloads ~30MB on first call.
 RUN python -c "from server.oracles import score_qed, score_sa, score_toxicity, score_mpro_docking; \
                smi='CC(=O)Oc1ccccc1C(=O)O'; \
-               print('warmup:', score_qed(smi), score_sa(smi), score_mpro_docking(smi), score_toxicity(smi))" || true
+               print('composite warmup:', score_qed(smi), score_sa(smi), score_toxicity(smi)); \
+               print('multi-target warmup:'); \
+               [print(' ', t, '=', score_mpro_docking(smi, target=t)) for t in ('DRD2', 'GSK3B', 'JNK3')]" || true
 
 CMD ["python", "-m", "server.app"]

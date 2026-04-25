@@ -1,3 +1,14 @@
+---
+title: PharmaRL
+emoji: 💊
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 8000
+pinned: false
+short_description: OpenEnv-native LLM-as-policy molecular optimization.
+---
+
 # PharmaRL
 
 **The first OpenEnv-native, LLM-as-policy environment for iterative molecular optimization.**

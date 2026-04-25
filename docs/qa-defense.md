@@ -88,19 +88,30 @@ This is the answer that *gains* credibility. Don't run from the limitation; own 
 
 ## Q13. Does training on one target transfer to a different target?
 
-**"We tested that explicitly. We trained on two targets, DRD2 and GSK3B, and reserved a third — JNK3, a kinase the model never saw during training — for evaluation. Untrained Qwen scores [BEFORE] on JNK3; trained Qwen scores [AFTER]. Delta of [DELTA]. That's a held-out generalization measurement most molecular RL papers don't run. The agent has learned [if positive: 'medicinal-chemistry primitives — basic-amine plus aromatic scaffolds — that transfer between kinase targets' / if neutral: 'drug-like scaffold construction but not target-specific pharmacophore — exactly what you'd expect from a model that hasn't seen the target']."**
+**"We tested that explicitly. We trained on DRD2 and GSK3B, and reserved JNK3 — a kinase the model never saw during training — for evaluation. Untrained Qwen scores [BEFORE] on JNK3; trained Qwen scores [AFTER]. Delta of [DELTA]. Most molRL papers don't run a held-out target measurement at all."**
 
-Replace the bracket placeholders with actual numbers from the W&B run before pitching. **If transfer is null, frame it neutrally — null result is still a result.** Don't claim transfer if the data doesn't support it.
+Replace the bracket placeholders with actual numbers from the W&B run before pitching. **If transfer is null, frame it neutrally — null result is still a result.**
 
-If pressed: "Why JNK3 specifically? It's a MAP kinase, distinct binding site from GSK3B (Ser/Thr) and DRD2 (GPCR). Similar pharmacophore vocabulary at the basic-amine-plus-aromatic level, but different target geometry. Reasonable test of whether the agent learned the chemistry primitives or just the targets."
+**Honest scope of the claim** — say this if asked:
+> "GSK3B and JNK3 are both serine/threonine kinases, so this is *intra-family* transfer to a novel kinase, not cross-family. It's a real measurement, but we're not claiming the agent learned 'binding principles in general' — we're showing it transfers to a kinase target the agent never saw."
 
-If pressed harder: "We're not claiming this generalizes to *any* disease. The transfer signal we measured is between three TDC classifiers — same protein family signal, different specific protein. Real cross-disease generalization (GPCR → enzyme, e.g.) is harder and not what we tested."
+This is the move: fix the *language*, not the *experiment*. The experiment is real and useful. The overclaim ("learned general binding principles") is what would collapse credibility.
+
+If pressed harder: "We're not claiming this generalizes to *any* disease. Cross-family transfer (kinase → GPCR or → enzyme) is much harder and is not what we tested. We tested whether a kinase-trained agent can hit a kinase the trainer hid."
 
 ---
 
-## Q14. Why DRD2 + GSK3B as training targets and JNK3 as held-out, not other combinations?
+## Q14. Why DRD2 + GSK3B as training targets and JNK3 as held-out?
 
-**"All three are TDC classifiers — pure Python, no native chemistry deps, fast oracle calls. DRD2 is the canonical molRL benchmark. GSK3B and JNK3 are kinase classifiers — they share basic pharmacophore vocabulary with each other but have distinct binding sites. So the held-out experiment is controlled: same target *family*, different specific *protein*. Cleaner signal than 'GPCR vs protease vs kinase' which would be too dissimilar to transfer at all."**
+**"All three are TDC classifiers — pure Python, no native chemistry deps, fast oracle calls. DRD2 is the canonical molRL benchmark. GSK3B and JNK3 are both Ser/Thr kinases — they share fold and ATP-binding-pocket geometry — so this is intra-family transfer rather than cross-family. We picked it because (a) it's reachable in our compute budget and (b) JNK3 isn't trivially identical to GSK3B — it's a different protein, with different selectivity, that the model never saw."**
+
+Don't pretend this is a "novel disease" test. It's a novel *target* in the same protein family. That's enough to be interesting; overclaiming kills credibility.
+
+---
+
+## Q15. Wouldn't a TDC oracle like BBB_Martins make a better held-out test?
+
+**"No. BBB_Martins is a physicochemical property classifier — does the molecule cross the blood-brain barrier? It correlates strongly with QED and Lipinski compliance, which we already optimize in the composite reward. So a trained model would *automatically* score higher on BBB regardless of whether real binding-skill transferred. We'd get an artifactual positive signal. Same critique applies to CYP-toxicity classifiers — they correlate with what we trained on. JNK3 binding is independent of the composite reward we optimized; that's why it's a meaningful test even though it's intra-family."**
 
 ---
 

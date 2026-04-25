@@ -17,9 +17,14 @@ from rdkit.Chem import QED
 
 
 def score_qed(smiles: str) -> float:
-    """Returns QED score in [0, 1]. Returns 0.0 for invalid molecules."""
+    """Returns QED score in [0, 1]. Returns 0.0 for invalid molecules.
+
+    Note: RDKit's MolFromSmiles('') returns a 0-atom Mol (not None) and QED.qed()
+    on it gives ~0.34 — a reward-hacking surface for empty/invalid outputs.
+    Explicit zero-atom check below.
+    """
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
+    if mol is None or mol.GetNumAtoms() == 0:
         return 0.0
     try:
         return float(QED.qed(mol))

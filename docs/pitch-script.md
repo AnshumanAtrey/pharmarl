@@ -54,11 +54,13 @@ The pitch leads with **policy-class novelty**, not chemistry. The chemistry is t
 
 [switch to W&B graph]
 
-> "We trained Qwen 2.5 1.5B with Unsloth and TRL's GRPO across [N] steps **on two targets — DRD2 and GSK3B**. Reward curve climbs from [BEFORE] to [AFTER]. But here's what most molecular RL papers don't do: we held out a third target — **JNK3**, a kinase the agent never saw during training — and ran the trained model on it cold."
+> "We trained Qwen 2.5 1.5B with Unsloth and TRL's GRPO across [N] steps **on two targets — DRD2 and GSK3B**. Reward curve climbs from [BEFORE] to [AFTER]. But here's what most molecular RL papers don't run: we **held out JNK3** — a kinase the agent never saw during training — and ran the trained model on it cold."
 
 [on-screen: split panel — left = W&B curve climbing across DRD2+GSK3B training; right = bar chart "untrained vs trained on held-out JNK3"]
 
-> "Untrained Qwen scored [UNTRAINED_JNK3] on JNK3. Trained Qwen scored [TRAINED_JNK3]. Delta of [DELTA]. [If positive: 'That's transfer of medicinal-chemistry primitives to an unseen target — the basic-amine plus aromatic scaffolds the agent learned for DRD2 and GSK3B carry over to a different kinase.' / If null: 'Null result. The agent learned the training targets but didn't transfer to JNK3 — the data tells us the policy is target-specific, not generally drug-discovering.']"
+> "Untrained Qwen scored [UNTRAINED_JNK3] on JNK3. Trained Qwen scored [TRAINED_JNK3]. Delta of [DELTA]. [If positive: 'That's transfer to a novel kinase the model never saw — same protein family, different specific target.' / If null: 'Null result. The model learned its training targets but did not transfer to JNK3 — that's a real measurement; we're not going to dress it up.']"
+
+> "GSK3B and JNK3 are both Ser/Thr kinases, so this is intra-family transfer, not cross-family. We're not claiming the agent learned binding principles in general. We're showing whether kinase-trained skill transfers to an unseen kinase. Most molRL papers don't run this comparison."
 
 ---
 
@@ -79,6 +81,9 @@ These are the lines that collapse credibility in Q&A:
 - ❌ "First drug-discovery lab"
 - ❌ "Curing <disease>"
 - ❌ "Replaces medicinal chemists"
+- ❌ "Learned binding principles" / "general drug-discovery skill" — we tested intra-family kinase transfer; don't oversell it
+- ❌ "The LLM brings the chemistry knowledge" — at 1.5B params, RL+format do the heavy lifting; chemistry priors are shallow
+- ❌ Specific score predictions ("we'll score 80/100") — the rubric is qualitative weights, not a 100-point scale
 
 If you find yourself reaching for one of those, swap it for: "trains an LLM to do iterative molecular optimization on a canonical benchmark."
 

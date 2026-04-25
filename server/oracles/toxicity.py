@@ -39,9 +39,11 @@ def score_toxicity(smiles: str) -> float:
     """Returns 0-1 toxicity probability (higher = more toxic).
 
     Reward function will subtract a fraction of this, so lower is better.
+    Empty / zero-atom Mols treated as max toxicity — otherwise the agent could
+    game the inverted-toxicity component by submitting nothing.
     """
     mol = Chem.MolFromSmiles(smiles)
-    if mol is None:
+    if mol is None or mol.GetNumAtoms() == 0:
         return 1.0  # max toxicity penalty for invalid molecules
 
     _lazy_init()
