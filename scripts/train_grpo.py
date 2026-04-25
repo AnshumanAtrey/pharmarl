@@ -228,6 +228,12 @@ def run_grpo(model, tokenizer, env_url: str, *,
         invalid = 0
         final_components = {}
         final_smiles = obs.get("smiles", "")
+        # Per-rollout observability — addresses the hackathon FAQ §17 monitoring list:
+        # truncation rate, Lipinski pass rate, episode length, action-type histogram.
+        action_type_counts: dict = {}
+        episode_truncated = False
+        final_lipinski_passes = True
+        starting_smiles = obs.get("smiles", "")
         for _ in range(max_episode_steps):
             prompt = (f"{SYSTEM}\n\nSMILES: {obs['smiles']}\n"
                       f"Fragments: {obs['available_fragments'][:8]}\n"
@@ -255,6 +261,9 @@ def run_grpo(model, tokenizer, env_url: str, *,
                 action = parsed
             else:
                 action = {"action_type": "ADD_FRAGMENT", "fragment": "C", "position": 0}
+            # Track action-type histogram (FAQ §17: format adherence + diversity of strategies)
+            at = str(action.get("action_type", "UNKNOWN"))
+            action_type_counts[at] = action_type_counts.get(at, 0) + 1
             step = requests.post(f"{env_url}/step", json=action).json()
             cum += step["reward"]
             step_obs = step["observation"]
@@ -264,6 +273,11 @@ def run_grpo(model, tokenizer, env_url: str, *,
             if step["done"]:
                 final_components = meta.get("final_oracle_scores") or {}
                 final_smiles = step_obs.get("smiles", final_smiles)
+                # FAQ §17 — track truncation rate (auto-truncated vs proper TERMINATE)
+                episode_truncated = bool(step_obs.get("truncated", False))
+                # Lipinski compliance on final molecule — directly observable from properties
+                lipinski_violations = step_obs.get("properties", {}).get("lipinski_violations", 0)
+                final_lipinski_passes = (lipinski_violations == 0)
 
             transitions.append({
                 "prompt_ids": prompt_cpu,
@@ -277,9 +291,15 @@ def run_grpo(model, tokenizer, env_url: str, *,
             "transitions": transitions,
             "cumulative": cum,
             "final_smiles": final_smiles,
+            "starting_smiles": starting_smiles,
             "final_components": final_components,
             "parse_rate": parse_ok / max(parse_total, 1),
             "invalid_action_rate": invalid / max(parse_total, 1),
+            # Hackathon FAQ §17 monitoring — extras for richer W&B dashboards
+            "episode_length": parse_total,        # number of policy decisions
+            "truncated": episode_truncated,        # hit step cap (proxy for "agent never terminates")
+            "lipinski_passes": final_lipinski_passes,
+            "action_type_counts": action_type_counts,
         }
 
     def loss_for(t, advantage):
@@ -363,6 +383,21 @@ def run_grpo(model, tokenizer, env_url: str, *,
         optim.step()
 
         if use_wandb:
+            # Hackathon FAQ §17 monitoring set — overall reward, per-component, format
+            # adherence, truncation, Lipinski, episode length, diversity, and a periodic
+            # qualitative sample. Catches reward hacking before the run finishes.
+            truncation_rate = sum(1 for r in rollouts if r.get("truncated")) / len(rollouts)
+            lipinski_pass_rate = sum(1 for r in rollouts if r.get("lipinski_passes")) / len(rollouts)
+            episode_lengths = [r.get("episode_length", 0) for r in rollouts]
+            mean_episode_length = statistics.mean(episode_lengths) if episode_lengths else 0
+            unique_finals = len(set(r["final_smiles"] for r in rollouts if r.get("final_smiles")))
+            diversity_pct = unique_finals / len(rollouts) if rollouts else 0
+            # Action-type histogram aggregated across rollouts
+            agg_action_types: dict = {}
+            for r in rollouts:
+                for at, c in (r.get("action_type_counts") or {}).items():
+                    agg_action_types[at] = agg_action_types.get(at, 0) + c
+
             log_payload = {
                 "step": step, "difficulty": difficulty,
                 "mean_reward": mean_r, "max_reward": max(cum),
@@ -371,11 +406,40 @@ def run_grpo(model, tokenizer, env_url: str, *,
                 "loss": loss_acc / n_trans, "grad_norm": float(grad_norm),
                 "n_transitions": n_trans,
                 "parse_rate": parse_rate, "invalid_action_rate": invalid_rate,
+                # FAQ §17 verifier metrics
+                "verifier/truncation_rate": truncation_rate,
+                "verifier/lipinski_pass_rate": lipinski_pass_rate,
+                "verifier/parse_rate": parse_rate,
+                "verifier/invalid_action_rate": invalid_rate,
+                # Episode-shape metrics
+                "episode/mean_length": mean_episode_length,
+                "episode/diversity_unique_pct": diversity_pct,
+                **{f"action_type/{k}": v for k, v in agg_action_types.items()},
                 **{f"reward_component/{k}": v for k, v in comp_means.items()},
             }
             if curr_diag:
                 log_payload["curriculum/rolling_mean"] = curr_diag.get("rolling_mean", 0.0)
             wandb.log(log_payload)
+
+            # Qualitative sample table — FAQ §15 explicitly says: "Inspect actual
+            # generations during training. A rising reward is not enough if the model
+            # is learning to exploit bugs." Log every audit_every steps.
+            if step % audit_every == 0:
+                try:
+                    table = wandb.Table(
+                        columns=["step", "difficulty", "starting_smiles", "final_smiles",
+                                 "cumulative_reward", "episode_length", "lipinski_passes",
+                                 "truncated"],
+                        data=[
+                            [step, difficulty, r.get("starting_smiles", ""),
+                             r["final_smiles"], r["cumulative"], r.get("episode_length", 0),
+                             r.get("lipinski_passes", False), r.get("truncated", False)]
+                            for r in rollouts[:8]
+                        ],
+                    )
+                    wandb.log({"samples/episode_outcomes": table, "step": step})
+                except Exception as _:  # noqa: BLE001 — best-effort logging
+                    pass
 
         if step % audit_every == 0:
             best = max(rollouts, key=lambda r: r["cumulative"])
