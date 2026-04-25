@@ -58,6 +58,8 @@ The pitch leads with **policy-class novelty**, not chemistry. The chemistry is t
 
 > "Capacity isn't the bottleneck. Discipline is. That's why we trained a 1.5B model with targeted RL."
 
+> "And the reward signal those numbers stand on: third-party. Same TDC classifiers used in REINVENT, MolDQN, GFlowNets — `pip install pytdc` and reproduce them yourself, no PharmaRL code in the loop. We red-teamed the reward function with 14 adversarial tests before training; one real exploit caught and patched in the oracle layer. We hardened the reward, not the prompt."
+
 [switch to W&B graph]
 
 > "We trained Qwen 2.5 1.5B with Unsloth and TRL's GRPO across [N] steps **on two targets — DRD2 and GSK3B**. Reward curve climbs from [BEFORE] to [AFTER]. But here's what most molecular RL papers don't run: we **held out JNK3** — a kinase the agent never saw during training — and ran the trained model on it cold."
