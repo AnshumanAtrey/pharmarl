@@ -1,0 +1,16 @@
+=== Live HF Space smoke (https://anshumanatrey-pharmarl.hf.space) ===
+
+--- /health ---
+{"status":"healthy"}
+
+--- /oracle_status ---
+{"active_oracle":"DRD2","active_target":"DRD2_dopamine_D2_receptor"}
+
+--- /reset (default) ---
+{"observation":{"smiles":"O=C1CCCNC1","selfies":"[O][=C][C][C][C][N][C][Ring1][=Branch1]","target":"DRD2_dopamine_D2_receptor","difficulty":"easy","properties":{"mw":99.13300000000001,"logp":-0.0611000000000001,"hbd":1.0,"hba":2.0,"lipinski_violations":0.0},"valid_actions":["ADD_FRAGMENT","REMOVE_FRAGMENT","SUBSTITUTE_ATOM"],"available_fragments":["C","O","N","c1ccccc1","C(=O)O","c1ccncc1","C1CCNCC1","C1CCOCC1","F","Cl","C(=O)N","S(=O)(=O)N","C#N","C(F)(F)F","OC"],"steps_remaining":15,"last_action_valid":true,"message":"Episode 1e40101e started @ easy. Scaffold = O=C1CCCNC1. Optimizing binding to DRD2_dopamine_D2_receptor.","truncated":false,"active_constraints":["docking","qed","sa","toxicity"],"drift_warning":"","critique":null,"oversight":null,"episode_id":"1e40101e-3c7a-4430-ab04-a334a
+
+--- /step with canonical schema ---
+{"observation":{"smiles":"O=C1CCCNC1","selfies":"[O][=C][C][C][C][N][C][Ring1][=Branch1]","target":"DRD2_dopamine_D2_receptor","difficulty":"easy","properties":{"mw":99.13300000000001,"logp":-0.0611000000000001,"hbd":1.0,"hba":2.0,"lipinski_violations":0.0},"valid_actions":["ADD_FRAGMENT","REMOVE_FRAGMENT","SUBSTITUTE_ATOM","TERMINATE"],"available_fragments":["C","O","N","c1ccccc1","C(=O)O","c1ccncc1","C1CCNCC1","C1CCOCC1","F","Cl","C(=O)N","S(=O)(=O)N","C#N","C(F)(F)F","OC"],"steps_remaining":14,"last_action_valid":false,"message":"ADD_FRAGMENT rejected: resulting molecule failed sanitization
+
+--- /step with verbose ACTION-key (action normalization) ---
+{"observation":{"smiles":"O=C1CCCNC1","selfies":"[O][=C][C][C][C][N][C][Ring1][=Branch1]","target":"DRD2_dopamine_D2_receptor","difficulty":"easy","properties":{"mw":99.13300000000001,"logp":-0.0611000000000001,"hbd":1.0,"hba":2.0,"lipinski_violations":0.0},"valid_actions":["ADD_FRAGMENT","REMOVE_FRAGMENT","SUBSTITUTE_ATOM","TERMINATE"],"available_fragments":["C","O","N","c1ccccc1","C(=O)O","c1ccncc1","C1CCNCC1","C1CCOCC1","F","Cl","C(=O)N","S(=O)(=O)N","C#N","C(F)(F)F","OC"],"steps_remaining":13,"last_action_valid":true,"message":"TERMINATED. Target=DRD2 composite=0.182, Lipinski=PASS, final 

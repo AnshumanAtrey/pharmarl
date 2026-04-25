@@ -1,0 +1,70 @@
+=== validate_stack ===
+Command: .venv/bin/python scripts/validate_stack.py
+Started: Sat Apr 25 21:43:21 UTC 2026
+
+Found local copy...
+Found local copy...
+Found local copy...
+Found local copy...
+Found local copy...
+Found local copy...
+PharmaRL Gate 1 — stack validation
+
+============================================================
+  1. Library imports
+============================================================
+  [OK]    import tdc
+  [OK]    import selfies
+  [OK]    import rdkit
+
+============================================================
+  2. TDC oracles on aspirin (CC(=O)Oc1ccccc1C(=O)O)
+============================================================
+
+  Composite reward components:
+    [OK]    QED            aspirin = 0.5501
+    [OK]    SA             aspirin = 1.5800
+    [OK]    DRD2           aspirin = 0.0003
+    [OK]    CYP3A4_Veith   aspirin = 0.0000
+
+  Multi-target classifier trio (DRD2 train | GSK3B train | JNK3 held-out):
+    [OK]    GSK3B          aspirin = 0.0000
+    [OK]    JNK3           aspirin = 0.0000
+
+  DRD2 cache sanity check:
+    [OK]    haloperidol = 1.0000  (expect > 0.9)
+
+============================================================
+  3. Stage 2 docking oracles (PHARMARL_ENABLE_DOCKING)
+============================================================
+  [skip]  PHARMARL_ENABLE_DOCKING not set — Stage 1 (DRD2) is the active path.
+          To probe Stage 2: PHARMARL_ENABLE_DOCKING=1 python scripts/validate_stack.py
+
+============================================================
+  4. SELFIES round-trip
+============================================================
+  SMILES   in:  CC(=O)Oc1ccccc1C(=O)O
+  SELFIES out:  [C][C][=Branch1][C][=O][O][C][=C][C][=C][C][=C][Ring1][=Branch1][C][=Branch1][C][=O][O]
+  SMILES   out: CC(=O)OC1=CC=CC=C1C(=O)O
+  [OK]    round-trip succeeded
+
+============================================================
+  5. RDKit basics — molecule parsing + property calc
+============================================================
+  Aspirin MW=180.2, LogP=1.31, HBD=1, HBA=3
+  Lipinski: PASS
+
+============================================================
+  Summary
+============================================================
+  Composite-reward oracles:    4/4 (QED, SA, DRD2, CYP3A4)
+  Held-out trio:               3/3 (DRD2, GSK3B, JNK3)
+  Stage 2 docking oracle:      not active (Stage 1 = DRD2 + GSK3B + JNK3)
+  SELFIES round-trip:          OK
+  RDKit basics:                OK
+
+  [GREEN] Stage 1 multi-target stack ready. Held-out generalization test can run.
+           Train on DRD2 + GSK3B; evaluate transfer on JNK3.
+           Stage 2 docking is opt-in (PHARMARL_ENABLE_DOCKING=1).
+
+Exit: 0

@@ -1,0 +1,9 @@
+=== Fleet AI oversight via OpenRouter Llama 3B free ===
+Oversight LLM call failed: 429 Client Error: Too Many Requests for url: https://openrouter.ai/api/v1/chat/completions
+Provider: openrouter  available: True
+
+strategy_summary: 
+risk_flags: ['llm_call_failed']
+risk_level: unknown
+explanation: HTTPError: 429 Client Error: Too Many Requests for url: https://openrouter.ai/api/v1/chat/completions
+model_name: meta-llama/llama-3.2-3b-instruct:free
