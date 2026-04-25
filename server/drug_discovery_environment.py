@@ -41,7 +41,9 @@ try:
         DEFAULT_CONFIG,
         max_steps_for,
         pick_difficulty,
+        pick_drift_profile,
         reward_components_for,
+        weights_for,
     )
     from .grader import (
         parse_failure_reward,
@@ -71,7 +73,9 @@ except ImportError:
         DEFAULT_CONFIG,
         max_steps_for,
         pick_difficulty,
+        pick_drift_profile,
         reward_components_for,
+        weights_for,
     )
     from server.grader import (  # type: ignore
         parse_failure_reward,
@@ -127,10 +131,20 @@ class DrugDiscoveryEnvironment(Environment):
     # ─── reset / step ───────────────────────────────────────────────────
 
     def reset(self, seed: Optional[int] = None, episode_id: Optional[str] = None, **kwargs: Any) -> MoleculeObservation:
-        """Start a new episode. Optional kwargs: difficulty, training_step, target."""
+        """Start a new episode.
+
+        Optional kwargs:
+          - ``difficulty`` (str): override curriculum tier.
+          - ``training_step`` (int): used by the curriculum to pick a tier.
+          - ``target`` (str): override the binding-oracle target.
+          - ``drift_profile`` (str): force a specific schema-drift profile
+            (``static`` / ``early_admet`` / ``late_potency``); useful for the
+            demo rollouts that compare profiles head-to-head.
+        """
         difficulty: Optional[DifficultyTier] = kwargs.get("difficulty")
         training_step: Optional[int] = kwargs.get("training_step")
         target: Optional[str] = kwargs.get("target")
+        forced_drift_profile: Optional[str] = kwargs.get("drift_profile")
         if seed is not None:
             self._rng = random.Random(seed)
 
@@ -158,6 +172,14 @@ class DrugDiscoveryEnvironment(Environment):
         canonical = canonicalize_smiles(starting) or starting
         selfies = smiles_to_selfies(canonical) or "[C]"
 
+        # Pick (or force) a schema-drift profile for this episode. When the
+        # master flag in CurriculumConfig is OFF, this always returns "static"
+        # — guaranteeing legacy behavior for the headline training run.
+        if forced_drift_profile is not None:
+            drift_profile = forced_drift_profile
+        else:
+            drift_profile = pick_drift_profile(self._rng, self._config)
+
         eid = episode_id or str(uuid4())
         self._state = MoleculeState(
             episode_id=eid,
@@ -171,6 +193,8 @@ class DrugDiscoveryEnvironment(Environment):
             edit_history=[],
             cumulative_reward=0.0,
             final_oracle_scores=None,
+            drift_profile=drift_profile,
+            drift_step=self._config.drift_step,
         )
         self._edit_history_full = []
         self._final_oracle_scores = None
@@ -205,10 +229,17 @@ class DrugDiscoveryEnvironment(Environment):
                     truncated=False,
                 )
 
+            terminal_weights = weights_for(
+                self._state.drift_profile,
+                self._state.step_count,
+                self._state.drift_step,
+                self._config,
+            )
             tr = terminal_reward(
                 self._state.smiles,
                 components_active=reward_components_for(self._state.difficulty, self._config),
                 target=self._target_short,
+                weights=terminal_weights,
             )
             self._final_oracle_scores = tr.components
             self._state.final_oracle_scores = tr.components
@@ -276,10 +307,17 @@ class DrugDiscoveryEnvironment(Environment):
         truncated = self._state.step_count >= self._state.max_steps
         done = truncated
         if truncated:
+            terminal_weights = weights_for(
+                self._state.drift_profile,
+                self._state.step_count,
+                self._state.drift_step,
+                self._config,
+            )
             tr = terminal_reward(
                 self._state.smiles,
                 components_active=reward_components_for(self._state.difficulty, self._config),
                 target=self._target_short,
+                weights=terminal_weights,
             )
             self._final_oracle_scores = tr.components
             self._state.final_oracle_scores = tr.components
@@ -321,6 +359,41 @@ class DrugDiscoveryEnvironment(Environment):
             "lipinski_violations": float(lipinski.violations),
         }
 
+    def _active_constraints(self, weights: tuple) -> List[str]:
+        """Return the names of reward components currently dominant (weight > 0).
+
+        The agent observes this on every step so it knows when the constraint
+        set changes mid-episode (schema drift signal).
+        """
+        names = ("docking", "qed", "sa", "toxicity")
+        return [name for name, w in zip(names, weights) if w > 0.0]
+
+    def _drift_warning(self, weights_now: tuple, weights_prev: tuple) -> str:
+        """If weights flipped on this step, surface a human-readable warning."""
+        if weights_now == weights_prev:
+            return ""
+        # Construct a short description of which constraints just activated.
+        names = ("docking", "qed", "sa", "toxicity")
+        newly_active = [
+            name for name, wn, wp in zip(names, weights_now, weights_prev)
+            if wp == 0.0 and wn > 0.0
+        ]
+        newly_dominant = [
+            name for name, wn, wp in zip(names, weights_now, weights_prev)
+            if wp > 0.0 and wn > wp + 0.10
+        ]
+        parts = []
+        if newly_active:
+            parts.append(f"{'+'.join(newly_active)} constraint now active")
+        if newly_dominant:
+            parts.append(f"{'+'.join(newly_dominant)} weight increased")
+        if not parts:
+            parts.append("reward weights changed")
+        return (
+            f"Schema change at step {self._state.step_count}: "
+            + "; ".join(parts)
+        )
+
     def _build_observation(
         self,
         reward: float,
@@ -329,6 +402,26 @@ class DrugDiscoveryEnvironment(Environment):
         message: str,
         truncated: bool,
     ) -> MoleculeObservation:
+        # Compute the active constraint set + drift warning. Both rely only on
+        # static state (drift profile + step count), so they're cheap to derive
+        # on every observation.
+        weights_now = weights_for(
+            self._state.drift_profile,
+            self._state.step_count,
+            self._state.drift_step,
+            self._config,
+        )
+        # Compare against the previous step's weights to detect a drift event.
+        prev_step = max(0, self._state.step_count - 1)
+        weights_prev = weights_for(
+            self._state.drift_profile,
+            prev_step,
+            self._state.drift_step,
+            self._config,
+        )
+        active_constraints = self._active_constraints(weights_now)
+        drift_warning = self._drift_warning(weights_now, weights_prev)
+
         return MoleculeObservation(
             smiles=self._state.smiles,
             selfies=self._state.selfies,
@@ -343,8 +436,13 @@ class DrugDiscoveryEnvironment(Environment):
             truncated=truncated,
             done=done,
             reward=float(reward),
+            active_constraints=active_constraints,
+            drift_warning=drift_warning,
             metadata={
                 "cumulative_reward": self._state.cumulative_reward,
                 "final_oracle_scores": self._final_oracle_scores,
+                "drift_profile": self._state.drift_profile,
+                "drift_step": self._state.drift_step,
+                "weights": list(weights_now),
             },
         )

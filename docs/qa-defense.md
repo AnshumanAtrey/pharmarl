@@ -135,3 +135,11 @@ Don't pretend this is a "novel disease" test. It's a novel *target* in the same 
 - ❌ "Direct Mpro docking" (we don't — Stage 1 is DRD2)
 - ❌ "Snorkel-AI compliant" (false — Snorkel = noisy experts; our oracles are deterministic)
 - ❌ "Self-improving" without scare quotes (RLVE curriculum ≠ self-improvement)
+
+---
+
+## Q16. What is schema drift and why does it matter?
+
+**"Schema drift means the reward function's weights change mid-episode. Real medicinal chemistry projects work this way — you start optimizing potency, discover a metabolic stability problem, and the constraints shift mid-development. We model this directly in our env. The Patronus AI sub-theme rewards exactly this kind of consumer-workflow-with-changing-rules environment, and to our knowledge no prior molecular RL env has dynamic reward weights."**
+
+If pressed on implementation: "It's flag-gated behind `schema_drift_enabled` in `CurriculumConfig`, default OFF — the headline training run is unaffected. When enabled, each episode samples a drift profile (`static`, `early_admet`, `late_potency`); on the configured drift step the reward weights flip from a `pre` tuple to a `post` tuple, and the observation surfaces a `drift_warning` plus an updated `active_constraints` list so the agent can detect that the rules just changed."

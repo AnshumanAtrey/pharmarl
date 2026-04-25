@@ -112,6 +112,22 @@ class MoleculeObservation(Observation):
         description="True if episode ended via step limit, False if via TERMINATE.",
     )
 
+    active_constraints: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Names of reward components that currently dominate (weight > 0). "
+            "Schema-drift profiles change which components are active mid-episode."
+        ),
+    )
+
+    drift_warning: str = Field(
+        default="",
+        description=(
+            "Non-empty on the step at which the schema-drift weights flip. "
+            "Surfaces the 'underlying rules just changed' signal to the agent."
+        ),
+    )
+
 
 class MoleculeState(State):
     """Full episode state. Persists across step calls within one episode."""
@@ -134,4 +150,16 @@ class MoleculeState(State):
     final_oracle_scores: Optional[Dict[str, float]] = Field(
         default=None,
         description="Populated only on TERMINATE — the composite reward breakdown.",
+    )
+
+    drift_profile: str = Field(
+        default="static",
+        description=(
+            "Schema-drift profile for this episode (static / early_admet / "
+            "late_potency). 'static' = fixed weights = legacy behavior."
+        ),
+    )
+    drift_step: int = Field(
+        default=0,
+        description="Step on which the drift fires (post-weights take effect at this step).",
     )
