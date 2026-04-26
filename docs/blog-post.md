@@ -1,129 +1,206 @@
-# PharmaRL: An OpenEnv-Native Molecular RL Environment Where Discipline Beats Capacity
+# AI Alchemy In Medicine: How Three Students Tried to Build a Scientist and Ended Up Building a Workshop
 
-*Built for the Meta PyTorch OpenEnv Hackathon (Apr '26) by AI Mafias — Anshuman, Sahil, Vijay.*
-
-## TL;DR
-
-We built the first OpenEnv-native molecular environment where an LLM is the policy. Same canonical molecular RL benchmark every paper uses (DRD2 binding from Therapeutics Data Commons), new policy class. Two opt-in mechanics — mid-episode schema drift and a multi-actor medicinal-chemist critic — give us coverage on Patronus AI and Halluminate sub-theme bonuses. Most surprising finding: **Llama 70B scores worse than random uniform on this env.** Capacity isn't the bottleneck; discipline is.
-
-- 🤗 **Live env**: https://huggingface.co/spaces/anshumanatrey/pharmarl
-- 💻 **Code**: https://github.com/AnshumanAtrey/pharmarl
-- 📔 **Colab**: `<TODO>`
-- 🎬 **90s pitch**: `<TODO>`
-
-## The gap
-
-Every modern molecular RL paper — REINVENT, MolDQN, GraphAF, GFlowNets — uses a GNN or RNN policy trained from scratch. That's useful for research, but the open-source LLM ecosystem has been moving in a different direction: structured-action chat agents you can drop into any environment via JSON. There's no standard environment for training a chat-style LLM as the policy on a real molecular task. PharmaRL fills that gap.
-
-The agent issues structured JSON actions — `ADD_FRAGMENT`, `REMOVE_FRAGMENT`, `SUBSTITUTE_ATOM`, `TERMINATE` — over a 10-20 step episode. SELFIES (Krenn et al., 2020) guarantees every output is chemically valid. Reward is a composite of TDC's binding classifier + RDKit's QED + synthetic accessibility + CYP3A4 toxicity, gated by Lipinski's Rule of 5.
-
-## Architecture
-
-```
-DrugDiscoveryEnvironment (FastAPI on HF Space)
-├── reset(episode_id, difficulty)
-├── step(episode_id, action)         ← state persists per episode_id
-└── oracles/  → TDC binding (DRD2 default) + RDKit QED + SA + TDC CYP3A4
-```
-
-Episode state is keyed by `episode_id` so a GRPO group of 8 concurrent rollouts each gets isolated state. Curriculum has three RLVE-compliant tiers — trivial (QED only) → easy (QED + binding) → hard (full 4-component composite).
-
-## Reward design — designed to NOT be gamed
-
-A reward function people will actually train against has to be hard to game. We layered three independent defenses:
-
-1. **Composite oracle** — any single component getting gamed gets diluted by the other three.
-2. **Lipinski gate** — terminal reward halved if the final molecule fails Rule of 5. Eliminates the "build the biggest molecule possible" exploit.
-3. **Anti-degenerate guards** — zero-atom Mol → 0.0; parse failure → -0.5; cannot terminate on step 1.
-
-We pinned this with 14 adversarial reward tests in `tests/test_reward_redteam.py` covering empty SMILES, polyaromatic blobs, action repetition, disconnected fragments, charged species, and the exact failure-mode molecules our biggest baseline LLM produced.
-
-## Inverted scaling — the surprising finding
-
-Before training, we ran six off-the-shelf policies on the same eval (9 episodes per target × 3 targets, easy difficulty):
-
-| Policy | Mean cumulative reward | Cost |
-|---|---|---|
-| Random uniform | +2.30 | $0 |
-| Scripted 4-step | +2.81 | $0 |
-| Llama 3.2 3B Instruct | +1.67 | $0.001 |
-| Gemini 2.5 Flash | +1.81 | $0.026 |
-| **Llama 3.1 8B Instruct** | **+2.45 ← sweet spot** | $0.001 |
-| Llama 3.3 70B Instruct | +1.19 | $0.007 |
-| Gemini 2.5 Pro | +3.68 | $0.123 |
-
-Across the Llama family, **8B beats both 3B and 70B**. 70B specifically falls *below random uniform* — it tries to design oversized multi-fragment molecules in single turns and runs head-first into the env's Lipinski + chemistry validators. Parse rate also drops to 97%.
-
-This isn't just a fun graph. It's empirical proof that the env's reward design penalizes capacity-greedy strategies, which is exactly what you want from an RL environment intended for actual training. **Random and scripted policies beat 3 of the 4 LLMs.** Only Gemini 2.5 Pro clears the scripted baseline cleanly. Total probe spend: $0.158.
-
-The thesis behind training a 1.5B Qwen with GRPO on this env follows directly: targeted reward optimization can outperform raw model capacity.
-
-## Headline result — trained Qwen 1.5B
-
-We trained Qwen 2.5 1.5B with Unsloth + TRL's GRPO across `[N]` steps on two targets (DRD2 + GSK3B), with JNK3 held out for transfer evaluation.
-
-**Training curve**: `<EMBED docs/plots/training_curve.png>`
-
-**Per-target comparison vs baselines**: `<EMBED docs/plots/per_target_comparison.png>`
-
-**Distribution per target**: `<EMBED docs/plots/distribution_box.png>`
-
-`[FILL] Trained Qwen mean cumulative: +X.XX` — comparing against the baseline table above:
-
-- Beats random uniform (+2.30)? **`[YES/NO]`**
-- Beats scripted heuristic (+2.81) — *the "agent learned" floor*? **`[YES/NO]`**
-- Beats untrained Llama 8B sweet spot (+2.45)? **`[YES/NO]`**
-- Approaches Gemini 2.5 Pro (+3.68)? **`[YES/NO]`**
-
-`[FILL]` based on the actual JSON output of `colab/train_pharmarl.ipynb` cell 13.
-
-## Held-out target — JNK3 generalization test
-
-Most molRL papers don't run a held-out target measurement at all. We do:
-
-| | Untrained Qwen on JNK3 | Trained Qwen on JNK3 |
-|---|---|---|
-| Mean cumulative | `[BEFORE]` | `[AFTER]` |
-| Std | `[BEFORE_STD]` | `[AFTER_STD]` |
-| Delta | — | **`[DELTA]`** |
-
-**Honest scope**: GSK3B and JNK3 are both serine/threonine kinases — this is *intra-family* transfer to a novel kinase, not cross-family. We're not claiming the agent learned binding principles in general. We're showing whether kinase-trained skill transfers to an unseen kinase. If the result is null, we report it as null — null is still a result.
-
-## Two opt-in mechanics for sub-theme bonuses
-
-Both default OFF; they each have a dedicated demo cell in the Colab notebook.
-
-### Mid-episode schema drift (Patronus AI sub-theme)
-
-Real medicinal-chemistry projects don't have static optimization criteria. A potency push uncovers an ADMET liability; the synthesizability bar tightens before scale-up. The constraints shift mid-development.
-
-We model this directly. Enable `CurriculumConfig.schema_drift_enabled` and the reward weights flip mid-episode according to a sampled drift profile (`static`, `early_admet`, `late_potency`). The agent sees a `drift_warning` in the observation when constraints change.
-
-The Patronus AI sub-theme rewards exactly this kind of consumer-workflow-with-changing-rules environment. To our knowledge, no prior molecular RL env has dynamic reward weights.
-
-### Multi-actor medicinal chemist critic (Halluminate sub-theme)
-
-Enable `CurriculumConfig.critic_enabled` and a separate logical agent — a deterministic rules-based medicinal chemist — examines each post-edit molecule and emits structured feedback: PAINS substructures (thiocarbonyl, rhodanine, nitroaromatic Michael acceptors), Lipinski-flavored property warnings, reactive group flags (alkyl halide, epoxide, anhydride). The critique is appended to the next observation's metadata under `critique`; the policy can integrate the feedback (e.g., REMOVE_FRAGMENT to clear a flagged group) or ignore it.
-
-**Why rules-based, not an LLM critic?** Two reasons. **Deterministic**: same molecule always gets the same critique, so critic-conditioned training is reproducible. An LLM critic introduces stochasticity that interferes with reward signal cleanliness. **Fast**: ms latency vs ~1s per LLM call. The env contract has a clean seam — a frozen LLM critic can be swapped in here as future work.
-
-The Halluminate sub-theme rewards multi-actor environments where the agent interacts with separate logical agents to discover and achieve the task. Whether the actor is itself an LLM or a deterministic rules engine is implementation detail; what matters is the structured-feedback channel.
-
-## What's next
-
-This is hackathon scope (built in 18 hours, three teammates, one subscription tier of compute). The natural follow-ups, in order:
-
-1. **More training** — 200 GRPO steps is the lower bound for showing a curve on T4; 2000+ steps with better hyperparameters likely closes the gap to Gemini Pro.
-2. **Frozen LLM critic** — swap the rules-based critic for a frozen Qwen-7B with a chemist persona; richer feedback at the cost of latency.
-3. **Cross-family held-out** — find a non-kinase, non-QED-correlated TDC oracle for a stronger transfer claim. We investigated several candidates; documented which work and don't in `docs/cross_family_attempt.md`.
-4. **Stage 2 docking deployment** — the env supports pyscreener-backed docking against NSP15 / EGFR / ABL / BACE1. The chemistry stack doesn't pip-install cleanly in stock HF Spaces; a dedicated Docker build with OpenBabel + AutoDock Vina is the path forward.
-
-## Why this matters for OpenEnv
-
-OpenEnv's pitch is environments as portable, versioned software artifacts. PharmaRL is a small but pointed test of that thesis: a real chemistry environment with verifiable reward, deployed as a Hugging Face Space, runnable from a Colab notebook by any team — and a *demonstration* that off-the-shelf frontier LLMs alone don't solve it. The path from "we have a good env" to "we have a useful trained model" requires both — and the hackathon tooling stack (Unsloth + TRL + OpenEnv + HF Spaces) made the round-trip practical in under a day.
-
-Try it: https://huggingface.co/spaces/anshumanatrey/pharmarl
+**Team AI Mafias** — Anshuman Atrey, Sahil, Vijay Kota
+*Meta PyTorch OpenEnv Hackathon — Round 2 Grand Finale, Bangalore, April 25-26, 2026*
 
 ---
 
-*PharmaRL is open source under BSD. Code at https://github.com/AnshumanAtrey/pharmarl. Built by AI Mafias for the Meta PyTorch OpenEnv Hackathon, April 2026.*
+## The naive ambition
+
+Three students, in a Bangalore room, after winning Round 1 of the Meta PyTorch OpenEnv Hackathon. Round 2 began on April 25. The deadline: 5 PM IST on April 26.
+
+The first idea was bold and embarrassingly naive. *Let's build an AI scientist that can fight any virus, design molecules for any disease, save the human race from the next pandemic.* Drug discovery is broken — a decade per drug, billions of dollars, nine in ten candidates die in trials. Surely with the right LLM, the right training, the right reward signal, we could move that needle.
+
+We sat with this for a couple of hours. Then we read the literature.
+
+Eight years of generative reinforcement learning for small molecules — REINVENT, MolDQN, GraphAF, MARS, JT-VAE. Architectures so sophisticated they sound like science fiction. The 2022 Practical Molecular Optimization benchmark by Gao, Fu, Sun, and Coley ran 25 algorithms across 23 oracle-bounded tasks under realistic budgets. The headline finding: **vanilla REINVENT (2017) is still the most sample-efficient generative model on average.** Sophisticated successors do not consistently beat a 3-layer GRU from 2017.
+
+Roskoski's 2023 audit: **20 of 48 FDA-approved kinase inhibitors violate Lipinski's Rule of Five** outright — the heuristic every composite reward in our field still treats as gospel. Renz et al. show that an "add-a-carbon" trivial baseline near-perfectly games GuacaMol's distribution metrics. Meta's Galactica — their flagship LLM for science — was withdrawn 48 hours after public launch in November 2022 for fluently producing fabricated chemistry.
+
+The plateau is not in the optimizers. *It is in the priors and the rewards.*
+
+So we did the only thing that made sense. **We scoped down. Hard.** We were not going to build an AI scientist over a weekend. But we could build the *workshop* where one might eventually be trained.
+
+## 18:04, April 25 — first commit
+
+`f8ce57b — PharmaRL — multi-step molecular drug discovery OpenEnv environment`
+
+Meta and Hugging Face shipped OpenEnv in October 2025 — a standardized RL environment framework. We pulled the repo. Twenty-nine reference environments shipped: coding, chess, atari, browsergym, calendar, kernel-RL.
+
+**Zero chemistry environments.** That was our gap. We could build the first OpenEnv-native chemistry environment.
+
+The contract: an LLM is the policy. Each step, it emits one JSON molecular edit:
+
+```json
+{"action_type": "ADD_FRAGMENT", "fragment": "c1ccccc1", "position": 0}
+{"action_type": "REMOVE_FRAGMENT", "position": 3}
+{"action_type": "SUBSTITUTE_ATOM", "position": 5, "new_atom": "F"}
+{"action_type": "TERMINATE"}
+```
+
+The env applies the edit, sanitizes via RDKit, and returns the new molecule plus oracle scores. At episode end: composite reward over Lipinski compliance, QED, synthetic accessibility, and a TDC bioactivity classifier (DRD2 SVM, GSK3B and JNK3 random forests — the canonical oracles the field has compared against since Olivecrona's REINVENT in 2017).
+
+## Through the night — the env grew teeth
+
+`19:35 — Pivot Stage 1 to DRD2 + session-keyed server for GRPO concurrency`
+`20:15 — Multi-target oracle routing + held-out JNK3 generalization test`
+`21:41 — HF Space deployment + reward red-team + policy regression demo`
+`23:49 — Capture untrained-LLM baselines + add Gemini/OpenRouter runners`
+
+By midnight April 25, the env was live on a HuggingFace Space, scored four oracles, had a held-out generalization target, and had a 14-prompt reward red-team test suite. We could query it from anywhere with a `pip install`.
+
+We pushed past midnight into Day 2.
+
+`00:25 — Schema drift mechanic — flag-gated mid-episode reward weight changes (Patronus AI sub-theme)`
+
+This one we are proud of. Reward weights flip mid-episode at a deterministic step, with a `drift_warning` signal sent to the agent. Medicinal-chemistry projects evolve their objectives constantly — early-stage cares about hit rate, late-stage cares about ADMET liability. A policy that detects drift and re-plans is closer to a real medicinal chemist than one optimizing a fixed scalar. **Original to PharmaRL.**
+
+`00:28 — Rules-based medicinal chemist critic (Halluminate sub-theme)`
+`01:11 — Statistical CI eval + plot generation infrastructure`
+`01:56 — Fleet AI sub-theme — pure-LLM oversight agent`
+`02:59 — Fix Sahil's bug reports #8, #9, #10, #11, #12 + per-run validation logging`
+
+By 3 AM, the env had three sub-theme mechanics live, statistical CI tooling, and a per-run validation log. Sahil had been stress-testing it locally and filing bug reports we were burning down in real time. We were running on coffee and stubbornness.
+
+## 04:12, April 26 — turning to training
+
+`04:12 — Switch to Llama-3.2-3B + VRAM-safe defaults for T4 training`
+`04:18 — train_grpo.py: drop stale SARS-CoV-2 Mpro framing in SYSTEM prompt`
+`04:28 — train_grpo.py: full FAQ §17 W&B observability — verifier, episode shape, action histogram, sample SMILES table`
+
+The env was done. Now to train a policy against it. We thought we'd just `hf jobs run` a Llama-3.2 fine-tune with GRPO and watch it train. **Reader, it did not go like that.**
+
+## The training nightmare — six hours of dep hell
+
+**Attempt 1.** Pip dep resolution hell. `unsloth + trl + transformers` loose-pinned, took 80+ version backtracks, container watchdog killed the job. Restart.
+
+**Attempt 2.** Pinned exact versions. `git` not in the Docker image. Restart.
+
+**Attempt 3.** `git` installed. `unsloth_zoo` API mismatch — the function we needed was renamed three months ago. Restart.
+
+**Attempt 4.** `rich` library import missing. Add it. Restart.
+
+**Attempt 5.** `trl 0.11.4` + `unsloth 2025.2.15` produces a syntax error in an auto-generated trainer file. Bump trl. Restart.
+
+`08:32 — train_grpo.py: drop fast_inference=True (avoid vLLM dep)`
+`08:36 — train_grpo.py: stock gradient checkpointing instead of unsloth's`
+`08:39 — train_grpo.py: drop 4-bit quantization, load model in bf16`
+`08:42 — train_grpo.py: cast LoRA adapter params to bf16 after creation`
+
+**Attempt 6.** `vLLM required` error. Remove `fast_inference=True`. Restart.
+
+**Attempt 7.** `dtype mismatch in fast_lora.py:116` — bf16 dY × fp32 LoRA_B in the backward kernel. Cast LoRA params to bf16 explicitly. Restart.
+
+`08:45 — train_grpo.py: pass episode_id to /reset and /step + handle non-200`
+
+**Attempt 8.** Run actually starts. `KeyError: 'reward'` in the `/step` response. The env requires an `episode_id` for session-keyed state, returns 4xx without it. Wire it through. Restart.
+
+**Attempt 9.** We reach the rollout phase. **Parse rate: 0%.** Llama is not producing valid JSON. The system prompt is a paragraph of text concatenated raw, without the Llama instruct chat template. We are nine attempts in and the model has produced exactly zero valid actions.
+
+## 09:50, April 26 — the breakthrough
+
+`52808d8 — train_grpo.py: chat template + strong SYSTEM (parse-rate fix)`
+
+Switch to `tokenizer.apply_chat_template`. Restart.
+
+**Attempt 10. Parse rate: 100% from step 0.** The env's `verifier/parse_rate` metric — which we'd instrumented six hours earlier — told us we had finally gotten the policy contract right.
+
+We were exhausted. We also had two GPUs we could use in parallel.
+
+## 11:19 — Vijay launches the H200 in parallel
+
+`b30ddf0 — H200 training pipeline on HF Jobs (issue #14)`
+
+The plan: Vijay takes the H200 with Llama-3.2-**1B**-Instruct. Smaller model, faster steps, parallel-finish insurance. Anshuman takes the A10G-large with Llama-3.2-**3B**-Instruct. Slower per step, but the bigger model.
+
+Same env. Same GRPO recipe. Same chat template. Only variable: policy class size.
+
+We hit publish on both jobs and started writing the README and the paper while training ran.
+
+## 15:20 — Vijay's run completes. The W&B dashboard tells a different story.
+
+`0ab1684 — Add vijay-h200 run audit bundle + Gradio UI`
+
+Vijay's H200 run completed all 200 steps cleanly. Exit code 0. The script auto-pushed the LoRA to HuggingFace Hub. From the outside, it looked perfect.
+
+Then we opened the W&B dashboard.
+
+| | Vijay's run (1B / H200) | Anshuman's run (3B / A10G) |
+|---|---|---|
+| GRPO steps | 200 | 200 |
+| `verifier/parse_rate` | **0% — entire run** | **100% — from step 0** |
+| Final mean_reward (step 199) | +0.809 (degraded from +5.0) | **+2.079** (easy tier) |
+| Peak max_reward | ~+1.4 | **+8.842** (step 96) |
+| Best molecule emitted | `CCCCCCCCCCC...` (trivial chains) | `CC1C(C(=O)O)C(c2ccccc2)CCN1Cc1ccncc1` (QED 0.94, docking 0.23) |
+
+![Vijay's H200 run — parse rate stuck at zero across all 200 GRPO steps](../runs/vijay-h200-llama1b/plots/03-parse-rate-stuck-at-zero.png)
+
+The 1B model never produced parseable JSON. Not once, in 200 steps, on H200 hardware. GRPO's group-standardized advantage with all-identical fallback actions is mathematically zero — the LoRA weights drifted slightly under the KL anchor but never trained. **The model that was supposed to learn drug design is effectively untrained.**
+
+![Reward dynamics under the 1B failure case — degrades over training rather than improving](../runs/vijay-h200-llama1b/plots/01-reward-mean-and-max-per-grpo-step.png)
+
+The 3B model, with the *exact same chat template*, parsed 100% from step 0 — *before any RL update at all*. Six hours of GRPO later, it was emitting real medicinal-chemistry molecules.
+
+![Anshuman's A10G run — clean reward curve, mean +2-5 across the run](../runs/anshuman-a10g-llama3b/plots/01-reward-mean-and-max-per-grpo-step.png)
+
+This is exactly the inverse-scaling phenomenon McCoy et al. document for low-probability token sequences. SMILES strings and structured JSON are sequences pretraining under-represents. **Below a certain policy-class floor, prompting alone cannot rescue the run. Above that floor, it gets you to 100% parse rate before training begins.**
+
+We did not plan this experiment. We just had two GPUs, two team members, and a deadline. But the comparison is the most honest data point we shipped — and *our env's instrumentation is the reason we could see it.* Without `verifier/parse_rate` as a tracked metric, we'd have shipped Vijay's null-trained LoRA thinking it was real. **An environment that surfaces its own failure modes is what makes downstream science possible.**
+
+We preserved Vijay's H200 run as a public diagnostic ablation in [`runs/vijay-h200-llama1b/`](https://github.com/AnshumanAtrey/pharmarl/tree/main/runs/vijay-h200-llama1b). Full W&B history, HF Hub logs, plots, the (effectively untrained) LoRA. Open it, look at the curves, make your own call.
+
+## What the trained 3B model actually emitted
+
+The training audit log captures the best molecule the policy emitted at every checkpoint. The arc is more interesting than a single number:
+
+| Step | SMILES | Reward | QED | Docking |
+|---|---|---:|---:|---:|
+| 0 | `O=C(O)CCc1c(C(=O)O)cc2ccccc2c1C(=O)O` | +7.525 | 0.78 | 0.006 |
+| 50 | `CCOC(=O)c1ccc(C(=O)O)cn1` | +6.865 | 0.73 | 0.000 |
+| 100 | `CCCCCCCCCCCCCNc1nccc(C(=O)O)n1` | +2.494 | 0.48 | 0.010 |
+| 125 | `CCCCCCCCCCCCCCNc1nccc(C(=O)O)n1` | +1.562 | 0.43 | 0.014 |
+| **150** | **`CC1C(C(=O)O)C(c2ccccc2)CCN1Cc1ccncc1`** | **+4.132** | **0.94** | **0.229** |
+| 175 | `CCCCC(C)C1CN(Cc2ccccc2)CC(=O)C1C(=O)O` | +2.886 | 0.78 | 0.003 |
+
+**This trajectory tells you more than the headline numbers do.** Steps 0-50 are the trivial-tier curriculum: small molecules with multiple carboxylic acids, easy QED. At step 100 the curriculum advanced to easy tier — and the policy briefly fell into a textbook reward-hack, generating long alkyl chains (`CCCCCCCCCCCCC...`) that exploit the SA-score component without producing real drug-like molecules. By step 150 the policy *recovered* and found a genuine candidate: a piperidine-pyridine scaffold with QED 0.94 and a non-trivial docking signal of 0.229 — the kind of molecule a medicinal chemist would actually consider.
+
+The recovery from the long-chain hack is what tells us the env's reward composition is doing real work — degenerate hacks are *available* but not *globally optimal*, and the policy learned to climb out of them.
+
+**You cannot build an AI scientist over a weekend.** That is not the kind of thing that fits in a hackathon. We knew this when we read the literature on hour two; it took fifteen more hours of training-debug grind to internalize it.
+
+**You can build an honest workshop.** A standardized chemistry env that does its diagnostic job — that's the right granularity for what three students can ship in 23 hours. PharmaRL doesn't claim to design drugs. It claims to surface what an LLM-policy does when asked to, and to make that legible to the next team.
+
+**Burtenshaw was right.** Ben Burtenshaw, who was guiding the hackathon publicly, posted this on Discord during the event:
+
+> *"If you use small models and iterate on training runs, you have a way higher chance of winning... Focus on the quality of your envs, reward signals, use qlora, budget your available compute."*
+
+Llama-3.2-3B + LoRA + GRPO on a single A10G, with a quality env that surfaces its own failure modes, is exactly the recipe Burtenshaw recommended. It is *also* what the inverse-scaling literature on chemistry primitives independently supports. Bigger isn't always better when the prior over your domain is shaped by autoregressive token statistics — but TOO small is definitely worse, and our env caught the line between them.
+
+## AI Alchemy In Medicine — what comes next
+
+We did not solve drug discovery. We built one node on a long arc.
+
+What we mean by *AI Alchemy In Medicine* is forward-looking and we use the phrase deliberately. Programmable, verifiable, multi-objective drug-design loops are a path the field has not yet built infrastructure for. LLM-as-policy is the policy class that makes such loops tractable. An OpenEnv-native environment is the substrate that makes them portable across teams.
+
+What comes next, concretely:
+
+- **Pharmacophore-conditioned policies** — diffusion-model pharmacophore generators (PharmacoForge 2025, PharmaDiff 2025, MolSnapper 2024) provide a conditioning signal we can feed to the LLM editor.
+- **Retrosynthesis-aware synthesizability** — replace the SAscore heuristic with AiZynthFinder / RAscore, so the policy's edit budget maps to actual retrosynthesis steps a chemist would have to perform.
+- **ADMET-AI integration** (Stanford 2024) — fold Caco-2, hERG, BBB into the composite reward. Bridge from "drug-like" to "developable."
+- **Wet-lab in the loop** — the version of this program that earns the word *medicine* without quotes.
+
+That is the research program. PharmaRL is one node. We are one team. The infrastructure is what makes it possible for the next team to build the next node without rewriting our env.
+
+## Try it
+
+- **Code:** [github.com/AnshumanAtrey/pharmarl](https://github.com/AnshumanAtrey/pharmarl)
+- **Environment (HF Space):** [huggingface.co/spaces/anshumanatrey/pharmarl](https://huggingface.co/spaces/anshumanatrey/pharmarl)
+- **Trained adapter:** [huggingface.co/anshumanatrey/pharmarl-llama-3b-trained-anshuman](https://huggingface.co/anshumanatrey/pharmarl-llama-3b-trained-anshuman)
+- **Training run (W&B):** [wandb.ai/atrey-dev/pharmarl/runs/hg0rkgyr](https://wandb.ai/atrey-dev/pharmarl/runs/hg0rkgyr)
+- **Run audit bundle:** [`runs/anshuman-a10g-llama3b/`](https://github.com/AnshumanAtrey/pharmarl/tree/main/runs/anshuman-a10g-llama3b)
+- **Vijay's diagnostic run:** [`runs/vijay-h200-llama1b/`](https://github.com/AnshumanAtrey/pharmarl/tree/main/runs/vijay-h200-llama1b)
+- **Paper:** *AI Alchemy In Medicine: A Vision for LLM-as-Policy Molecular Design via OpenEnv*
+
+Three students. Twenty-three hours. Two GPUs. Ten failed training attempts. One environment that finally caught the contract right at 09:50 AM on the deadline day. The ambition is bigger than what we shipped — and that, we think, is exactly the point of building infrastructure rather than a demo.
+
+If you pull the env and find a failure mode we missed, open an issue. That is what this is for.
