@@ -36,7 +36,7 @@ PLOTS_DIR = HERE / "plots"
 # W&B run path is shown in the HF Job's tail logs as:
 #   wandb: 🚀 View run <name> at: https://wandb.ai/<entity>/<project>/runs/<id>
 # Take the path-after-wandb.ai/ portion.
-WANDB_RUN_PATH = ""  # e.g. "anshumanatrey-itm/pharmarl/runs/abc123"
+WANDB_RUN_PATH = "atrey-dev/pharmarl/runs/hg0rkgyr"
 
 # HF Hub model repo where the trained LoRA was pushed by train_grpo.py.
 # Set in the HF Job command via --hf-repo.
