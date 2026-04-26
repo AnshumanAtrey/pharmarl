@@ -516,10 +516,12 @@ def main(argv=None) -> int:
 
     print("[main] loading model with Unsloth...")
     from unsloth import FastLanguageModel
+    import torch as _torch
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=args.model,
         max_seq_length=args.max_seq_len,
-        load_in_4bit=True,
+        load_in_4bit=False,
+        dtype=_torch.bfloat16,
     )
     model = FastLanguageModel.get_peft_model(
         model, r=args.lora_rank,
