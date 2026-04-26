@@ -1,0 +1,38 @@
+{
+  "job_id": "69edba4bd2c8bd8662bcf723",
+  "accelerator": "gpu",
+  "cpu_cores": "23",
+  "memory": "256Gi",
+  "started_at": "2026-04-26T07:11:36Z",
+  "model": "unsloth/Llama-3.2-1B-Instruct",
+  "max_steps": 200,
+  "num_generations": 8,
+  "sft_warmup_steps": 120,
+  "hf_repo": "vijay2776/pharmarl-llama-3b-trained-vijay-h200",
+  "gpu": {
+    "name": "NVIDIA H200",
+    "capability": [
+      9,
+      0
+    ],
+    "count": 1,
+    "torch_version": "2.6.0+cu124",
+    "torch_cuda": "12.4"
+  },
+  "versions": {
+    "transformers": "4.46.3",
+    "trl": "0.13.0",
+    "unsloth": "?",
+    "bitsandbytes": "0.45.5",
+    "xformers": "0.0.29.post3",
+    "peft": "0.19.1",
+    "accelerate": "1.13.0"
+  },
+  "env_pid": 1001,
+  "wandb_project": "pharmarl",
+  "wandb_run_name": "h200-69edba4bd2c8bd8662bcf723",
+  "training_seconds": 8361.1,
+  "trainer_exit_code": 0,
+  "finished_at": "2026-04-26T09:32:08Z",
+  "wandb_run_url": "https://wandb.ai/vijaykota2776-itm/pharmarl"
+}
