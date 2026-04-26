@@ -231,6 +231,12 @@ cmd = [
     # pull cu13 nvidia wheels and break the runtime. Skip vllm entirely —
     # H200 is fast enough that eager inference still meets the 4h budget.
     "--no-fast-inference",
+    # unsloth==2025.2.15's fast_lora kernel fails the LoRA backward with a
+    # BFloat16 vs float dtype mismatch when load_in_4bit=True OR when the
+    # unsloth_zoo gradient_checkpointing autocast wrapper is in the path.
+    # H200 has 141GB so we drop both: full bf16 base + no GC = ~10GB peak.
+    "--no-4bit",
+    "--no-gradient-checkpointing",
 ]
 log(f"launching trainer: {' '.join(c for c in cmd if not c.startswith('hf_'))}")
 

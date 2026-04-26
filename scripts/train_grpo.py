@@ -509,6 +509,12 @@ def main(argv=None) -> int:
     p.add_argument("--no-fast-inference", action="store_true",
                    help="Disable unsloth's vLLM-backed fast_inference (avoids the vllm dep). "
                         "Use this on environments where installing vllm is impractical.")
+    p.add_argument("--no-4bit", action="store_true",
+                   help="Load the base model in full bf16 instead of bnb 4-bit. "
+                        "Avoids unsloth's fast_lora dtype mismatch on Hopper (BFloat16!=float).")
+    p.add_argument("--no-gradient-checkpointing", action="store_true",
+                   help="Skip unsloth's gradient checkpointing. Frees the backward path from "
+                        "the unsloth_zoo autocast wrapper that breaks the LoRA backward dtype.")
     args = p.parse_args(argv)
 
     print(f"[main] env={args.env_url}  model={args.model}")
@@ -522,15 +528,16 @@ def main(argv=None) -> int:
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=args.model,
         max_seq_length=args.max_seq_len,
-        load_in_4bit=True,
+        load_in_4bit=not args.no_4bit,
         fast_inference=not args.no_fast_inference,
     )
+    gc_setting = False if args.no_gradient_checkpointing else "unsloth"
     model = FastLanguageModel.get_peft_model(
         model, r=args.lora_rank,
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                         "gate_proj", "up_proj", "down_proj"],
         lora_alpha=args.lora_rank,
-        use_gradient_checkpointing="unsloth",
+        use_gradient_checkpointing=gc_setting,
         random_state=42,
     )
 
