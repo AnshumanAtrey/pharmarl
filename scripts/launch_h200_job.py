@@ -64,11 +64,9 @@ _load_dotenv()
 # adds Hopper LLM.int8"). Keep these versions in lockstep with
 # training_space/Dockerfile.
 PINNED_DEPS = [
-    # Pin torch to the base image version so pip doesn't pull torch 2.7+ (cu13).
-    # The base image already ships with this build; pip will see it satisfied
-    # and skip reinstalling, but having it as an upper-bound prevents transitive
-    # upgrades from xformers / unsloth-zoo / etc.
-    "torch==2.6.0",
+    # Cap torch at 2.6.x to match the base image — without this cap, transitive
+    # deps drag in torch 2.7 + cu13 wheels and break bitsandbytes.
+    "torch>=2.6.0,<2.7",
     "transformers==4.46.3",
     "trl==0.13.0",
     "unsloth==2025.2.15",
@@ -76,9 +74,10 @@ PINNED_DEPS = [
     # which doesn't exist on cu12 hosts. 0.45.5 is the issue #14 minimum AND the
     # last release with cu12 binaries — pin exact.
     "bitsandbytes==0.45.5",
-    # xformers 0.0.30 has sm_90 kernels and still builds for torch 2.6 / cu124.
-    # Newer versions force torch 2.7 / cu13 again.
-    "xformers==0.0.30",
+    # xformers 0.0.30 (issue #14's pin) actually requires torch==2.7 and breaks
+    # the resolve. 0.0.29.post3 is the last release that builds against torch 2.6,
+    # has sm_90 kernels (H100 = same cap as H200), and stays on cu12 wheels.
+    "xformers==0.0.29.post3",
     "peft",
     "accelerate",
     "openenv-core",
