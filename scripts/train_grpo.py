@@ -520,7 +520,6 @@ def main(argv=None) -> int:
         model_name=args.model,
         max_seq_length=args.max_seq_len,
         load_in_4bit=True,
-        fast_inference=True,
     )
     model = FastLanguageModel.get_peft_model(
         model, r=args.lora_rank,
