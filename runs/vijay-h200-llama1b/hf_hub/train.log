@@ -1,0 +1,376 @@
+[main] env=http://127.0.0.1:8000  model=unsloth/Llama-3.2-1B-Instruct
+[main] config: G=8 max_steps=200 sft=120 lr=5e-06
+  env OK — reset returned SMILES='C1CCNCC1', vocab_size=5
+[main] loading model with Unsloth...
+🦥 Unsloth: Will patch your computer to enable 2x faster free finetuning.
+🦥 Unsloth Zoo will now patch everything to make training faster!
+==((====))==  Unsloth 2025.2.15: Fast Llama patching. Transformers: 4.46.3.
+   \\   /|    GPU: NVIDIA H200. Max memory: 139.801 GB. Platform: Linux.
+O^O/ \_/ \    Torch: 2.6.0+cu124. CUDA: 9.0. CUDA Toolkit: 12.4. Triton: 3.2.0
+\        /    Bfloat16 = TRUE. FA [Xformers = 0.0.29.post3. FA2 = False]
+ "-____-"     Free Apache license: http://github.com/unslothai/unsloth
+Unsloth: Fast downloading is enabled - ignore downloading bars which are red colored!
+
+
+model.safetensors:   0%|          | 0.00/2.47G [00:00<?, ?B/s][A
+
+model.safetensors:   0%|          | 129k/2.47G [00:01<5:22:08, 128kB/s][A
+
+model.safetensors:   0%|          | 517k/2.47G [00:03<4:10:30, 164kB/s][A
+
+model.safetensors:  31%|███▏      | 774M/2.47G [00:04<00:06, 255MB/s]  [A
+
+model.safetensors:  91%|█████████ | 2.25G/2.47G [00:06<00:00, 427MB/s][A
+model.safetensors: 100%|██████████| 2.47G/2.47G [00:08<00:00, 280MB/s]
+
+
+generation_config.json:   0%|          | 0.00/239 [00:00<?, ?B/s][A
+generation_config.json: 100%|██████████| 239/239 [00:00<00:00, 2.27MB/s]
+
+
+tokenizer_config.json:   0%|          | 0.00/54.7k [00:00<?, ?B/s][A
+tokenizer_config.json: 100%|██████████| 54.7k/54.7k [00:00<00:00, 66.1MB/s]
+
+
+special_tokens_map.json:   0%|          | 0.00/454 [00:00<?, ?B/s][A
+special_tokens_map.json: 100%|██████████| 454/454 [00:00<00:00, 5.58MB/s]
+
+
+tokenizer.json:   0%|          | 0.00/17.2M [00:00<?, ?B/s][A
+tokenizer.json: 100%|██████████| 17.2M/17.2M [00:00<00:00, 42.3MB/s]
+Unsloth 2025.2.15 patched 16 layers with 16 QKV layers, 16 O layers and 16 MLP layers.
+[main] cast 224 trainable params fp32→bf16 (Hopper fast_lora workaround)
+[sft] generated 480 pairs; example target: {"action_type": "SUBSTITUTE_ATOM", "position": 0, "new_atom": "Cl"}
+[sft] step=  0  loss=1.3477
+[sft] step= 10  loss=0.1308
+[sft] step= 20  loss=0.1466
+[sft] step= 30  loss=0.1223
+[sft] step= 40  loss=0.1265
+[sft] step= 50  loss=0.0947
+[sft] step= 60  loss=0.1118
+[sft] step= 70  loss=0.1664
+[sft] step= 80  loss=0.1585
+[sft] step= 90  loss=0.1338
+[sft] step=100  loss=0.1632
+[sft] step=110  loss=0.1015
+[sft] post-warmup parse check: parses_to_json=False
+[warn] SFT warmup ended without parseable output. Consider --sft-warmup-steps 120.
+[grpo] server.curriculum not on path — using step-threshold schedule
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: vijaykota2776 (vijaykota2776-itm) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: Tracking run with wandb version 0.25.0
+wandb: Run data is saved locally in /app/wandb/run-20260426_071331-zke7p0gr
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run h200-69edba4bd2c8bd8662bcf723
+wandb: ⭐️ View project at https://wandb.ai/vijaykota2776-itm/pharmarl
+wandb: 🚀 View run at https://wandb.ai/vijaykota2776-itm/pharmarl/runs/zke7p0gr
+wandb: Detected [huggingface_hub.inference, openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai/
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+  AUDIT [step=0]: best R=+6.190  final=CCCCCCCCCCC1CCNCC1  components={'qed': 0.5690135978250646, 'docking': 0.005627010409751159, 'sa': 0.8907267651504218, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step=  0 trivial  mean=+4.997 max=+6.190 pol=+0.0000 kl=0.7439 qed=0.51 dock=0.00 parse=0% ETA=83min
+[grpo] step=  1 trivial  mean=+3.343 max=+6.147 pol=-0.0000 kl=0.8046 qed=0.42 dock=0.01 parse=0% ETA=78min
+[grpo] step=  2 trivial  mean=+3.988 max=+6.147 pol=-0.0000 kl=0.7382 qed=0.50 dock=0.00 parse=0% ETA=76min
+[grpo] step=  3 trivial  mean=+3.154 max=+6.147 pol=-0.0000 kl=0.7463 qed=0.44 dock=0.00 parse=0% ETA=75min
+[grpo] step=  4 trivial  mean=+2.394 max=+5.884 pol=-0.0000 kl=0.7175 qed=0.30 dock=0.00 parse=0% ETA=74min
+[grpo] step=  5 trivial  mean=+4.572 max=+6.150 pol=-0.0000 kl=0.6798 qed=0.46 dock=0.00 parse=0% ETA=73min
+[grpo] step=  6 trivial  mean=+5.479 max=+6.190 pol=-0.0000 kl=0.6719 qed=0.53 dock=0.00 parse=0% ETA=73min
+[grpo] step=  7 trivial  mean=+4.882 max=+6.190 pol=-0.0000 kl=0.6408 qed=0.46 dock=0.00 parse=0% ETA=72min
+[grpo] step=  8 trivial  mean=+4.569 max=+6.150 pol=-0.0000 kl=0.6361 qed=0.45 dock=0.01 parse=0% ETA=72min
+[grpo] step=  9 trivial  mean=+3.804 max=+6.147 pol=+0.0000 kl=0.6133 qed=0.47 dock=0.01 parse=0% ETA=72min
+[grpo] step= 10 trivial  mean=+3.335 max=+6.147 pol=-0.0000 kl=0.6158 qed=0.42 dock=0.01 parse=0% ETA=72min
+[grpo] step= 11 trivial  mean=+4.680 max=+6.190 pol=+0.0000 kl=0.5786 qed=0.47 dock=0.00 parse=0% ETA=71min
+[grpo] step= 12 trivial  mean=+5.313 max=+6.190 pol=-0.0000 kl=0.6179 qed=0.51 dock=0.00 parse=0% ETA=71min
+[grpo] step= 13 trivial  mean=+3.646 max=+6.150 pol=-0.0000 kl=0.6461 qed=0.38 dock=0.01 parse=0% ETA=70min
+[grpo] step= 14 trivial  mean=+3.675 max=+6.190 pol=+0.0000 kl=0.6776 qed=0.43 dock=0.01 parse=0% ETA=70min
+[grpo] step= 15 trivial  mean=+4.659 max=+6.147 pol=+0.0000 kl=0.6652 qed=0.51 dock=0.01 parse=0% ETA=70min
+[grpo] step= 16 trivial  mean=+4.712 max=+6.150 pol=-0.0000 kl=0.6054 qed=0.51 dock=0.01 parse=0% ETA=69min
+[grpo] step= 17 trivial  mean=+4.141 max=+6.150 pol=+0.0000 kl=0.5748 qed=0.45 dock=0.00 parse=0% ETA=69min
+[grpo] step= 18 trivial  mean=+4.505 max=+6.190 pol=+0.0000 kl=0.5536 qed=0.45 dock=0.00 parse=0% ETA=69min
+[grpo] step= 19 trivial  mean=+4.547 max=+6.190 pol=-0.0000 kl=0.5785 qed=0.48 dock=0.01 parse=0% ETA=69min
+[grpo] step= 20 trivial  mean=+4.300 max=+6.190 pol=+0.0000 kl=0.5719 qed=0.46 dock=0.00 parse=0% ETA=69min
+[grpo] step= 21 trivial  mean=+3.504 max=+5.884 pol=-0.0000 kl=0.6148 qed=0.48 dock=0.01 parse=0% ETA=68min
+[grpo] step= 22 trivial  mean=+5.054 max=+6.190 pol=-0.0000 kl=0.5919 qed=0.51 dock=0.01 parse=0% ETA=68min
+[grpo] step= 23 trivial  mean=+5.174 max=+6.190 pol=-0.0000 kl=0.6138 qed=0.53 dock=0.00 parse=0% ETA=68min
+[grpo] step= 24 trivial  mean=+4.191 max=+6.147 pol=+0.0000 kl=0.6174 qed=0.49 dock=0.00 parse=0% ETA=68min
+[ckpt] saved → /data/trained/lora_step_25
+  AUDIT [step=25]: best R=+2.894  final=CCCCCCCCCCc1ccccc1  components={'qed': 0.48874847304017466, 'docking': 0.0037472882658701554, 'sa': 0.9559922315988669, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step= 25 trivial  mean=+2.641 max=+2.894 pol=+0.0000 kl=0.6123 qed=0.45 dock=0.01 parse=0% ETA=68min
+[grpo] step= 26 trivial  mean=+4.570 max=+6.190 pol=-0.0000 kl=0.5596 qed=0.48 dock=0.01 parse=0% ETA=67min
+[grpo] step= 27 trivial  mean=+4.556 max=+6.150 pol=-0.0000 kl=0.6251 qed=0.46 dock=0.00 parse=0% ETA=67min
+[grpo] step= 28 trivial  mean=+4.548 max=+6.190 pol=+0.0000 kl=0.5482 qed=0.45 dock=0.00 parse=0% ETA=67min
+[grpo] step= 29 trivial  mean=+4.331 max=+6.190 pol=-0.0000 kl=0.5670 qed=0.46 dock=0.00 parse=0% ETA=66min
+[grpo] step= 30 trivial  mean=+3.261 max=+5.884 pol=+0.0000 kl=0.6106 qed=0.40 dock=0.01 parse=0% ETA=66min
+[grpo] step= 31 trivial  mean=+3.381 max=+6.150 pol=-0.0000 kl=0.5441 qed=0.42 dock=0.01 parse=0% ETA=66min
+[grpo] step= 32 trivial  mean=+5.907 max=+6.190 pol=-0.0000 kl=0.5599 qed=0.54 dock=0.00 parse=0% ETA=65min
+[grpo] step= 33 trivial  mean=+3.739 max=+6.150 pol=+0.0000 kl=0.5567 qed=0.46 dock=0.01 parse=0% ETA=65min
+[grpo] step= 34 trivial  mean=+3.771 max=+6.150 pol=+0.0000 kl=0.5529 qed=0.47 dock=0.01 parse=0% ETA=65min
+[grpo] step= 35 trivial  mean=+3.766 max=+5.954 pol=-0.0000 kl=0.6034 qed=0.47 dock=0.01 parse=0% ETA=65min
+[grpo] step= 36 trivial  mean=+5.107 max=+6.190 pol=-0.0000 kl=0.5235 qed=0.52 dock=0.00 parse=0% ETA=64min
+[grpo] step= 37 trivial  mean=+4.776 max=+6.190 pol=-0.0000 kl=0.5139 qed=0.52 dock=0.00 parse=0% ETA=64min
+[grpo] step= 38 trivial  mean=+3.451 max=+6.190 pol=-0.0000 kl=0.5302 qed=0.43 dock=0.01 parse=0% ETA=64min
+[grpo] step= 39 trivial  mean=+4.350 max=+6.150 pol=+0.0000 kl=0.4912 qed=0.47 dock=0.00 parse=0% ETA=63min
+[grpo] step= 40 trivial  mean=+2.949 max=+5.884 pol=-0.0000 kl=0.5385 qed=0.38 dock=0.00 parse=0% ETA=63min
+[grpo] step= 41 trivial  mean=+4.134 max=+5.716 pol=+0.0000 kl=0.5270 qed=0.48 dock=0.01 parse=0% ETA=63min
+[grpo] step= 42 trivial  mean=+4.205 max=+6.190 pol=+0.0000 kl=0.5774 qed=0.44 dock=0.01 parse=0% ETA=62min
+[grpo] step= 43 trivial  mean=+3.426 max=+5.954 pol=+0.0000 kl=0.5605 qed=0.47 dock=0.01 parse=0% ETA=62min
+[grpo] step= 44 trivial  mean=+4.307 max=+6.190 pol=+0.0000 kl=0.5233 qed=0.45 dock=0.01 parse=0% ETA=62min
+[grpo] step= 45 trivial  mean=+4.216 max=+6.150 pol=-0.0000 kl=0.5753 qed=0.48 dock=0.01 parse=0% ETA=61min
+[grpo] step= 46 trivial  mean=+5.493 max=+6.150 pol=+0.0000 kl=0.5633 qed=0.53 dock=0.00 parse=0% ETA=61min
+[grpo] step= 47 trivial  mean=+4.061 max=+5.954 pol=+0.0000 kl=0.5469 qed=0.43 dock=0.01 parse=0% ETA=61min
+[grpo] step= 48 trivial  mean=+4.141 max=+6.190 pol=-0.0000 kl=0.5287 qed=0.40 dock=0.00 parse=0% ETA=60min
+[grpo] step= 49 trivial  mean=+4.643 max=+6.190 pol=-0.0000 kl=0.5515 qed=0.51 dock=0.00 parse=0% ETA=60min
+[ckpt] saved → /data/trained/lora_step_50
+  AUDIT [step=50]: best R=+5.954  final=CCCCCCCCCCc1ccncc1  components={'qed': 0.5453591972107305, 'docking': 0.004157125652945404, 'sa': 0.9230426407641694, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step= 50 trivial  mean=+4.879 max=+5.954 pol=-0.0000 kl=0.5083 qed=0.49 dock=0.01 parse=0% ETA=60min
+[grpo] step= 51 trivial  mean=+4.648 max=+6.150 pol=+0.0000 kl=0.5025 qed=0.51 dock=0.00 parse=0% ETA=59min
+[grpo] step= 52 trivial  mean=+3.318 max=+5.954 pol=+0.0000 kl=0.5550 qed=0.41 dock=0.01 parse=0% ETA=59min
+[grpo] step= 53 trivial  mean=+3.793 max=+6.147 pol=+0.0000 kl=0.5206 qed=0.47 dock=0.01 parse=0% ETA=59min
+[grpo] step= 54 trivial  mean=+4.421 max=+6.147 pol=+0.0000 kl=0.5296 qed=0.52 dock=0.00 parse=0% ETA=58min
+[grpo] step= 55 trivial  mean=+5.383 max=+5.884 pol=+0.0000 kl=0.5329 qed=0.52 dock=0.00 parse=0% ETA=58min
+[grpo] step= 56 trivial  mean=+4.981 max=+6.147 pol=+0.0000 kl=0.5219 qed=0.51 dock=0.00 parse=0% ETA=58min
+[grpo] step= 57 trivial  mean=+3.330 max=+6.190 pol=+0.0000 kl=0.5841 qed=0.38 dock=0.00 parse=0% ETA=57min
+[grpo] step= 58 trivial  mean=+4.834 max=+6.150 pol=+0.0000 kl=0.6192 qed=0.49 dock=0.01 parse=0% ETA=57min
+[grpo] step= 59 trivial  mean=+5.319 max=+6.190 pol=-0.0000 kl=0.5956 qed=0.51 dock=0.00 parse=0% ETA=56min
+[grpo] step= 60 trivial  mean=+4.279 max=+6.190 pol=+0.0000 kl=0.5337 qed=0.46 dock=0.00 parse=0% ETA=56min
+[grpo] step= 61 trivial  mean=+3.487 max=+6.150 pol=-0.0000 kl=0.5422 qed=0.44 dock=0.00 parse=0% ETA=56min
+[grpo] step= 62 trivial  mean=+3.349 max=+5.884 pol=-0.0000 kl=0.5477 qed=0.42 dock=0.01 parse=0% ETA=55min
+[grpo] step= 63 trivial  mean=+4.584 max=+6.190 pol=+0.0000 kl=0.5279 qed=0.50 dock=0.00 parse=0% ETA=55min
+[grpo] step= 64 trivial  mean=+3.387 max=+6.147 pol=+0.0000 kl=0.5651 qed=0.42 dock=0.01 parse=0% ETA=55min
+[grpo] step= 65 trivial  mean=+4.219 max=+6.150 pol=+0.0000 kl=0.5196 qed=0.44 dock=0.01 parse=0% ETA=54min
+[grpo] step= 66 trivial  mean=+5.229 max=+6.150 pol=+0.0000 kl=0.4991 qed=0.53 dock=0.00 parse=0% ETA=54min
+[grpo] step= 67 trivial  mean=+4.989 max=+6.190 pol=+0.0000 kl=0.5202 qed=0.50 dock=0.01 parse=0% ETA=53min
+[grpo] step= 68 trivial  mean=+4.130 max=+6.190 pol=+0.0000 kl=0.5302 qed=0.44 dock=0.00 parse=0% ETA=53min
+[grpo] step= 69 trivial  mean=+4.297 max=+6.147 pol=-0.0000 kl=0.5107 qed=0.50 dock=0.01 parse=0% ETA=53min
+[grpo] step= 70 trivial  mean=+5.816 max=+6.190 pol=+0.0000 kl=0.5162 qed=0.53 dock=0.00 parse=0% ETA=52min
+[grpo] step= 71 trivial  mean=+4.453 max=+6.190 pol=+0.0000 kl=0.5002 qed=0.47 dock=0.01 parse=0% ETA=52min
+[grpo] step= 72 trivial  mean=+2.630 max=+6.150 pol=+0.0000 kl=0.5560 qed=0.37 dock=0.00 parse=0% ETA=52min
+[grpo] step= 73 trivial  mean=+3.886 max=+6.190 pol=-0.0000 kl=0.5382 qed=0.45 dock=0.00 parse=0% ETA=51min
+[grpo] step= 74 trivial  mean=+5.197 max=+6.190 pol=+0.0000 kl=0.4697 qed=0.53 dock=0.00 parse=0% ETA=51min
+[ckpt] saved → /data/trained/lora_step_75
+  AUDIT [step=75]: best R=+6.190  final=CCCCCCCCCCC1CCNCC1  components={'qed': 0.5690135978250646, 'docking': 0.005627010409751159, 'sa': 0.8907267651504218, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step= 75 trivial  mean=+4.201 max=+6.190 pol=+0.0000 kl=0.5007 qed=0.48 dock=0.01 parse=0% ETA=51min
+[grpo] step= 76 trivial  mean=+2.971 max=+6.150 pol=-0.0000 kl=0.5253 qed=0.38 dock=0.00 parse=0% ETA=50min
+[grpo] step= 77 trivial  mean=+5.033 max=+6.150 pol=-0.0000 kl=0.4586 qed=0.52 dock=0.01 parse=0% ETA=50min
+[grpo] step= 78 trivial  mean=+5.180 max=+6.147 pol=-0.0000 kl=0.5200 qed=0.50 dock=0.00 parse=0% ETA=50min
+[grpo] step= 79 trivial  mean=+3.829 max=+6.190 pol=+0.0000 kl=0.5280 qed=0.48 dock=0.01 parse=0% ETA=49min
+[grpo] step= 80 trivial  mean=+3.912 max=+6.147 pol=+0.0000 kl=0.4948 qed=0.45 dock=0.00 parse=0% ETA=49min
+[grpo] step= 81 trivial  mean=+4.697 max=+6.190 pol=+0.0000 kl=0.4748 qed=0.51 dock=0.01 parse=0% ETA=48min
+[grpo] step= 82 trivial  mean=+4.404 max=+6.150 pol=-0.0000 kl=0.5304 qed=0.51 dock=0.00 parse=0% ETA=48min
+[grpo] step= 83 trivial  mean=+2.907 max=+5.884 pol=+0.0000 kl=0.4882 qed=0.36 dock=0.00 parse=0% ETA=48min
+[grpo] step= 84 trivial  mean=+4.285 max=+6.150 pol=+0.0000 kl=0.4982 qed=0.49 dock=0.01 parse=0% ETA=47min
+[grpo] step= 85 trivial  mean=+4.280 max=+6.150 pol=+0.0000 kl=0.4888 qed=0.46 dock=0.00 parse=0% ETA=47min
+[grpo] step= 86 trivial  mean=+4.655 max=+6.150 pol=+0.0000 kl=0.4877 qed=0.50 dock=0.01 parse=0% ETA=47min
+[grpo] step= 87 trivial  mean=+3.867 max=+6.190 pol=+0.0000 kl=0.5245 qed=0.44 dock=0.01 parse=0% ETA=46min
+[grpo] step= 88 trivial  mean=+4.600 max=+6.150 pol=+0.0000 kl=0.4987 qed=0.50 dock=0.01 parse=0% ETA=46min
+[grpo] step= 89 trivial  mean=+3.961 max=+5.884 pol=-0.0000 kl=0.4808 qed=0.42 dock=0.01 parse=0% ETA=46min
+[grpo] step= 90 trivial  mean=+4.426 max=+6.150 pol=+0.0000 kl=0.4975 qed=0.47 dock=0.01 parse=0% ETA=45min
+[grpo] step= 91 trivial  mean=+5.476 max=+6.147 pol=-0.0000 kl=0.4388 qed=0.53 dock=0.00 parse=0% ETA=45min
+[grpo] step= 92 trivial  mean=+4.237 max=+6.147 pol=-0.0000 kl=0.4875 qed=0.45 dock=0.00 parse=0% ETA=44min
+[grpo] step= 93 trivial  mean=+4.229 max=+6.150 pol=+0.0000 kl=0.4347 qed=0.49 dock=0.01 parse=0% ETA=44min
+[grpo] step= 94 trivial  mean=+4.356 max=+6.147 pol=-0.0000 kl=0.4899 qed=0.51 dock=0.00 parse=0% ETA=44min
+[grpo] step= 95 trivial  mean=+5.119 max=+6.150 pol=+0.0000 kl=0.4678 qed=0.52 dock=0.00 parse=0% ETA=43min
+[grpo] step= 96 trivial  mean=+4.298 max=+6.147 pol=-0.0000 kl=0.4733 qed=0.50 dock=0.00 parse=0% ETA=43min
+[grpo] step= 97 trivial  mean=+4.215 max=+6.190 pol=+0.0000 kl=0.4803 qed=0.44 dock=0.01 parse=0% ETA=43min
+[grpo] step= 98 trivial  mean=+4.730 max=+6.190 pol=-0.0000 kl=0.4762 qed=0.52 dock=0.00 parse=0% ETA=42min
+[grpo] step= 99 trivial  mean=+4.736 max=+6.150 pol=+0.0000 kl=0.4467 qed=0.52 dock=0.01 parse=0% ETA=42min
+[ckpt] saved → /data/trained/lora_step_100
+  AUDIT [step=100]: best R=+1.221  final=CCCCCCCCCCCCCCCCC(C)(C)O  components={'qed': 0.3345863595501435, 'docking': 0.02520260967246366, 'sa': 0.905083278605298, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step=100 easy     mean=+0.887 max=+1.221 pol=+0.0000 kl=0.3983 qed=0.40 dock=0.02 parse=0% ETA=42min
+[grpo] step=101 easy     mean=+0.974 max=+1.253 pol=-0.0000 kl=0.3520 qed=0.32 dock=0.02 parse=0% ETA=42min
+[grpo] step=102 easy     mean=+0.975 max=+1.435 pol=-0.0000 kl=0.3511 qed=0.36 dock=0.02 parse=0% ETA=42min
+[grpo] step=103 easy     mean=+1.029 max=+1.221 pol=-0.0000 kl=0.3243 qed=0.34 dock=0.02 parse=0% ETA=43min
+[grpo] step=104 easy     mean=+1.040 max=+1.253 pol=+0.0000 kl=0.3531 qed=0.34 dock=0.02 parse=0% ETA=43min
+[grpo] step=105 easy     mean=+0.970 max=+1.435 pol=-0.0000 kl=0.3418 qed=0.37 dock=0.02 parse=0% ETA=43min
+[grpo] step=106 easy     mean=+1.218 max=+1.435 pol=+0.0000 kl=0.3072 qed=0.34 dock=0.02 parse=0% ETA=43min
+[grpo] step=107 easy     mean=+0.797 max=+1.253 pol=-0.0000 kl=0.3570 qed=0.36 dock=0.02 parse=0% ETA=43min
+[grpo] step=108 easy     mean=+0.763 max=+1.168 pol=+0.0000 kl=0.4121 qed=0.40 dock=0.01 parse=0% ETA=43min
+[grpo] step=109 easy     mean=+0.960 max=+1.253 pol=-0.0000 kl=0.3373 qed=0.32 dock=0.02 parse=0% ETA=43min
+[grpo] step=110 easy     mean=+0.977 max=+1.435 pol=-0.0000 kl=0.3448 qed=0.36 dock=0.02 parse=0% ETA=43min
+[grpo] step=111 easy     mean=+1.088 max=+1.435 pol=-0.0000 kl=0.3456 qed=0.35 dock=0.02 parse=0% ETA=43min
+[grpo] step=112 easy     mean=+0.958 max=+1.253 pol=-0.0000 kl=0.3643 qed=0.36 dock=0.02 parse=0% ETA=43min
+[grpo] step=113 easy     mean=+1.106 max=+1.168 pol=-0.0000 kl=0.3371 qed=0.31 dock=0.02 parse=0% ETA=43min
+[grpo] step=114 easy     mean=+1.114 max=+1.253 pol=-0.0000 kl=0.3255 qed=0.32 dock=0.02 parse=0% ETA=43min
+[grpo] step=115 easy     mean=+0.967 max=+1.253 pol=+0.0000 kl=0.3750 qed=0.36 dock=0.02 parse=0% ETA=42min
+[grpo] step=116 easy     mean=+0.920 max=+1.168 pol=+0.0000 kl=0.3397 qed=0.36 dock=0.02 parse=0% ETA=42min
+[grpo] step=117 easy     mean=+0.910 max=+1.253 pol=-0.0000 kl=0.3520 qed=0.34 dock=0.02 parse=0% ETA=42min
+[grpo] step=118 easy     mean=+0.875 max=+1.435 pol=+0.0000 kl=0.3378 qed=0.39 dock=0.02 parse=0% ETA=42min
+[grpo] step=119 easy     mean=+1.059 max=+1.221 pol=-0.0000 kl=0.3064 qed=0.35 dock=0.02 parse=0% ETA=42min
+[grpo] step=120 easy     mean=+1.030 max=+1.163 pol=+0.0000 kl=0.2680 qed=0.28 dock=0.02 parse=0% ETA=42min
+[grpo] step=121 easy     mean=+0.881 max=+1.168 pol=+0.0000 kl=0.3141 qed=0.34 dock=0.02 parse=0% ETA=41min
+[grpo] step=122 easy     mean=+0.922 max=+1.253 pol=+0.0000 kl=0.3210 qed=0.35 dock=0.02 parse=0% ETA=41min
+[grpo] step=123 easy     mean=+1.093 max=+1.253 pol=-0.0000 kl=0.3103 qed=0.30 dock=0.02 parse=0% ETA=41min
+[grpo] step=124 easy     mean=+1.049 max=+1.435 pol=+0.0000 kl=0.3165 qed=0.34 dock=0.02 parse=0% ETA=41min
+[ckpt] saved → /data/trained/lora_step_125
+  AUDIT [step=125]: best R=+1.435  final=CCCCCCCCCCCCCCCNc1ncccn1  components={'qed': 0.40497638029864386, 'docking': 0.018311643148685035, 'sa': 0.889226582929282, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step=125 easy     mean=+1.058 max=+1.435 pol=+0.0000 kl=0.3398 qed=0.35 dock=0.02 parse=0% ETA=41min
+[grpo] step=126 easy     mean=+1.100 max=+1.435 pol=+0.0000 kl=0.3234 qed=0.35 dock=0.02 parse=0% ETA=40min
+[grpo] step=127 easy     mean=+1.092 max=+1.435 pol=+0.0000 kl=0.3474 qed=0.35 dock=0.02 parse=0% ETA=40min
+[grpo] step=128 easy     mean=+1.095 max=+1.253 pol=-0.0000 kl=0.3126 qed=0.32 dock=0.02 parse=0% ETA=40min
+[grpo] step=129 easy     mean=+0.837 max=+1.221 pol=+0.0000 kl=0.3463 qed=0.38 dock=0.02 parse=0% ETA=39min
+[grpo] step=130 easy     mean=+0.767 max=+1.120 pol=+0.0000 kl=0.4125 qed=0.36 dock=0.02 parse=0% ETA=39min
+[grpo] step=131 easy     mean=+0.958 max=+1.221 pol=+0.0000 kl=0.3501 qed=0.36 dock=0.02 parse=0% ETA=39min
+[grpo] step=132 easy     mean=+1.139 max=+1.435 pol=-0.0000 kl=0.3568 qed=0.32 dock=0.02 parse=0% ETA=38min
+[grpo] step=133 easy     mean=+1.114 max=+1.435 pol=-0.0000 kl=0.3192 qed=0.31 dock=0.02 parse=0% ETA=38min
+[grpo] step=134 easy     mean=+1.005 max=+1.253 pol=+0.0000 kl=0.3259 qed=0.33 dock=0.02 parse=0% ETA=38min
+[grpo] step=135 easy     mean=+0.935 max=+1.221 pol=-0.0000 kl=0.3698 qed=0.35 dock=0.02 parse=0% ETA=37min
+[grpo] step=136 easy     mean=+1.123 max=+1.435 pol=-0.0000 kl=0.3062 qed=0.32 dock=0.02 parse=0% ETA=37min
+[grpo] step=137 easy     mean=+0.985 max=+1.253 pol=+0.0000 kl=0.2943 qed=0.32 dock=0.02 parse=0% ETA=36min
+[grpo] step=138 easy     mean=+0.865 max=+1.168 pol=+0.0000 kl=0.3630 qed=0.34 dock=0.02 parse=0% ETA=36min
+[grpo] step=139 easy     mean=+1.103 max=+1.253 pol=-0.0000 kl=0.3039 qed=0.31 dock=0.02 parse=0% ETA=36min
+[grpo] step=140 easy     mean=+0.916 max=+1.435 pol=-0.0000 kl=0.3757 qed=0.40 dock=0.02 parse=0% ETA=35min
+[grpo] step=141 easy     mean=+1.051 max=+1.435 pol=-0.0000 kl=0.3619 qed=0.35 dock=0.02 parse=0% ETA=35min
+[grpo] step=142 easy     mean=+1.089 max=+1.168 pol=-0.0000 kl=0.3469 qed=0.31 dock=0.02 parse=0% ETA=34min
+[grpo] step=143 easy     mean=+0.948 max=+1.435 pol=+0.0000 kl=0.3441 qed=0.36 dock=0.02 parse=0% ETA=34min
+[grpo] step=144 easy     mean=+1.143 max=+1.435 pol=-0.0000 kl=0.3513 qed=0.37 dock=0.02 parse=0% ETA=33min
+[grpo] step=145 easy     mean=+0.940 max=+1.221 pol=-0.0000 kl=0.3549 qed=0.36 dock=0.02 parse=0% ETA=33min
+[grpo] step=146 easy     mean=+0.974 max=+1.435 pol=-0.0000 kl=0.3584 qed=0.37 dock=0.02 parse=0% ETA=32min
+[grpo] step=147 easy     mean=+1.151 max=+1.435 pol=-0.0000 kl=0.3825 qed=0.33 dock=0.02 parse=0% ETA=32min
+[grpo] step=148 easy     mean=+0.997 max=+1.114 pol=-0.0000 kl=0.3325 qed=0.27 dock=0.03 parse=0% ETA=31min
+[grpo] step=149 easy     mean=+1.039 max=+1.253 pol=+0.0000 kl=0.3355 qed=0.33 dock=0.02 parse=0% ETA=31min
+[ckpt] saved → /data/trained/lora_step_150
+  AUDIT [step=150]: best R=+1.435  final=CCCCCCCCCCCCCCCNc1ncccn1  components={'qed': 0.40497638029864386, 'docking': 0.018311643148685035, 'sa': 0.889226582929282, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step=150 easy     mean=+1.165 max=+1.435 pol=-0.0000 kl=0.3284 qed=0.32 dock=0.02 parse=0% ETA=31min
+[grpo] step=151 easy     mean=+1.094 max=+1.253 pol=+0.0000 kl=0.3420 qed=0.30 dock=0.02 parse=0% ETA=30min
+[grpo] step=152 easy     mean=+0.999 max=+1.163 pol=+0.0000 kl=0.3743 qed=0.32 dock=0.02 parse=0% ETA=30min
+[grpo] step=153 easy     mean=+1.122 max=+1.253 pol=+0.0000 kl=0.3408 qed=0.32 dock=0.02 parse=0% ETA=29min
+[grpo] step=154 easy     mean=+0.907 max=+1.253 pol=+0.0000 kl=0.3846 qed=0.35 dock=0.02 parse=0% ETA=28min
+[grpo] step=155 easy     mean=+0.760 max=+1.163 pol=+0.0000 kl=0.3840 qed=0.35 dock=0.02 parse=0% ETA=28min
+[grpo] step=156 easy     mean=+0.882 max=+1.114 pol=+0.0000 kl=0.3418 qed=0.30 dock=0.02 parse=0% ETA=27min
+[grpo] step=157 easy     mean=+1.176 max=+1.435 pol=+0.0000 kl=0.3732 qed=0.33 dock=0.02 parse=0% ETA=27min
+[grpo] step=158 easy     mean=+1.088 max=+1.435 pol=+0.0000 kl=0.3345 qed=0.35 dock=0.02 parse=0% ETA=26min
+[grpo] step=159 easy     mean=+1.174 max=+1.435 pol=-0.0000 kl=0.3412 qed=0.32 dock=0.02 parse=0% ETA=26min
+[grpo] step=160 easy     mean=+0.817 max=+1.435 pol=+0.0000 kl=0.3777 qed=0.42 dock=0.01 parse=0% ETA=25min
+[grpo] step=161 easy     mean=+1.047 max=+1.435 pol=-0.0000 kl=0.3583 qed=0.34 dock=0.02 parse=0% ETA=25min
+[grpo] step=162 easy     mean=+1.126 max=+1.253 pol=-0.0000 kl=0.3496 qed=0.32 dock=0.02 parse=0% ETA=24min
+[grpo] step=163 easy     mean=+0.930 max=+1.221 pol=-0.0000 kl=0.4654 qed=0.36 dock=0.02 parse=0% ETA=23min
+[grpo] step=164 easy     mean=+0.943 max=+1.435 pol=+0.0000 kl=0.4150 qed=0.36 dock=0.02 parse=0% ETA=23min
+[grpo] step=165 easy     mean=+0.782 max=+1.168 pol=+0.0000 kl=0.4010 qed=0.37 dock=0.02 parse=0% ETA=22min
+[grpo] step=166 easy     mean=+0.913 max=+1.168 pol=-0.0000 kl=0.3459 qed=0.31 dock=0.02 parse=0% ETA=22min
+[grpo] step=167 easy     mean=+1.121 max=+1.253 pol=-0.0000 kl=0.3663 qed=0.32 dock=0.02 parse=0% ETA=21min
+[grpo] step=168 easy     mean=+0.792 max=+1.168 pol=+0.0000 kl=0.3192 qed=0.36 dock=0.02 parse=0% ETA=20min
+[grpo] step=169 easy     mean=+1.061 max=+1.435 pol=-0.0000 kl=0.4103 qed=0.35 dock=0.02 parse=0% ETA=20min
+[grpo] step=170 easy     mean=+0.746 max=+1.435 pol=+0.0000 kl=0.3562 qed=0.40 dock=0.01 parse=0% ETA=19min
+[grpo] step=171 easy     mean=+0.971 max=+1.163 pol=+0.0000 kl=0.3750 qed=0.32 dock=0.02 parse=0% ETA=19min
+[grpo] step=172 easy     mean=+0.974 max=+1.253 pol=+0.0000 kl=0.3384 qed=0.36 dock=0.02 parse=0% ETA=18min
+[grpo] step=173 easy     mean=+0.960 max=+1.221 pol=+0.0000 kl=0.3494 qed=0.32 dock=0.02 parse=0% ETA=17min
+[grpo] step=174 easy     mean=+1.159 max=+1.435 pol=-0.0000 kl=0.3666 qed=0.32 dock=0.02 parse=0% ETA=17min
+[ckpt] saved → /data/trained/lora_step_175
+  AUDIT [step=175]: best R=+1.435  final=CCCCCCCCCCCCCCCNc1ncccn1  components={'qed': 0.40497638029864386, 'docking': 0.018311643148685035, 'sa': 0.889226582929282, 'toxicity_raw': 0.0, 'toxicity_clean': 1.0}
+[grpo] step=175 easy     mean=+0.873 max=+1.435 pol=-0.0000 kl=0.4293 qed=0.39 dock=0.01 parse=0% ETA=16min
+[grpo] step=176 easy     mean=+0.973 max=+1.253 pol=+0.0000 kl=0.3474 qed=0.36 dock=0.02 parse=0% ETA=15min
+[grpo] step=177 easy     mean=+0.812 max=+1.168 pol=+0.0000 kl=0.3716 qed=0.37 dock=0.01 parse=0% ETA=15min
+[grpo] step=178 easy     mean=+1.087 max=+1.435 pol=-0.0000 kl=0.3554 qed=0.36 dock=0.02 parse=0% ETA=14min
+[grpo] step=179 easy     mean=+0.941 max=+1.435 pol=+0.0000 kl=0.3673 qed=0.35 dock=0.02 parse=0% ETA=13min
+[grpo] step=180 easy     mean=+0.948 max=+1.253 pol=-0.0000 kl=0.3756 qed=0.36 dock=0.02 parse=0% ETA=13min
+[grpo] step=181 easy     mean=+1.025 max=+1.435 pol=+0.0000 kl=0.3888 qed=0.34 dock=0.02 parse=0% ETA=12min
+[grpo] step=182 easy     mean=+0.972 max=+1.253 pol=-0.0000 kl=0.4072 qed=0.36 dock=0.02 parse=0% ETA=12min
+[grpo] step=183 easy     mean=+0.933 max=+1.435 pol=+0.0000 kl=0.3807 qed=0.35 dock=0.02 parse=0% ETA=11min
+[grpo] step=184 easy     mean=+0.976 max=+1.221 pol=+0.0000 kl=0.4207 qed=0.37 dock=0.02 parse=0% ETA=10min
+[grpo] step=185 easy     mean=+1.002 max=+1.435 pol=+0.0000 kl=0.3783 qed=0.32 dock=0.02 parse=0% ETA=10min
+[grpo] step=186 easy     mean=+1.060 max=+1.435 pol=+0.0000 kl=0.3839 qed=0.34 dock=0.02 parse=0% ETA=9min
+[grpo] step=187 easy     mean=+0.976 max=+1.253 pol=+0.0000 kl=0.3864 qed=0.36 dock=0.02 parse=0% ETA=8min
+[grpo] step=188 easy     mean=+0.816 max=+1.163 pol=+0.0000 kl=0.3719 qed=0.36 dock=0.02 parse=0% ETA=8min
+[grpo] step=189 easy     mean=+1.019 max=+1.221 pol=-0.0000 kl=0.3936 qed=0.34 dock=0.02 parse=0% ETA=7min
+[grpo] step=190 easy     mean=+1.141 max=+1.253 pol=-0.0000 kl=0.3566 qed=0.31 dock=0.02 parse=0% ETA=6min
+[grpo] step=191 easy     mean=+1.093 max=+1.435 pol=-0.0000 kl=0.4265 qed=0.35 dock=0.02 parse=0% ETA=5min
+[grpo] step=192 easy     mean=+1.033 max=+1.253 pol=-0.0000 kl=0.4111 qed=0.29 dock=0.02 parse=0% ETA=5min
+[grpo] step=193 easy     mean=+1.029 max=+1.253 pol=+0.0000 kl=0.3489 qed=0.33 dock=0.02 parse=0% ETA=4min
+[grpo] step=194 easy     mean=+1.180 max=+1.435 pol=-0.0000 kl=0.3940 qed=0.33 dock=0.02 parse=0% ETA=3min
+[grpo] step=195 easy     mean=+0.860 max=+1.221 pol=-0.0000 kl=0.4025 qed=0.33 dock=0.02 parse=0% ETA=3min
+[grpo] step=196 easy     mean=+0.904 max=+1.253 pol=+0.0000 kl=0.4530 qed=0.35 dock=0.02 parse=0% ETA=2min
+[grpo] step=197 easy     mean=+1.151 max=+1.435 pol=-0.0000 kl=0.4312 qed=0.32 dock=0.02 parse=0% ETA=1min
+[grpo] step=198 easy     mean=+0.908 max=+1.253 pol=+0.0000 kl=0.4548 qed=0.35 dock=0.02 parse=0% ETA=1min
+[grpo] step=199 easy     mean=+0.809 max=+1.435 pol=-0.0000 kl=0.4004 qed=0.42 dock=0.01 parse=0% ETA=0min
+[ckpt] saved → /data/trained/lora_step_200
+[grpo] training complete; final adapter at /data/trained/lora_final
+[push] uploading final adapter → vijay2776/pharmarl-llama-3b-trained-vijay-h200
+
+Processing Files (0 / 0)      : |          |  0.00B /  0.00B            
+
+New Data Upload               : |          |  0.00B /  0.00B            [A
+
+
+  ...adapter_model.safetensors:   0%|          | 29.1kB / 22.6MB            [A[A
+
+
+  ...adapter_model.safetensors:   0%|          | 29.1kB / 22.6MB            [A[A
+
+
+  ...adapter_model.safetensors:   0%|          | 29.1kB / 22.6MB            [A[A
+
+
+  ...adapter_model.safetensors:   0%|          | 29.1kB / 22.6MB            [A[A
+
+
+  ...adapter_model.safetensors:   0%|          | 29.1kB / 22.6MB            [A[A
+Processing Files (0 / 1)      :   0%|          | 29.1kB / 39.8MB, 36.5kB/s  
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+
+
+  ...adapter_model.safetensors:  84%|████████▍ | 19.0MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+
+New Data Upload               :  84%|████████▍ | 19.0MB / 22.5MB, 19.0MB/s  [A
+
+
+  ...adapter_model.safetensors:  98%|█████████▊| 22.1MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+
+
+  ...adapter_model.safetensors:  98%|█████████▊| 22.1MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+
+
+  ...adapter_model.safetensors: 100%|██████████| 22.6MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+
+
+  ...adapter_model.safetensors: 100%|██████████| 22.6MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+Processing Files (2 / 2)      : 100%|██████████| 39.8MB / 39.8MB, 22.1MB/s  
+
+
+  ...adapter_model.safetensors: 100%|██████████| 22.6MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+
+
+  ...adapter_model.safetensors: 100%|██████████| 22.6MB / 22.6MB            [A[A
+
+
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            [A[A[A
+Processing Files (2 / 2)      : 100%|██████████| 39.8MB / 39.8MB, 19.9MB/s  
+
+New Data Upload               : 100%|██████████| 22.5MB / 22.5MB, 11.3MB/s  
+
+  ...adapter_model.safetensors: 100%|██████████| 22.6MB / 22.6MB            
+
+  ...lora_final/tokenizer.json: 100%|██████████| 17.2MB / 17.2MB            
+[push] done — https://huggingface.co/vijay2776/pharmarl-llama-3b-trained-vijay-h200
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mh200-69edba4bd2c8bd8662bcf723[0m at: [34mhttps://wandb.ai/vijaykota2776-itm/pharmarl/runs/zke7p0gr[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260426_071331-zke7p0gr/logs[0m

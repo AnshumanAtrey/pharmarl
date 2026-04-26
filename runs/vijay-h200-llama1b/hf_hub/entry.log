@@ -1,0 +1,20 @@
+[2026-04-26 07:11:36] [h200-entry] JOB_ID=69edba4bd2c8bd8662bcf723 ACCELERATOR=gpu
+[2026-04-26 07:11:36] [h200-entry] config: model=unsloth/Llama-3.2-1B-Instruct max_steps=200 G=8 sft=120
+[2026-04-26 07:11:37] [h200-entry] GPU: NVIDIA H200  capability=(9, 0)  count=1
+[2026-04-26 07:11:37] [h200-entry] torch=2.6.0+cu124 cuda=12.4
+[2026-04-26 07:11:37] [h200-entry] transformers import OK (4.46.3)
+[2026-04-26 07:11:37] [h200-entry] trl import OK (0.13.0)
+[2026-04-26 07:12:41] [h200-entry] unsloth import OK (?)
+[2026-04-26 07:12:41] [h200-entry] bitsandbytes import OK (0.45.5)
+[2026-04-26 07:12:41] [h200-entry] xformers import OK (0.0.29.post3)
+[2026-04-26 07:12:41] [h200-entry] peft import OK (0.19.1)
+[2026-04-26 07:12:41] [h200-entry] accelerate import OK (1.13.0)
+[2026-04-26 07:12:41] [h200-entry] starting env server: uvicorn server.app:app on 127.0.0.1:8000
+[2026-04-26 07:12:45] [h200-entry] env health OK at http://127.0.0.1:8000/health
+[2026-04-26 07:12:45] [h200-entry] pre-warming oracles via /reset+/step…
+[2026-04-26 07:12:47] [h200-entry] oracle pre-warm done
+[2026-04-26 07:12:47] [h200-entry] launching trainer: /opt/conda/bin/python -m scripts.train_grpo --env-url http://127.0.0.1:8000 --model unsloth/Llama-3.2-1B-Instruct --max-steps 200 --num-generations 8 --sft-warmup-steps 120 --output-dir /data/trained --hf-repo vijay2776/pharmarl-llama-3b-trained-vijay-h200 --hf-token --save-every 25 --audit-every 25 --no-fast-inference --no-4bit --no-gradient-checkpointing --gen-temp 0.3
+[2026-04-26 09:32:08] [h200-entry] trainer exit=0 elapsed=8361s (139.4min)
+[2026-04-26 09:32:08] [h200-entry] detected W&B run: https://wandb.ai/vijaykota2776-itm/pharmarl
+[2026-04-26 09:32:08] [h200-entry] run metadata written → /tmp/h200_run/run_metadata.json
+[2026-04-26 09:32:08] [h200-entry] uploaded run_metadata.json → vijay2776/pharmarl-llama-3b-trained-vijay-h200:logs/run_metadata.json

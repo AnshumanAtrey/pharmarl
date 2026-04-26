@@ -62,9 +62,18 @@ lightning_logs/
 *.gguf
 *.onnx
 checkpoints/
-runs/
+# runs/ — repurposed as the canonical "completed training run audit bundle"
+# location (vijay-h200-llama1b, anshuman-a10g-llama3b, sahil-kaggle-llama3b).
+# Tracked in git so teammates see each other's results. Per-validation
+# transient logs go to logs/. Wandb dumps + train.log inside runs/** are
+# explicitly un-ignored below to avoid needing `git add -f` per bundle.
 outputs/
 hf_cache/
+# Allow run-bundle internals that are normally globally ignored:
+!runs/**/wandb/
+!runs/**/wandb/**
+!runs/**/*.log
+!runs/**/hf_hub/
 
 # ─── Notebook outputs ──────────────────────────────────────────────────
 .ipynb_checkpoints/

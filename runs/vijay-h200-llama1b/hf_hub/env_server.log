@@ -1,0 +1,21 @@
+Downloading Oracle...
+
+
+  0%|          | 0.00/35.4M [00:00<?, ?iB/s][A
+100%|██████████| 35.4M/35.4M [00:00<00:00, 103MiB/s]
+Done!
+2026-04-26 07:12:47,265 [INFO] server.oracles.docking_mpro: Using classifier oracle DRD2 for binding component (docking unavailable — install pyscreener+Vina to enable docking).
+Found local copy...
+2026-04-26 07:13:34,273 [INFO] server.oracles.docking_mpro: Loaded per-target oracle DRD2 (TDC=DRD2).
+Downloading Oracle...
+
+
+  0%|          | 0.00/9.05M [00:00<?, ?iB/s][A
+100%|██████████| 9.05M/9.05M [00:00<00:00, 23.8MiB/s]
+Done!
+Downloading Oracle...
+
+
+  0%|          | 0.00/8.05M [00:00<?, ?iB/s][A
+100%|██████████| 8.05M/8.05M [00:00<00:00, 43.3MiB/s]
+Done!
