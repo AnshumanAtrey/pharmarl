@@ -531,6 +531,15 @@ def main(argv=None) -> int:
         use_gradient_checkpointing=True,
         random_state=42,
     )
+    # Force LoRA adapters to bf16 to match the base model dtype.
+    # unsloth/kernels/fast_lora.py:116 does dY @ downB.t() which requires
+    # matching dtypes; peft initializes LoRA in fp32 regardless of base dtype.
+    n_cast = 0
+    for name, param in model.named_parameters():
+        if param.requires_grad and param.dtype == _torch.float32:
+            param.data = param.data.to(_torch.bfloat16)
+            n_cast += 1
+    print(f"[main] cast {n_cast} LoRA params from fp32 to bf16")
 
     if args.sft_warmup_steps > 0:
         ok = run_sft_warmup(model, tokenizer, args.env_url, args.sft_warmup_steps)
