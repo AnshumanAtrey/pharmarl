@@ -126,22 +126,7 @@ for mod_name in ("transformers", "trl", "unsloth", "bitsandbytes", "xformers", "
     except Exception as e:
         fail(f"{mod_name} import failed: {e}")
 
-# ─── 3. Pre-warm TDC oracles (avoid 30s stall on first /step) ────────────
-
-log("pre-warming TDC oracles…")
-try:
-    from server.oracles.qed import score_qed  # type: ignore
-    from server.oracles.sa import score_sa  # type: ignore
-    from server.oracles.toxicity import score_toxicity  # type: ignore
-    from server.oracles.docking_mpro import score_mpro_docking  # type: ignore
-
-    aspirin = "CC(=O)Oc1ccccc1C(=O)O"
-    log(f"  qed={score_qed(aspirin):.3f} sa={score_sa(aspirin):.3f} tox={score_toxicity(aspirin):.3f}")
-    for tgt in ("DRD2", "GSK3B", "JNK3"):
-        v = score_mpro_docking(aspirin, target=tgt)
-        log(f"  {tgt}={v:.3f}")
-except Exception as e:
-    log(f"WARNING: oracle pre-warm hit error (continuing): {e}")
+# Oracle pre-warm now happens via HTTP after the env server is up — see below.
 
 # ─── 4. Start env server sidecar ─────────────────────────────────────────
 
@@ -191,6 +176,22 @@ if not _wait_env_ready():
     env_proc.kill()
     fail("env health check timed out", code=3)
 log("env health OK at http://127.0.0.1:8000/health")
+
+# Pre-warm oracles via HTTP — first /step on each target downloads the TDC
+# classifier (~30MB each). Doing it now keeps the first GRPO rollout fast.
+log("pre-warming oracles via /reset+/step…")
+try:
+    import requests
+    requests.post("http://127.0.0.1:8000/reset", json={"difficulty": "trivial"}, timeout=60)
+    for _ in range(2):
+        requests.post(
+            "http://127.0.0.1:8000/step",
+            json={"action_type": "ADD_FRAGMENT", "fragment": "C", "position": 0},
+            timeout=120,
+        )
+    log("oracle pre-warm done")
+except Exception as e:
+    log(f"WARNING: oracle pre-warm hit error (continuing): {e}")
 
 # Make sure the env subprocess dies with us.
 def _shutdown(signum, frame):  # noqa: ARG001

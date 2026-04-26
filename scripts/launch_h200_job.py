@@ -70,6 +70,13 @@ PINNED_DEPS = [
     "transformers==4.46.3",
     "trl==0.13.0",
     "unsloth==2025.2.15",
+    # unsloth==2025.2.15 needs a 2025.2.x companion zoo. pip's loose
+    # `unsloth_zoo>=2025.2.7` resolves to 2025.4.4 (latest), whose
+    # gradient_checkpointing.backward calls fast_lora.backward with a dtype
+    # contract that doesn't match the older kernel — surfaces as
+    # `expected mat1 and mat2 to have the same dtype, but got BFloat16 != float`
+    # during the SFT backward pass. Lock zoo to the matching minor.
+    "unsloth_zoo>=2025.2.7,<2025.3",
     # bitsandbytes 0.46+ ships cu13-only binaries that need libnvJitLink.so.13,
     # which doesn't exist on cu12 hosts. 0.45.5 is the issue #14 minimum AND the
     # last release with cu12 binaries — pin exact.
