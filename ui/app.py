@@ -1,8 +1,8 @@
 """PharmaRL — Live Drug Discovery Operations Center.
 
-Gradio dashboard that runs an episode in real time inside the same Python
-process as the env. No HTTP, no separate uvicorn. Streams per-step trace,
-2D molecule structure, reward decomposition, and the curriculum baselines.
+Stripped-down dashboard: 3D molecule viewer, two-agent comparison
+(pre-training baseline vs the H200-trained adapter), reward / oracle
+breakdown for the selected agent.
 
 Run:
     python -m ui.app
@@ -22,20 +22,44 @@ _REPO_ROOT = os.path.dirname(_HERE)
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
+
+def _load_dotenv() -> None:
+    """Load pharmarl/.env into os.environ before anything else imports.
+
+    The agents module checks env vars at import-time to decide whether
+    each agent is live or static-card. Loading .env after that import
+    would leave the agents permanently in static-card mode for this
+    process, even if the env vars exist on disk.
+    """
+    env_path = os.path.join(_REPO_ROOT, ".env")
+    if not os.path.exists(env_path):
+        return
+    with open(env_path) as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and k not in os.environ:
+                os.environ[k] = v
+
+
+_load_dotenv()
+
 import gradio as gr  # noqa: E402
 
-from models import MoleculeAction, MoleculeObservation  # noqa: E402
+from models import MoleculeAction, MoleculeObservation  # noqa: E402,F401
 from server.drug_discovery_environment import DrugDiscoveryEnvironment  # noqa: E402
 
 from ui.agents import AGENTS, get_agent, make_agent  # noqa: E402
 from ui.render import (  # noqa: E402
     KNOWN_DRUGS,
-    action_histogram_figure,
     mol_properties,
-    mol_to_svg,
+    mol_to_3d_html,
     reward_breakdown_figure,
     reward_curve_figure,
-    tanimoto,
 )
 
 
@@ -60,7 +84,7 @@ _THEME = gr.themes.Soft(
 )
 
 _CSS = """
-.gradio-container { max-width: 1320px !important; margin: 0 auto; }
+.gradio-container { max-width: 1240px !important; margin: 0 auto; }
 .hero { padding: 22px 28px; border-radius: 18px;
         background: linear-gradient(135deg, #064e3b 0%, #0e7490 50%, #1e3a8a 100%);
         border: 1px solid rgba(16,185,129,0.35);
@@ -70,9 +94,6 @@ _CSS = """
            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
            background-clip: text; font-weight: 800; }
 .hero p  { margin: 4px 0 !important; color: #cbd5e1; }
-.hero .pill { display: inline-block; padding: 3px 10px; border-radius: 999px;
-              font-size: 12px; margin-right: 6px; font-family: ui-monospace, monospace;
-              background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); }
 .cum-card { padding: 22px 26px; border-radius: 16px;
             background: linear-gradient(135deg, #0f3027 0%, #134e4a 100%);
             border: 1px solid #10b981; }
@@ -81,26 +102,31 @@ _CSS = """
 .cum-value { font-size: 44px; font-weight: 800; font-family: ui-monospace, monospace;
              color: #ecfdf5; line-height: 1; }
 .cum-sub   { font-size: 12px; color: #99f6e4; margin-top: 6px; font-family: ui-monospace, monospace; }
-.mol-frame { background: #0f172a; border: 1px solid #1e293b; border-radius: 14px;
-             padding: 8px; }
-.mol-frame svg { display:block; margin: 0 auto; }
 #trace textarea { font-family: 'JetBrains Mono', ui-monospace, monospace !important;
                   font-size: 12.5px !important; background: #0a0f1c !important;
                   color: #e2e8f0 !important; line-height: 1.55 !important; }
-.section-title { font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+.section-title { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
                  color: #94a3b8; font-weight: 600; margin: 4px 0 8px 0; }
-.tier-card { border: 1px solid #1e293b; border-radius: 12px; padding: 12px 14px;
-             background: #0f172a; margin-bottom: 8px; }
-.tier-card.trivial { border-left: 3px solid #10b981; }
-.tier-card.easy    { border-left: 3px solid #06b6d4; }
-.tier-card.hard    { border-left: 3px solid #a855f7; }
+.audit a { color: #6ee7b7; text-decoration: none; }
+.audit a:hover { text-decoration: underline; }
+.compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.compare-card { padding: 14px 16px; border-radius: 12px; border: 1px solid #1e293b;
+                background: #0f172a; }
+.compare-card.before { border-left: 3px solid #94a3b8; }
+.compare-card.after  { border-left: 3px solid #10b981; }
+.compare-card .num { font-size: 28px; font-weight: 700; font-family: ui-monospace, monospace;
+                     color: #e2e8f0; line-height: 1; margin-top: 4px; }
+.compare-card .lbl { font-size: 11px; color: #94a3b8; letter-spacing: 0.12em;
+                     text-transform: uppercase; }
+.compare-card .sub { font-size: 11px; color: #64748b; margin-top: 6px;
+                     font-family: ui-monospace, monospace; }
 """
 
 
-# ─── Episode runner (generator) ──────────────────────────────────────────
+# ─── Episode runner ──────────────────────────────────────────────────────
 
 
-def _format_step_line(step_num: int, action: MoleculeAction, reward: float, cum: float, msg: str) -> str:
+def _format_step_line(step_num: int, action, reward: float, cum: float, msg: str) -> str:
     at = action.action_type
     parts = [f"step {step_num:>2} | {at:<16}"]
     if action.fragment is not None:
@@ -114,13 +140,13 @@ def _format_step_line(step_num: int, action: MoleculeAction, reward: float, cum:
     return f"{head} | reward {reward:+.3f} | cum {cum:+.3f} {tag}\n   ↳ {msg.strip()}\n"
 
 
-def _cum_card(cum: float, max_seen: float, parse_pct: float, lipinski_ok: bool) -> str:
+def _cum_card(cum: float, max_seen: float, lipinski_ok: bool, label: str = "cumulative reward") -> str:
     badge = "Lipinski ✓" if lipinski_ok else "Lipinski ✗"
     return (
         f'<div class="cum-card">'
-        f'<div class="cum-label">cumulative reward</div>'
+        f'<div class="cum-label">{label}</div>'
         f'<div class="cum-value">{cum:+.3f}</div>'
-        f'<div class="cum-sub">max {max_seen:+.3f} · parse {parse_pct:.0f}% · {badge}</div>'
+        f'<div class="cum-sub">max {max_seen:+.3f} · {badge}</div>'
         f'</div>'
     )
 
@@ -159,49 +185,45 @@ def _final_scores_md(final_components: dict | None, target: str) -> str:
     return out
 
 
-def _baselines_table(current_score: float | None) -> list[list]:
-    """The README's baseline spectrum, sortable, with the active run highlighted."""
-    rows = [
-        ["Random uniform",   "+2.30", "$0",       ""],
-        ["Scripted (4-step)", "+2.81", "$0",       ""],
-        ["Llama 3.2 3B",      "+1.67", "$0.001",   ""],
-        ["Gemini 2.5 Flash",  "+1.81", "$0.026",   ""],
-        ["Llama 3.1 8B",      "+2.45", "$0.001",   "best small"],
-        ["Llama 3.3 70B",     "+1.19", "$0.007",   "⚠ inverted scaling"],
-        ["Gemini 2.5 Pro",    "+3.68", "$0.123",   "best baseline"],
-    ]
-    if current_score is not None:
-        rows.append([f"Llama 1B trained (vijay-h200) — this run", f"{current_score:+.2f}", "—", "← live"])
-    return rows
+def _baseline_card_explainer(info, target: str) -> tuple[str, str]:
+    """Return (trace_text, mol_html) for a non-live baseline-card agent.
+
+    Renders the published reference-drug structure for the chosen target
+    so the molecule pane is never empty even before any live agent runs.
+    """
+    lines = [f"=== {info.label} ===\n"]
+    lines.append(f"📚 baseline card — not a live policy in this UI.\n")
+    lines.append(f"{info.blurb}\n")
+    if info.baseline is not None:
+        lines.append(f"\nPublished mean reward: {info.baseline:+.3f}\n")
+    drug = KNOWN_DRUGS.get(target)
+    if drug:
+        lines.append(f"\nShowing the reference drug for {target.split('_')[0]}: {drug['name']}.")
+        lines.append(f"  SMILES: {drug['smiles']}")
+        lines.append(f"  {drug['note']}")
+        mol_html = mol_to_3d_html(drug["smiles"])
+    else:
+        mol_html = mol_to_3d_html("")
+    return "\n".join(lines), mol_html
 
 
 def run_episode(difficulty: str, agent_key: str, target: str, max_steps: int) -> Generator[Tuple, None, None]:
-    """Generator: yields (trace_text, mol_svg_html, properties_md, cum_card_html,
-    reward_curve_fig, breakdown_fig, action_hist_fig, final_md, baselines_rows)
-    after every env step. The Gradio handler binds these to outputs.
-    """
+    """Yields (trace, mol_html, props_md, cum_card, reward_curve_fig,
+    breakdown_fig, final_scores_md) per step. Both current agents are
+    baseline-card stubs; the live trainer hookup will land later."""
     info = get_agent(agent_key)
 
-    # Non-live baseline: render an explanatory card instead of running.
     if not info.live:
-        explainer = (
-            f"📚 **{info.label}** is a published baseline, not a live agent in this UI.\n\n"
-            f"{info.blurb}\n\n"
-            f"Mean across DRD2/GSK3B/JNK3: **{info.baseline:+.2f}**"
-            if info.baseline is not None
-            else f"📚 **{info.label}** — {info.blurb}\n\n"
-                 "Live wiring lands here once the H200 GRPO adapter is published."
-        )
-        empty_mol = mol_to_svg("")
+        trace, mol_html = _baseline_card_explainer(info, target)
+        cum_html = _cum_card(info.baseline or 0.0, info.baseline or 0.0, True,
+                             label="published reward")
+        # If we have a reference drug for the target, show its property table.
+        drug = KNOWN_DRUGS.get(target)
+        props = mol_properties(drug["smiles"]) if drug else {}
         empty_curve = reward_curve_figure([])
         empty_bd = reward_breakdown_figure({})
-        empty_hist = action_histogram_figure({})
-        cum_html = _cum_card(info.baseline or 0.0, info.baseline or 0.0, 100.0, True)
-        yield (
-            explainer, _wrap_mol(empty_mol), _properties_md({}), cum_html,
-            empty_curve, empty_bd, empty_hist,
-            "_baseline-only — no live run_", _baselines_table(None),
-        )
+        yield (trace, mol_html, _properties_md(props), cum_html,
+               empty_curve, empty_bd, "_baseline-only — no live run_")
         return
 
     agent = make_agent(agent_key, difficulty)
@@ -209,39 +231,29 @@ def run_episode(difficulty: str, agent_key: str, target: str, max_steps: int) ->
     obs = env.reset(difficulty=difficulty, target=target if target else None)
 
     trace = (f"=== {info.label} on {difficulty} (target={obs.target.split('_')[0]}) ===\n"
-             f"start    | seed scaffold     | SMILES={obs.smiles}\n"
-             f"            (fragments={obs.available_fragments[:6]}{'…' if len(obs.available_fragments)>6 else ''})\n\n")
+             f"start    | seed scaffold     | SMILES={obs.smiles}\n\n")
     rewards: list[float] = []
-    actions: dict[str, int] = {}
     cum = 0.0
     max_seen = 0.0
-    parse_attempts = parse_ok = 0
     final_components: dict[str, float] | None = None
     last_smiles = obs.smiles
 
-    # Yield initial state immediately so the UI renders the seed molecule
-    # before the first step kicks in.
-    yield (
-        trace, _wrap_mol(mol_to_svg(obs.smiles)), _properties_md(mol_properties(obs.smiles)),
-        _cum_card(0.0, 0.0, 100.0, True),
-        reward_curve_figure([]), reward_breakdown_figure({}), action_histogram_figure({}),
-        "_episode running…_", _baselines_table(None),
-    )
+    yield (trace, mol_to_3d_html(obs.smiles), _properties_md(mol_properties(obs.smiles)),
+           _cum_card(0.0, 0.0, True),
+           reward_curve_figure([]), reward_breakdown_figure({}),
+           "_episode running…_")
 
     for step_num in range(1, max_steps + 1):
         try:
             action = agent.next_action(obs)
-            parse_attempts += 1
-            parse_ok += 1  # in-process agents always emit valid actions
         except Exception as e:
             trace += f"step {step_num:>2} | AGENT ERROR: {e}\n"
-            yield trace, _wrap_mol(mol_to_svg(last_smiles)), _properties_md(mol_properties(last_smiles)), \
-                  _cum_card(cum, max_seen, _pct(parse_ok, parse_attempts), True), \
+            yield trace, mol_to_3d_html(last_smiles), _properties_md(mol_properties(last_smiles)), \
+                  _cum_card(cum, max_seen, True), \
                   reward_curve_figure(rewards), reward_breakdown_figure(final_components or {}), \
-                  action_histogram_figure(actions), "_agent crashed_", _baselines_table(None)
+                  "_agent crashed_"
             return
 
-        actions[action.action_type] = actions.get(action.action_type, 0) + 1
         obs = env.step(action)
         rewards.append(obs.reward)
         cum += obs.reward
@@ -253,38 +265,19 @@ def run_episode(difficulty: str, agent_key: str, target: str, max_steps: int) ->
             final_components = obs.final_oracle_scores or (obs.metadata or {}).get("final_oracle_scores") or {}
             trace += (f"\n=== TERMINAL (step {step_num}) ===\n"
                       f"final SMILES: {obs.smiles}\n"
-                      f"composite:    {final_components.get('composite', cum):.3f}\n"
-                      f"truncated:    {obs.truncated}\n")
+                      f"composite:    {final_components.get('composite', cum):.3f}\n")
             break
 
-        # Stream every step so the UI feels alive. The 0.18s delay is
-        # purely cosmetic — the env.step itself is sub-100ms.
-        yield (
-            trace, _wrap_mol(mol_to_svg(obs.smiles)), _properties_md(mol_properties(obs.smiles)),
-            _cum_card(cum, max_seen, _pct(parse_ok, parse_attempts), _lipinski_ok(obs.smiles)),
-            reward_curve_figure(rewards), reward_breakdown_figure(final_components or {}),
-            action_histogram_figure(actions),
-            "_episode running…_", _baselines_table(None),
-        )
-        time.sleep(0.18)
+        yield (trace, mol_to_3d_html(obs.smiles), _properties_md(mol_properties(obs.smiles)),
+               _cum_card(cum, max_seen, _lipinski_ok(obs.smiles)),
+               reward_curve_figure(rewards), reward_breakdown_figure(final_components or {}),
+               "_episode running…_")
+        # Live LLM calls already take 1-3s per step — no cosmetic delay needed.
 
-    # Final render — include baselines highlight
-    final_md = _final_scores_md(final_components, obs.target)
-    yield (
-        trace, _wrap_mol(mol_to_svg(last_smiles)), _properties_md(mol_properties(last_smiles)),
-        _cum_card(cum, max_seen, _pct(parse_ok, parse_attempts), _lipinski_ok(last_smiles)),
-        reward_curve_figure(rewards), reward_breakdown_figure(final_components or {}),
-        action_histogram_figure(actions),
-        final_md, _baselines_table(cum),
-    )
-
-
-def _pct(n: int, d: int) -> float:
-    return 100.0 * n / d if d else 100.0
-
-
-def _wrap_mol(svg: str) -> str:
-    return f'<div class="mol-frame">{svg}</div>'
+    yield (trace, mol_to_3d_html(last_smiles), _properties_md(mol_properties(last_smiles)),
+           _cum_card(cum, max_seen, _lipinski_ok(last_smiles)),
+           reward_curve_figure(rewards), reward_breakdown_figure(final_components or {}),
+           _final_scores_md(final_components, obs.target))
 
 
 def _lipinski_ok(smiles: str) -> bool:
@@ -296,27 +289,19 @@ def _lipinski_ok(smiles: str) -> bool:
 
 
 def build_app() -> gr.Blocks:
-    # Gradio 6.0 moved theme/css to launch(); we still pass title here.
     with gr.Blocks(title="PharmaRL — Live Operations Center") as app:
         gr.HTML(
             '<div class="hero">'
-            '<h1>💊 PharmaRL — Live Drug Discovery Operations Center</h1>'
-            '<p><b>OpenEnv hackathon submission</b> — the first OpenEnv-native env where an LLM is the policy. '
-            'Chat-agent SELFIES editing against frozen TDC oracles (DRD2 / GSK3B / JNK3). '
-            'Same canonical MOSES/GuacaMol benchmark used in MolDQN, REINVENT, GraphAF, GFlowNets — new policy class.</p>'
-            '<p>'
-            '<span class="pill">Llama 3.2 1B</span>'
-            '<span class="pill">DRD2 / GSK3B / JNK3</span>'
-            '<span class="pill">TDC verified</span>'
-            '<span class="pill">3-tier curriculum</span>'
-            '<span class="pill">GRPO post-training</span>'
-            '</p></div>'
+            '<h1>💊 PharmaRL — Live Drug Discovery</h1>'
+            '<p>OpenEnv-native molecular RL — chat-agent SMILES editing, '
+            'TDC oracle reward, GRPO post-training on H200.</p>'
+            '</div>'
         )
 
         with gr.Row():
-            # ─── LEFT COLUMN — controls + cumulative ─────────────────────
+            # ─── LEFT — controls + cumulative ────────────────────────────
             with gr.Column(scale=1, min_width=320):
-                gr.HTML('<div class="section-title">🎯 Scenario</div>')
+                gr.HTML('<div class="section-title">scenario</div>')
                 difficulty = gr.Radio(
                     choices=[
                         ("Trivial — QED only · 5 fragments · 10 steps", "trivial"),
@@ -336,76 +321,62 @@ def build_app() -> gr.Blocks:
                     label="Binding target",
                 )
 
-                gr.HTML('<div class="section-title">🤖 Agent</div>')
+                # Show "live ✓" or "card" next to each agent so it's
+                # obvious at a glance whether the env vars got picked up.
+                _agent_choices = [
+                    (f"{a.label}  ·  {'live ✓' if a.live else 'card'}", a.key)
+                    for a in AGENTS
+                ]
+                gr.HTML('<div class="section-title">agent</div>')
                 agent = gr.Radio(
-                    choices=[(a.label, a.key) for a in AGENTS],
-                    value="scripted",
-                    label="Pick a policy",
-                    info="Live agents (Random, Scripted) run end-to-end. Llama / Gemini rows show the published baselines.",
+                    choices=_agent_choices,
+                    value="pretrained",
+                    label="Pre-training vs post-GRPO",
                 )
 
                 max_steps = gr.Slider(1, 20, value=12, step=1, label="Max steps")
                 run_btn = gr.Button("▶  Run episode", variant="primary", size="lg")
 
-                gr.HTML('<div class="section-title">💯 Cumulative reward</div>')
-                cum_card = gr.HTML(_cum_card(0.0, 0.0, 100.0, True))
+                gr.HTML('<div class="section-title">cumulative reward</div>')
+                cum_card = gr.HTML(_cum_card(0.0, 0.0, True))
 
-                gr.HTML('<div class="section-title">🧪 Final molecule</div>')
-                mol_html = gr.HTML(_wrap_mol(mol_to_svg("")))
-                props_md = gr.Markdown(_properties_md({}), label="Properties")
-
-            # ─── RIGHT COLUMN — live trace + charts ──────────────────────
+            # ─── RIGHT — molecule + trace ────────────────────────────────
             with gr.Column(scale=2):
-                gr.HTML('<div class="section-title">🧬 Episode trace (streaming)</div>')
+                gr.HTML('<div class="section-title">molecule (3D · drag to rotate)</div>')
+                mol_html = gr.HTML(mol_to_3d_html(""))
+
+                gr.HTML('<div class="section-title">properties</div>')
+                props_md = gr.Markdown(_properties_md({}))
+
+                gr.HTML('<div class="section-title">episode trace</div>')
                 trace = gr.Textbox(
-                    value="run an episode →",
-                    label="Step-by-step log",
-                    lines=18, max_lines=28,
+                    value="pick an agent + scenario, hit ▶ Run episode",
+                    label="",
+                    lines=10, max_lines=18,
                     elem_id="trace",
+                    show_label=False,
                 )
 
-                with gr.Row():
-                    with gr.Column():
-                        gr.HTML('<div class="section-title">📈 Reward curve</div>')
-                        reward_plot = gr.Plot(reward_curve_figure([]))
-                    with gr.Column():
-                        gr.HTML('<div class="section-title">🎯 Final reward decomposition</div>')
-                        breakdown_plot = gr.Plot(reward_breakdown_figure({}))
+        with gr.Row():
+            with gr.Column():
+                gr.HTML('<div class="section-title">reward curve</div>')
+                reward_plot = gr.Plot(reward_curve_figure([]), show_label=False)
+            with gr.Column():
+                gr.HTML('<div class="section-title">final reward decomposition</div>')
+                breakdown_plot = gr.Plot(reward_breakdown_figure({}), show_label=False)
 
-                with gr.Row():
-                    with gr.Column():
-                        gr.HTML('<div class="section-title">🪄 Action histogram</div>')
-                        action_plot = gr.Plot(action_histogram_figure({}))
-                    with gr.Column():
-                        gr.HTML('<div class="section-title">📋 Final scores</div>')
-                        final_md = gr.Markdown("_run an episode to see the breakdown_")
-
-        # ─── BASELINES LEADERBOARD ───────────────────────────────────────
-        gr.HTML('<div class="section-title" style="margin-top:18px">🏆 Baseline spectrum (mean DRD2 / GSK3B / JNK3)</div>')
-        baselines = gr.Dataframe(
-            headers=["Policy", "Mean reward", "Cost", "Note"],
-            value=_baselines_table(None),
-            interactive=False,
-            wrap=True,
-        )
-        gr.Markdown(
-            "**Inverted scaling proof.** Llama 70B (+1.19) underperforms Random (+2.30) "
-            "and 8B (+2.45) — the env's reward function isn't trivially gameable by raw "
-            "model capacity. Discipline beats scale past a sweet spot. "
-            "Full table + reproducing instructions in `docs/baselines.md`. "
-            "Probe spend across 6 baselines: $0.158."
-        )
+        gr.HTML('<div class="section-title" style="margin-top:14px"> </div>')
+        final_md = gr.Markdown("")
 
         gr.HTML(
-            '<div style="margin-top:18px; padding:12px 16px; border-radius:12px; '
-            'background:#0f172a; border:1px solid #1e293b; font-size:12.5px; color:#94a3b8;">'
-            '<b>Audit trail:</b> H200 training Job logs at '
-            '<a href="https://huggingface.co/vijay2776/pharmarl-llama-3b-trained-vijay-h200" '
-            'style="color:#6ee7b7">vijay2776/pharmarl-llama-3b-trained-vijay-h200</a> · '
-            'W&amp;B project at <a href="https://wandb.ai/vijaykota2776-itm/pharmarl" '
-            'style="color:#6ee7b7">wandb.ai/vijaykota2776-itm/pharmarl</a> · '
-            'Code at <a href="https://github.com/AnshumanAtrey/pharmarl/tree/vijay" '
-            'style="color:#6ee7b7">github.com/AnshumanAtrey/pharmarl/tree/vijay</a>.'
+            '<div class="audit" style="margin-top:18px; padding:12px 16px; '
+            'border-radius:12px; background:#0f172a; border:1px solid #1e293b; '
+            'font-size:12.5px; color:#94a3b8;">'
+            'audit trail · '
+            '<a href="https://huggingface.co/vijay2776/pharmarl-llama-3b-trained-vijay-h200">'
+            'HF Hub adapter + logs</a> · '
+            '<a href="https://wandb.ai/vijaykota2776-itm/pharmarl/runs/zke7p0gr">W&amp;B run</a> · '
+            '<a href="https://github.com/AnshumanAtrey/pharmarl/tree/vijay">GitHub branch</a>'
             '</div>'
         )
 
@@ -413,8 +384,7 @@ def build_app() -> gr.Blocks:
             fn=run_episode,
             inputs=[difficulty, agent, target, max_steps],
             outputs=[trace, mol_html, props_md, cum_card,
-                     reward_plot, breakdown_plot, action_plot,
-                     final_md, baselines],
+                     reward_plot, breakdown_plot, final_md],
             show_progress="hidden",
         )
 

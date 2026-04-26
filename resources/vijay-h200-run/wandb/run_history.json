@@ -37,13 +37,13 @@
     "_step":1,
     "_runtime":25.210635114,
     "samples\/episode_outcomes":{
-      "_latest_artifact_path":"wandb-client-artifact:\/\/0xqxss1zqqcsenftqlttrol0wgv1qbj1y4ktpkc66vbpasb0dy9gbb85fh30i085bxbpjm7yuay4vgsugqc5s3ekldgsrqlqumotczey2lcoo251c7cvpf1fqdjozwqc:latest\/samples\/episode_outcomes.table.json",
-      "sha256":"fe719b18b4c8f9696a13d664cfe19eb859727da8fa6f216eaf614464266692cb",
       "artifact_path":"wandb-client-artifact:\/\/b6tvbqzajvjrhu7djl11k64hh8h73eegawk9z8vzryvb2j5i43dw7vb44qvgopn0o4son4cmvtvhizgws5bxv2yj2q130lfrgj6tqkmkj2kho41ixythhrcn9difyvft\/samples\/episode_outcomes.table.json",
-      "_type":"table-file",
+      "_latest_artifact_path":"wandb-client-artifact:\/\/0xqxss1zqqcsenftqlttrol0wgv1qbj1y4ktpkc66vbpasb0dy9gbb85fh30i085bxbpjm7yuay4vgsugqc5s3ekldgsrqlqumotczey2lcoo251c7cvpf1fqdjozwqc:latest\/samples\/episode_outcomes.table.json",
       "ncols":8,
-      "nrows":8,
       "path":"media\/table\/samples\/episode_outcomes_1_fe719b18b4c8f9696a13.table.json",
+      "_type":"table-file",
+      "nrows":8,
+      "sha256":"fe719b18b4c8f9696a13d664cfe19eb859727da8fa6f216eaf614464266692cb",
       "log_mode":"IMMUTABLE",
       "size":800
     },
@@ -827,15 +827,15 @@
     "_step":27,
     "_runtime":605.609718053,
     "samples\/episode_outcomes":{
-      "ncols":8,
-      "log_mode":"IMMUTABLE",
       "artifact_path":"wandb-client-artifact:\/\/hsmarf8kuxz97o9repc2ub6m1dvfd2rk6ggby7wol3koeoy3r1r0dyanfjmf0phqzxo8isbpav6mapkonspg5rnvbm0989mkuplspdyyh4l9b45mg4qeypt2pgzn1jbl\/samples\/episode_outcomes.table.json",
       "_type":"table-file",
+      "size":847,
+      "_latest_artifact_path":"wandb-client-artifact:\/\/qsr303hruwe0ebd0hhb4otc3tcf4ub5qwqpdcx5pmrvboheku6qjqs69f7kiq2yqci9y8uky2piw2v5o3qgt5d25td45uuqohc2gahigd5u0wpo2omlsfa3x6u0cp1uh:latest\/samples\/episode_outcomes.table.json",
+      "ncols":8,
       "nrows":8,
       "path":"media\/table\/samples\/episode_outcomes_27_66b517084020422b1051.table.json",
       "sha256":"66b517084020422b10516ee1de47c55f30a9e388f28bf6866a49356342d70f4a",
-      "size":847,
-      "_latest_artifact_path":"wandb-client-artifact:\/\/qsr303hruwe0ebd0hhb4otc3tcf4ub5qwqpdcx5pmrvboheku6qjqs69f7kiq2yqci9y8uky2piw2v5o3qgt5d25td45uuqohc2gahigd5u0wpo2omlsfa3x6u0cp1uh:latest\/samples\/episode_outcomes.table.json"
+      "log_mode":"IMMUTABLE"
     },
     "action_type\/ADD_FRAGMENT":null,
     "verifier\/lipinski_pass_rate":null,
@@ -1619,13 +1619,13 @@
     "samples\/episode_outcomes":{
       "artifact_path":"wandb-client-artifact:\/\/7ceaw0y5ybx55ci1wv37k9xpp6ngdj5mjxg8jfn7vlxsr5g6p9dakrs6q6m70i3ecm8vt4kzdnz1l6rfefngsr3tvvr02bnzfl3t0fzzxqprty91pnzvxw48bt3i46jq\/samples\/episode_outcomes.table.json",
       "_latest_artifact_path":"wandb-client-artifact:\/\/3rx4bqofbolzj3fcmrfy9ll8gva74a22gow7irlprqayhrhcr8mn4r51azp6fiyjcmk0qej08bh3q4atr4xzikxg6etx6ctt38wi8x1ap9i39xhn3z9bx131dzg7l7y1:latest\/samples\/episode_outcomes.table.json",
-      "ncols":8,
-      "nrows":8,
-      "log_mode":"IMMUTABLE",
       "_type":"table-file",
+      "nrows":8,
       "path":"media\/table\/samples\/episode_outcomes_53_5e7630a61fb9b75a14ff.table.json",
       "sha256":"5e7630a61fb9b75a14ffe01e7dca8fa0976b15509acfaa63a78cb406d4c79da7",
-      "size":818
+      "size":818,
+      "ncols":8,
+      "log_mode":"IMMUTABLE"
     },
     "action_type\/ADD_FRAGMENT":null,
     "verifier\/lipinski_pass_rate":null,
@@ -2407,15 +2407,15 @@
     "_step":79,
     "_runtime":1861.488477658,
     "samples\/episode_outcomes":{
-      "path":"media\/table\/samples\/episode_outcomes_79_42013cb1f8676799fbe5.table.json",
       "artifact_path":"wandb-client-artifact:\/\/f31tgveopxepkxmujhzish1fjeqqmb72dphptcfc20frknaw6ldq2902igrv9abll91no2wdjkf6c5i3w1667sparvodfdm987olddowhlb0idjyl0i5wojqerq8n4vx\/samples\/episode_outcomes.table.json",
-      "ncols":8,
-      "sha256":"42013cb1f8676799fbe5dc3096c0e10029e04b151282d287854c3add99674dcf",
-      "log_mode":"IMMUTABLE",
-      "size":825,
       "_latest_artifact_path":"wandb-client-artifact:\/\/fwvoswxmd9zbflzuogmr2zfalijwhgs7wtwq159fguz33xp1bdo88vumdwvriz0u1zzxxithlklhqbwg1v8rjjdsubbd4rsqqhh1xx8j4zyibbsyrvazvezjre5tsqxd:latest\/samples\/episode_outcomes.table.json",
+      "ncols":8,
+      "nrows":8,
+      "path":"media\/table\/samples\/episode_outcomes_79_42013cb1f8676799fbe5.table.json",
+      "sha256":"42013cb1f8676799fbe5dc3096c0e10029e04b151282d287854c3add99674dcf",
+      "size":825,
       "_type":"table-file",
-      "nrows":8
+      "log_mode":"IMMUTABLE"
     },
     "action_type\/ADD_FRAGMENT":null,
     "verifier\/lipinski_pass_rate":null,
@@ -3199,13 +3199,13 @@
     "samples\/episode_outcomes":{
       "artifact_path":"wandb-client-artifact:\/\/mw0tugfil8ujxq0kjs9gzmr6f9q4zpu7le4u8ycnm8q9m29qrjmb0ky68dymvjr01voq66ce4eje0oz6c0vf9ty62qnv2ljqhx0uuf9z4u0o2kbzfkijumdchtr90ogd\/samples\/episode_outcomes.table.json",
       "_latest_artifact_path":"wandb-client-artifact:\/\/qsqvx5e6vrjwcbjlswusqud8q0dn7bhmu5u5wcgpfie27hlx86plfz3wlv3tz83upmv38elztfebrivwgal3yjzgs7gn3ady5oeezcx701dk8tcnx9wneiqbqrchtm5p:latest\/samples\/episode_outcomes.table.json",
+      "_type":"table-file",
       "ncols":8,
       "nrows":8,
       "path":"media\/table\/samples\/episode_outcomes_105_5f177dcb305179f6f059.table.json",
+      "sha256":"5f177dcb305179f6f059510ef0b6e24eaa4b4d67b9fa8280327657a3da6a58be",
       "log_mode":"IMMUTABLE",
-      "size":906,
-      "_type":"table-file",
-      "sha256":"5f177dcb305179f6f059510ef0b6e24eaa4b4d67b9fa8280327657a3da6a58be"
+      "size":906
     },
     "action_type\/ADD_FRAGMENT":null,
     "verifier\/lipinski_pass_rate":null,
@@ -3987,11 +3987,11 @@
     "_step":131,
     "_runtime":4141.141002693,
     "samples\/episode_outcomes":{
+      "artifact_path":"wandb-client-artifact:\/\/wmtnv9v933k4sd09q056jqyqpg8rhs1niouc3eft1hgqr3jwphi3vpt8spr3xdgktm0q5mryc4rgc2gzw3l48fyrqfrcutcpcxhrhx0tw6ksh709vkue5zk1toers5bc\/samples\/episode_outcomes.table.json",
       "_latest_artifact_path":"wandb-client-artifact:\/\/lki7sg3sycsd5872k58joz4z6q9sdxc38kuhxcvy8d2hrnaeetplczshsnl3bs3r6bmz3p4j4nfbnv0gacchumbu6wziuks16suvq103u2dzoizohlhc3o12lh6mgpw7:latest\/samples\/episode_outcomes.table.json",
       "ncols":8,
       "nrows":8,
       "path":"media\/table\/samples\/episode_outcomes_131_86383f38ea7b5795acf7.table.json",
-      "artifact_path":"wandb-client-artifact:\/\/wmtnv9v933k4sd09q056jqyqpg8rhs1niouc3eft1hgqr3jwphi3vpt8spr3xdgktm0q5mryc4rgc2gzw3l48fyrqfrcutcpcxhrhx0tw6ksh709vkue5zk1toers5bc\/samples\/episode_outcomes.table.json",
       "_type":"table-file",
       "sha256":"86383f38ea7b5795acf7a20a10c89c1ffd79e1eeeabcd98c75f9cf71bbd7b7dc",
       "log_mode":"IMMUTABLE",
@@ -4777,15 +4777,15 @@
     "_step":157,
     "_runtime":5644.863741832,
     "samples\/episode_outcomes":{
-      "_latest_artifact_path":"wandb-client-artifact:\/\/2g4fma11vwup23no3ath62qvxfhzey6nu38z4uwfypq97ywp3h8lz20go3f7rkeg9sxbiiz9n40hw79bqbq2x392v638iu84fk6nj2zg8gbnl3a1wcyo30zkxl37l5lm:latest\/samples\/episode_outcomes.table.json",
-      "path":"media\/table\/samples\/episode_outcomes_157_8623e657b2802045aa15.table.json",
       "log_mode":"IMMUTABLE",
       "size":911,
+      "artifact_path":"wandb-client-artifact:\/\/s8944yxee1c9n8v3k1k9p0lupwp2qhh4qvv6gl8x9fzj2ok5wc2oypvgntug5ue5t1jqns5tferae388g8niwyirrg1b0h92465k9k06qomaouumybtnpyk4dhvxqlda\/samples\/episode_outcomes.table.json",
       "_type":"table-file",
-      "ncols":8,
       "nrows":8,
-      "sha256":"8623e657b2802045aa158740b23907775c909969603aae3c2170b117614023d5",
-      "artifact_path":"wandb-client-artifact:\/\/s8944yxee1c9n8v3k1k9p0lupwp2qhh4qvv6gl8x9fzj2ok5wc2oypvgntug5ue5t1jqns5tferae388g8niwyirrg1b0h92465k9k06qomaouumybtnpyk4dhvxqlda\/samples\/episode_outcomes.table.json"
+      "path":"media\/table\/samples\/episode_outcomes_157_8623e657b2802045aa15.table.json",
+      "_latest_artifact_path":"wandb-client-artifact:\/\/2g4fma11vwup23no3ath62qvxfhzey6nu38z4uwfypq97ywp3h8lz20go3f7rkeg9sxbiiz9n40hw79bqbq2x392v638iu84fk6nj2zg8gbnl3a1wcyo30zkxl37l5lm:latest\/samples\/episode_outcomes.table.json",
+      "ncols":8,
+      "sha256":"8623e657b2802045aa158740b23907775c909969603aae3c2170b117614023d5"
     },
     "action_type\/ADD_FRAGMENT":null,
     "verifier\/lipinski_pass_rate":null,
@@ -5568,14 +5568,14 @@
     "_runtime":7074.958421432,
     "samples\/episode_outcomes":{
       "_latest_artifact_path":"wandb-client-artifact:\/\/33s90na10vjizj6puukoicbhvk8g9ztf3lmel8sghh4j0pnpx16tnuzu0q4p5rpf70cszfkrkn9ntripar2xzsugbb114sgvxdehp5d5hry7m22jd5slgk4fnjoscl9z:latest\/samples\/episode_outcomes.table.json",
+      "ncols":8,
+      "nrows":8,
+      "path":"media\/table\/samples\/episode_outcomes_183_11c0b7e03541cd4c779b.table.json",
       "sha256":"11c0b7e03541cd4c779b3a1cd25962d628048f788862f1349d47c737f67d2c37",
       "log_mode":"IMMUTABLE",
       "size":856,
       "artifact_path":"wandb-client-artifact:\/\/nafz6hyr3oopmkuq1uprn487bk3bm4xlvy0n9bm22f2plnje0d9mya3suhdsnq0iyw6t361gh9p9e309x28qwou4p1ydxwh7z9r6qv85wgtafysr718psgotw6umq1v9\/samples\/episode_outcomes.table.json",
-      "_type":"table-file",
-      "ncols":8,
-      "nrows":8,
-      "path":"media\/table\/samples\/episode_outcomes_183_11c0b7e03541cd4c779b.table.json"
+      "_type":"table-file"
     },
     "action_type\/ADD_FRAGMENT":null,
     "verifier\/lipinski_pass_rate":null,

@@ -60,6 +60,84 @@ def _empty_svg(w: int, h: int, label: str) -> str:
     )
 
 
+# ─── Realistic 3D molecule (3Dmol.js via CDN) ────────────────────────────
+
+_MOL3D_TEMPLATE = """\
+<div style="position:relative; width:100%; height:{height}px; border-radius:14px;
+            overflow:hidden; border:1px solid #1e293b;
+            background: radial-gradient(ellipse at center, #1e293b 0%, #0b1220 70%);">
+  <div id="{vid}" style="position:absolute; inset:0;"></div>
+  <div style="position:absolute; bottom:6px; right:10px; font:11px ui-monospace,monospace;
+              color:#64748b; pointer-events:none;">drag · rotate · scroll · zoom</div>
+</div>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+<script>
+(function(){{
+  function go(){{
+    if (typeof $3Dmol === 'undefined') {{ setTimeout(go, 60); return; }}
+    var el = document.getElementById("{vid}");
+    if (!el) {{ setTimeout(go, 60); return; }}
+    if (el.dataset.rendered === '1') return;
+    el.dataset.rendered = '1';
+    var v = $3Dmol.createViewer(el, {{ backgroundColor: 'rgba(0,0,0,0)' }});
+    var molblock = `{molblock}`;
+    v.addModel(molblock, 'mol');
+    v.setStyle({{}}, {{stick: {{radius: 0.18, colorscheme: 'cyanCarbon'}},
+                       sphere: {{scale: 0.28, colorscheme: 'cyanCarbon'}}}});
+    v.setBackgroundColor(0x0b1220, 0);
+    v.zoomTo();
+    v.zoom(1.2);
+    v.spin('y', 0.6);
+    v.render();
+  }}
+  go();
+}})();
+</script>
+"""
+
+
+def mol_to_3d_html(smiles: str, height: int = 320) -> str:
+    """Render the SMILES as a rotatable 3D ball-and-stick model.
+
+    Generates 3D coords with RDKit (ETKDG embed + MMFF94 optimization),
+    then ships the MolBlock to the browser where 3Dmol.js renders it as
+    a real WebGL scene with proper depth, lighting, and CPK colors.
+    Falls back to a minimal SVG card if the SMILES doesn't parse or
+    embedding fails.
+    """
+    if not smiles:
+        return f'<div style="height:{height}px;">{_empty_svg(340, height, "no molecule yet")}</div>'
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None or mol.GetNumAtoms() == 0:
+        return f'<div style="height:{height}px;">{_empty_svg(340, height, "invalid SMILES")}</div>'
+    try:
+        mol_h = Chem.AddHs(mol)
+        params = AllChem.ETKDGv3()
+        params.randomSeed = 42
+        params.useRandomCoords = True
+        if AllChem.EmbedMolecule(mol_h, params) != 0:
+            # Fallback if ETKDG fails on awkward structures
+            AllChem.EmbedMolecule(mol_h, useRandomCoords=True)
+        try:
+            AllChem.MMFFOptimizeMolecule(mol_h, maxIters=200)
+        except Exception:
+            try:
+                AllChem.UFFOptimizeMolecule(mol_h, maxIters=200)
+            except Exception:
+                pass
+        molblock = Chem.MolToMolBlock(mol_h)
+    except Exception:
+        return f'<div style="height:{height}px;">{_empty_svg(340, height, "3D embed failed")}</div>'
+
+    # Make MolBlock safe to embed inside a JS template literal: escape
+    # backticks and backslashes; preserve newlines (they're fine in `…`).
+    molblock = molblock.replace("\\", "\\\\").replace("`", "\\`")
+    # Stable but unique element id so Gradio re-renders pick up new content.
+    import hashlib
+    vid = "mol3d_" + hashlib.md5(smiles.encode()).hexdigest()[:10]
+    return _MOL3D_TEMPLATE.format(vid=vid, molblock=molblock, height=height)
+
+
 def mol_properties(smiles: str) -> Dict[str, float | int | bool | str]:
     """Compute the chemist-facing properties: MW, LogP, HBD, HBA, QED,
     rotatable bonds, Lipinski pass/fail. Tolerant of invalid SMILES."""
