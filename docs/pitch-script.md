@@ -50,13 +50,11 @@ The pitch leads with **policy-class novelty**, not chemistry. The chemistry is t
 
 ---
 
-### 1:00 — 1:20 · PROOF — baselines + held-out generalization test
+### 1:00 — 1:20 · PROOF — held-out generalization test
 
-[switch to baseline table on screen]
+[switch to baseline table on screen — brief glance, ~3 seconds]
 
-> "Before training, we ran six policies on the same eval. Random uniform: +2.30. Hand-coded scripted heuristic: +2.81. Llama 3B Instruct: +1.67. Llama 8B: +2.45 — that's the sweet spot. Llama 70B: **+1.19. Worse than random.** It tries multi-fragment over-substituted molecules; the env's chemistry validator rejects them. Inverted scaling. Only Gemini 2.5 Pro at +3.68 cleanly beats the scripted baseline."
-
-> "Capacity isn't the bottleneck. Discipline is. That's why we trained a 1.5B model with targeted RL."
+> "Before training we measured six off-the-shelf policies on the same eval as our score-to-beat — random uniform, a scripted heuristic, three Llama sizes, two Gemini tiers. Total probe spend: sixteen cents. Full table is in `docs/baselines.md`."
 
 > "And the reward signal those numbers stand on: third-party. Same TDC classifiers used in REINVENT, MolDQN, GFlowNets — `pip install pytdc` and reproduce them yourself, no PharmaRL code in the loop. We red-teamed the reward function with 14 adversarial tests before training; one real exploit caught and patched in the oracle layer. We hardened the reward, not the prompt."
 

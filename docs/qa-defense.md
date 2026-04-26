@@ -158,13 +158,11 @@ If pressed on implementation: "It's flag-gated behind `schema_drift_enabled` in 
 
 ## Q18. Did you compare against off-the-shelf LLMs as baselines?
 
-**"Yes — six policies on the same eval (9 episodes per target × 3 targets). The full table is in `docs/baselines.md`, but the headline numbers: random uniform +2.30, scripted 4-step heuristic +2.81, Llama 3.2 3B +1.67, Gemini 2.5 Flash +1.81, Llama 3.1 8B +2.45, Llama 3.3 70B +1.19, Gemini 2.5 Pro +3.68. Every probe ran in under $0.16 total spend."**
+**"Yes — six policies on the same eval (9 episodes per target × 3 targets). The full table is in `docs/baselines.md`. Score-to-beat numbers: random uniform +2.30, scripted 4-step heuristic +2.81, three Llama sizes (3B, 8B, 70B) and two Gemini tiers (Flash, Pro) all measured for ~$0.16 total spend. Most off-the-shelf LLMs land in the +1 to +2.5 range; only Gemini 2.5 Pro at +3.68 clears the scripted heuristic cleanly, at ~100× the per-call cost."**
 
-The interesting result: **inverted scaling.** Across the Llama family, 8B Instruct (+2.45) was the sweet spot — bigger 70B (+1.19) and smaller 3B (+1.67) both underperform. 70B specifically gets greedy: it tries multi-fragment over-substituted molecules in one turn that fail Lipinski + the env's chemistry validator. Parse rate dropped to 97% (3 failed-JSON turns out of 135).
+If pressed for a non-obvious finding: across the Llama family, 8B Instruct (+2.45) was the sweet spot — bigger 70B (+1.19) and smaller 3B (+1.67) both underperformed. The constrained action space and Lipinski terminal gate penalize capacity-greedy multi-fragment edits, which is why size alone doesn't win.
 
-Implication: in this constrained action space, raw model capacity is anti-correlated with performance past a sweet spot. The env's reward-design discipline — composite + Lipinski gate + parse penalty + zero-atom guard — penalizes capacity-greedy strategies. **Random and scripted policies beat 3 of the 4 LLMs we tested.** Only Gemini 2.5 Pro clears the scripted baseline cleanly.
-
-This is the benchmark to beat with our trained 1.5B Qwen.
+Score-to-beat for our trained 1.5B Qwen: the scripted +2.81 floor (must clear to claim "the agent learned"), and the Llama 8B +2.45 untrained-size-equivalent ceiling.
 
 ---
 
@@ -185,6 +183,6 @@ If pressed on which model: **"We default to Gemini 2.5 Flash with thinking disab
 
 ## Q19. So what stops an agent from gaming your reward?
 
-**"Three stacked defenses, validated empirically. (1) Composite oracle: any single component that gets gamed gets diluted by the other three. (2) Lipinski gate: violating Rule of 5 halves the terminal reward. (3) Anti-degenerate guards: zero-atom Mol → 0.0; parse failure → -0.5; cannot terminate on step 1. Plus 9 redteam tests covering empty SMILES, polyaromatic blobs, single carbon, action repetition, disconnected fragments. The empirical proof: when we ran Llama 70B on the env, it tried capacity-greedy strategies (over-substituted multi-fragment molecules) and scored worse than random uniform. The reward signal isn't just hard to game in theory; we have data showing a frontier-class LLM can't game it."**
+**"Three stacked defenses, all encoded structurally in the reward — not in the agent's prompt. (1) Composite oracle: any single component that gets gamed gets diluted by the other three. (2) Lipinski gate: violating Rule of 5 halves the terminal reward. (3) Anti-degenerate guards: zero-atom Mol → 0.0; parse failure → -0.5; cannot terminate on step 1. Plus 14 redteam regression tests covering empty SMILES, polyaromatic blobs, single carbon, action repetition, disconnected fragments, and capacity-greedy multi-fragment molecules. Before training, we caught one real exploit — empty SMILES farming composite ~0.44 — and patched it in the oracle code with a regression test. We hardened the reward, not the prompt."**
 
 ---

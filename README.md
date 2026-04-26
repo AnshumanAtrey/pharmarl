@@ -50,18 +50,6 @@ flowchart LR
 
 ---
 
-## The headline finding
-
-```mermaid
-xychart-beta
-    title "Mean PharmaRL reward — bigger Llama, worse score"
-    x-axis ["Random uniform", "Llama 3.2 3B", "Llama 3.1 8B", "Llama 3.3 70B"]
-    y-axis "Mean reward across DRD2 · GSK3B · JNK3" 0 --> 3
-    bar [2.30, 1.67, 2.45, 1.19]
-```
-
-> *Llama 70B confidently chains eight fragments into one 700-dalton monstrosity. Lipinski's Rule of 5 trips. Reward halved. Llama 8B edits one fragment at a time — like a junior medicinal chemist who knows what they don't know — and wins. **Discipline beats capacity.** That's the finding, and it's only visible because the env's reward function refuses to be gamed.*
-
 ## The setup
 
 Molecular RL has used the same Therapeutics Data Commons benchmark since **2017** — REINVENT, MolDQN, GraphAF, GFlowNets, MOSES, GuacaMol have all been graded against it. But always with GNN, RNN, or GFlowNet policies, trained from scratch on millions of molecules. Modern LLMs are general chat agents that nobody had plugged in *as the policy class itself*.
@@ -70,7 +58,7 @@ So we built the env that lets you do exactly that. Point any LLM at a SELFIES st
 
 The interesting question was never "can AI cure disease" — that's the framing every health-ML pitch deck has used for five years. The interesting question is: **what happens when you swap the policy class on a benchmark the field has already optimized to death?**
 
-The chart above is the answer. The rest of this README explains it.
+The rest of this README explains how we built the env that lets that experiment run reproducibly, what we measured, and what we left for the trained Qwen run to demonstrate.
 
 ## What an episode actually looks like
 
@@ -82,7 +70,7 @@ step 14:   N(c1ccc(F)cc1)C2CCN(...)   reward  0.05    DRD2-flavored hit
 step 15:   TERMINATE                  reward  8.70    composite oracle
 ```
 
-Each step changes the molecule and changes what's possible next — this is real RL, real state dynamics. Reward = `0.40 × binding + 0.25 × QED + 0.15 × synthesizability + 0.20 × (1 − toxicity)`. Final molecule violates Lipinski's Rule of 5? **Score × 0.5.** That's the trapdoor 70B keeps falling through.
+Each step changes the molecule and changes what's possible next — this is real RL, real state dynamics. Reward = `0.40 × binding + 0.25 × QED + 0.15 × synthesizability + 0.20 × (1 − toxicity)`. Final molecule violates Lipinski's Rule of 5? **Score × 0.5.** Capacity-greedy strategies (oversized multi-fragment molecules in one turn) trip the gate and lose half their composite.
 
 Curriculum has three RLVE-compliant tiers — trivial → easy → hard. We train on **DRD2 + GSK3B** (rotated per episode) and reserve **JNK3** as a never-seen kinase to measure transfer.
 
@@ -95,10 +83,10 @@ An RL env whose only defense is the agent's prompt is an env whose reward is wro
 Three structural defenses, all in the reward — not in the prompt:
 
 1. **Composite oracle.** Game one component, the other three drag your score down.
-2. **Lipinski terminal gate.** Final molecule violates Rule of 5? `composite × 0.5`. *This is what halves Llama 70B.*
+2. **Lipinski terminal gate.** Final molecule violates Rule of 5? `composite × 0.5`.
 3. **Anti-degenerate guards.** Empty Mol → 0.0. Parse failure → −0.5. Cannot TERMINATE on step 1.
 
-Fourteen redteam tests pin this surface — empty SMILES, polyaromatic blobs, single-carbon spam, disconnected fragments, charged species, the exact bloated molecules 70B produced when it failed.
+Fourteen redteam tests pin this surface — empty SMILES, polyaromatic blobs, single-carbon spam, disconnected fragments, charged species, and the bloated multi-fragment molecules large untrained LLMs tend to produce.
 
 ## You don't have to trust our scoring
 
@@ -114,11 +102,11 @@ Six policies. Same eval. 9 episodes per target × 3 targets. Total spend across 
 | Scripted (4-step pharmacophore) | +2.90 | +3.04 | +2.50 | +2.81 | $0 |
 | Llama 3.2 3B | +1.80 | +1.99 | +1.22 | +1.67 | $0.001 |
 | Gemini 2.5 Flash | +2.18 | +1.10 | +2.15 | +1.81 | $0.026 |
-| Llama 3.1 8B | +2.52 | +2.57 | +2.27 | **+2.45** | $0.001 |
-| **Llama 3.3 70B** | +1.65 | +0.79 | +1.14 | **+1.19 ↓** | $0.007 |
+| Llama 3.1 8B | +2.52 | +2.57 | +2.27 | +2.45 | $0.001 |
+| Llama 3.3 70B | +1.65 | +0.79 | +1.14 | +1.19 | $0.007 |
 | Gemini 2.5 Pro | +4.74 | +3.40 | +2.91 | +3.68 | $0.123 |
 
-The closed-source frontier model wins on raw capability — but at 100× the cost per call. The open Llama family alone shows the inverted-scaling curve in clean form: 3B underperforms, 8B finds the sweet spot, **70B falls below random uniform**. Full table and reproduction steps in `docs/baselines.md`.
+Most off-the-shelf LLMs land in the +1 to +2.5 range; only Gemini 2.5 Pro clears the scripted heuristic cleanly, at ~100× the per-call cost. These are the score-to-beat for our trained 1.5B Qwen. Full table, per-target breakdowns, and reproduction steps in `docs/baselines.md`.
 
 ## The real ML claim — does training transfer?
 
