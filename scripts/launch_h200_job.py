@@ -132,7 +132,24 @@ def cmd_launch(args: argparse.Namespace) -> int:
         "SAVE_EVERY": str(args.save_every),
         "AUDIT_EVERY": str(args.audit_every),
     }
-    secrets = {"HF_TOKEN": True}  # passed implicitly from local hf auth
+    # SDK expects real strings (the CLI's --secrets HF_TOKEN shorthand doesn't apply here).
+    # Resolve the token: env first, then huggingface_hub's stored token.
+    hf_token = os.environ.get("HF_TOKEN")
+    if not hf_token:
+        try:
+            from huggingface_hub import HfFolder
+            hf_token = HfFolder.get_token()
+        except Exception:
+            hf_token = None
+    if not hf_token:
+        token_path = Path.home() / ".cache" / "huggingface" / "token"
+        if token_path.exists():
+            hf_token = token_path.read_text().strip()
+    if not hf_token:
+        print("ERROR: no HF token found. Run `hf auth login` or `export HF_TOKEN=...`",
+              file=sys.stderr)
+        return 1
+    secrets = {"HF_TOKEN": hf_token}
     if args.with_wandb:
         wandb_key = os.environ.get("WANDB_API_KEY")
         if not wandb_key:
@@ -163,6 +180,8 @@ def cmd_launch(args: argparse.Namespace) -> int:
             print(f"  {line}")
         return 0
 
+    # Pass namespace explicitly so the SDK skips its /whoami-v2 preflight,
+    # which has a strict rate limit and trips often during iterative dev.
     job = run_job(
         image=args.image,
         command=_build_command(args.code_repo, args.branch),
@@ -171,6 +190,7 @@ def cmd_launch(args: argparse.Namespace) -> int:
         flavor=args.flavor,
         timeout=args.timeout,
         labels=labels,
+        namespace=args.namespace,
     )
     print(f"\n[launch] submitted ✔")
     print(f"[launch] job_id:  {job.id}")
@@ -240,6 +260,8 @@ def build_parser() -> argparse.ArgumentParser:
     pl.add_argument("--wandb-project", default="pharmarl")
     pl.add_argument("--with-wandb", action="store_true",
                     help="Forward WANDB_API_KEY from your shell to the job")
+    pl.add_argument("--namespace", default="vijay2776",
+                    help="HF user/org under which the job runs (default: vijay2776)")
     pl.add_argument("--dry-run", action="store_true",
                     help="Print the command without submitting")
     pl.set_defaults(func=cmd_launch)
