@@ -64,11 +64,21 @@ _load_dotenv()
 # adds Hopper LLM.int8"). Keep these versions in lockstep with
 # training_space/Dockerfile.
 PINNED_DEPS = [
+    # Pin torch to the base image version so pip doesn't pull torch 2.7+ (cu13).
+    # The base image already ships with this build; pip will see it satisfied
+    # and skip reinstalling, but having it as an upper-bound prevents transitive
+    # upgrades from xformers / unsloth-zoo / etc.
+    "torch==2.6.0",
     "transformers==4.46.3",
     "trl==0.13.0",
     "unsloth==2025.2.15",
-    "bitsandbytes>=0.45.5",
-    "xformers>=0.0.30",
+    # bitsandbytes 0.46+ ships cu13-only binaries that need libnvJitLink.so.13,
+    # which doesn't exist on cu12 hosts. 0.45.5 is the issue #14 minimum AND the
+    # last release with cu12 binaries — pin exact.
+    "bitsandbytes==0.45.5",
+    # xformers 0.0.30 has sm_90 kernels and still builds for torch 2.6 / cu124.
+    # Newer versions force torch 2.7 / cu13 again.
+    "xformers==0.0.30",
     "peft",
     "accelerate",
     "openenv-core",
@@ -101,9 +111,15 @@ def _build_command(code_repo: str, branch: str) -> list[str]:
         echo "[bootstrap] apt-get install git build-essential libxrender1 libxext6 libsm6"
         apt-get update -qq
         apt-get install -y --no-install-recommends git build-essential libxrender1 libxext6 libsm6
-        echo "[bootstrap] pip install pinned stack"
+        echo "[bootstrap] pip install pinned stack (cu124 index, only-if-needed)"
         python -m pip install --upgrade pip
-        python -m pip install --no-cache-dir {deps}
+        # --extra-index-url cu124 keeps torch/torchvision/etc on the cu12.4 wheels
+        # that match the base image. --upgrade-strategy only-if-needed prevents
+        # transitive upgrades from yanking torch off cu124 onto cu13.
+        python -m pip install --no-cache-dir \\
+            --extra-index-url https://download.pytorch.org/whl/cu124 \\
+            --upgrade-strategy only-if-needed \\
+            {deps}
         echo "[bootstrap] git clone -b {branch} {code_repo} /app"
         git clone --depth=1 -b {branch} {code_repo} /app
         cd /app
