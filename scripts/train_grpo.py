@@ -112,7 +112,7 @@ def synthesize_sft_pairs(env_url: str, n_pairs: int = 240, difficulty: str = "tr
     return pairs
 
 
-def run_sft_warmup(model, tokenizer, env_url: str, n_steps: int, use_fp16: bool = False):
+def run_sft_warmup(model, tokenizer, env_url: str, n_steps: int):
     """Format-priming SFT — teach JSON action shape before GRPO."""
     import torch
     from torch.utils.data import Dataset
@@ -157,24 +157,44 @@ def run_sft_warmup(model, tokenizer, env_url: str, n_steps: int, use_fp16: bool 
         [p for p in model.parameters() if p.requires_grad], lr=2e-4
     )
     device = next(model.parameters()).device
-    # No GradScaler: Unsloth's fast_lora kernel needs LoRA params in fp16 to
-    # match the compute dtype, but GradScaler only accepts fp32 gradients.
-    # AdamW directly on fp16 params is what Unsloth's own SFTTrainer does
-    # on T4; lr=2e-4 is high enough that grad underflow isn't a concern.
+
+    # Diagnostic: dump trainable-param dtype distribution before training so
+    # NaN bugs are easier to debug. PEFT keeps LoRA in fp32 by default; mixing
+    # with fp16/bf16 base is fine because PyTorch promotes dtypes in linear ops.
+    dtype_hist: dict = {}
+    n_train = 0
+    for p in model.parameters():
+        if p.requires_grad:
+            n_train += 1
+            dtype_hist[str(p.dtype)] = dtype_hist.get(str(p.dtype), 0) + 1
+    print(f"[sft] trainable params: {n_train}; dtypes={dtype_hist}")
+
     step = 0
     for batch in loader:
         if step >= n_steps:
             break
         batch = {k: v.to(device) for k, v in batch.items()}
         out = model(**batch)
+        loss_val = out.loss.item()
+        if not (loss_val == loss_val) or loss_val == float("inf"):  # NaN/Inf check
+            # Find the first finite/non-finite param to localize the failure.
+            bad = next(
+                ((n, p.dtype, "nan" if torch.isnan(p).any() else "inf")
+                 for n, p in model.named_parameters()
+                 if p.requires_grad and not torch.isfinite(p).all()),
+                None,
+            )
+            print(f"[sft] FATAL: loss={loss_val} at step={step}; bad_param={bad}")
+            raise RuntimeError(f"NaN/Inf loss at SFT step {step}")
         out.loss.backward()
-        torch.nn.utils.clip_grad_norm_(
+        # Pre-clip grad norm for diagnostics; clip to 1.0 in place.
+        gn = torch.nn.utils.clip_grad_norm_(
             [p for p in model.parameters() if p.requires_grad], 1.0
         )
         optim.step()
         optim.zero_grad()
-        if step % 10 == 0:
-            print(f"[sft] step={step:3d}  loss={out.loss.item():.4f}")
+        if step % 5 == 0 or step < 10:
+            print(f"[sft] step={step:3d}  loss={loss_val:.4f}  grad_norm={float(gn):.3f}")
         step += 1
 
     # Format check — uses chat template, same path as GRPO rollout.
@@ -205,7 +225,7 @@ def run_grpo(model, tokenizer, env_url: str, *,
              kl_coef: float, clip_eps: float, max_new_tokens: int,
              max_episode_steps: int, gen_temp: float, gen_top_p: float,
              save_every: int, audit_every: int, output_dir: Path,
-             use_adaptive: bool, use_fp16: bool = False):
+             use_adaptive: bool):
     import torch
     import torch.nn.functional as F
     from unsloth import FastLanguageModel
@@ -214,8 +234,6 @@ def run_grpo(model, tokenizer, env_url: str, *,
     optim = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad], lr=lr
     )
-    # See SFT-loop comment: no GradScaler on fp16 path (incompatible with
-    # fp16 LoRA params required by unsloth's fast_lora kernel).
     has_disable_adapter = hasattr(model, "disable_adapter")
 
     adaptive = None
@@ -421,15 +439,27 @@ def run_grpo(model, tokenizer, env_url: str, *,
         FastLanguageModel.for_training(model)
         optim.zero_grad()
         pol_acc = kl_acc = loss_acc = 0.0
+        nan_in_step = False
         for r, adv in zip(rollouts, advs):
             for t in r["transitions"]:
                 loss, pol, kl = loss_for(t, adv)
+                lv = loss.item()
+                if not (lv == lv) or lv == float("inf") or lv == float("-inf"):
+                    nan_in_step = True
+                    print(f"[grpo] WARN step={step} non-finite loss={lv} "
+                          f"adv={adv:.3f} pol={pol.item():.3f} kl={kl.item():.3f} — skipping transition")
+                    continue
                 (loss / n_trans).backward()
-                pol_acc += pol.item(); kl_acc += kl.item(); loss_acc += loss.item()
+                pol_acc += pol.item(); kl_acc += kl.item(); loss_acc += lv
 
         grad_norm = torch.nn.utils.clip_grad_norm_(
             [p for p in model.parameters() if p.requires_grad], 1.0
         )
+        if nan_in_step:
+            # Drop the whole step rather than apply a partial / corrupted update.
+            optim.zero_grad()
+            print(f"[grpo] step={step} skipped (non-finite losses); grad_norm_pre_clip={float(grad_norm):.3f}")
+            continue
         optim.step()
 
         if use_wandb:
@@ -559,17 +589,29 @@ def main(argv=None) -> int:
     import torch
     from unsloth import FastLanguageModel
 
-    # Hardware-aware loader: T4 (CUDA 7.5, no bf16) needs fp16 + 4-bit;
-    # Ampere+ uses bf16 base in full precision (matches remote setup).
+    # Hardware-aware loader. Two configs validated against the bug history:
+    #
+    #  T4 (CUDA 7.5, no bf16):  4-bit base + fp16 compute. Standard Unsloth
+    #    Kaggle/Colab recipe.
+    #  Ampere+ (bf16 hw):       full-precision bf16 base, no quantization.
+    #    Matches Anshuman's A10G fix (commit a775f05).
+    #
+    # In BOTH cases we use stock gradient checkpointing (use_gradient_checkpointing=True),
+    # NOT "unsloth", to bypass unsloth/kernels/fast_lora.py — its backward kernel
+    # requires LoRA dtype == base dtype, which forces a cast that destabilizes
+    # AdamW on fp16 master weights (commit 380473c established stock GC works).
+    #
+    # We also do NOT cast LoRA params: PEFT keeps them in fp32, PyTorch promotes
+    # dtypes in linear ops, AdamW operates on fp32 master weights — numerically
+    # stable. The fp16/bf16 cast in fe5aa09 was the original NaN cause.
     bf16_ok = torch.cuda.is_bf16_supported()
     if bf16_ok:
         load_kwargs = dict(load_in_4bit=False, dtype=torch.bfloat16)
-        gc_strategy = True  # stock GC works with non-quantized bf16 base
+        precision_label = "bf16 base, no quant"
     else:
         load_kwargs = dict(load_in_4bit=True, dtype=torch.float16)
-        gc_strategy = "unsloth"  # unsloth's GC is required for 4-bit on T4
-    print(f"[main] hw: bf16_supported={bf16_ok} → "
-          f"{'bf16 base' if bf16_ok else 'fp16 + 4-bit'}, gc={gc_strategy}")
+        precision_label = "fp16 base + 4-bit quant"
+    print(f"[main] hw: bf16_supported={bf16_ok} → {precision_label}, gc=stock")
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name=args.model,
@@ -582,27 +624,26 @@ def main(argv=None) -> int:
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                         "gate_proj", "up_proj", "down_proj"],
         lora_alpha=args.lora_rank,
-        use_gradient_checkpointing=gc_strategy,
+        use_gradient_checkpointing=True,
         random_state=42,
     )
+    # Stock GC needs the input embeddings to require_grad so gradients can
+    # flow back through the frozen embedding layer.
+    if hasattr(model, "enable_input_require_grads"):
+        model.enable_input_require_grads()
 
-    # Match LoRA dtype to compute dtype. PEFT initializes LoRA in fp32 regardless
-    # of base dtype; unsloth/kernels/fast_lora.py:116 does dY @ downB.t() which
-    # requires matching dtypes. Casting to bf16 on T4 (no hw bf16) silently NaNs
-    # within ~10 SFT steps, so we pick fp16 there.
-    target_dtype = torch.bfloat16 if bf16_ok else torch.float16
-    n_cast = 0
-    for param in model.parameters():
-        if param.requires_grad and param.dtype != target_dtype:
-            param.data = param.data.to(target_dtype)
-            n_cast += 1
-    use_fp16 = not bf16_ok
-    print(f"[main] cast {n_cast} LoRA params to "
-          f"{'bf16' if bf16_ok else 'fp16'}; mixed-precision={'fp16' if use_fp16 else 'bf16-native'}")
+    # Diagnostic: param dtype audit before training so we can catch regressions.
+    dtype_hist: dict = {}
+    n_train = 0
+    for p in model.parameters():
+        if p.requires_grad:
+            n_train += 1
+            dtype_hist[str(p.dtype)] = dtype_hist.get(str(p.dtype), 0) + 1
+    print(f"[main] {n_train} trainable params; dtypes={dtype_hist}")
 
     if args.sft_warmup_steps > 0:
         ok = run_sft_warmup(model, tokenizer, args.env_url,
-                            args.sft_warmup_steps, use_fp16=use_fp16)
+                            args.sft_warmup_steps)
         if not ok:
             print("[warn] SFT warmup ended without parseable output. "
                   "Consider --sft-warmup-steps 240.")
@@ -617,7 +658,6 @@ def main(argv=None) -> int:
         save_every=args.save_every, audit_every=args.audit_every,
         output_dir=output_dir,
         use_adaptive=not args.no_adaptive_curriculum,
-        use_fp16=use_fp16,
     )
 
     if args.hf_repo:
