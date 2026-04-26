@@ -506,6 +506,9 @@ def main(argv=None) -> int:
                    help="HF Hub repo id to push final adapter (e.g. user/pharmarl-trained)")
     p.add_argument("--hf-token", default=None,
                    help="HF token for push (defaults to HF_TOKEN env var)")
+    p.add_argument("--no-fast-inference", action="store_true",
+                   help="Disable unsloth's vLLM-backed fast_inference (avoids the vllm dep). "
+                        "Use this on environments where installing vllm is impractical.")
     args = p.parse_args(argv)
 
     print(f"[main] env={args.env_url}  model={args.model}")
@@ -520,7 +523,7 @@ def main(argv=None) -> int:
         model_name=args.model,
         max_seq_length=args.max_seq_len,
         load_in_4bit=True,
-        fast_inference=True,
+        fast_inference=not args.no_fast_inference,
     )
     model = FastLanguageModel.get_peft_model(
         model, r=args.lora_rank,

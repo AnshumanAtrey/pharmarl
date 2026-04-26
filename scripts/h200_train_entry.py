@@ -226,6 +226,10 @@ cmd = [
     "--hf-token", HF_TOKEN,
     "--save-every", os.environ.get("SAVE_EVERY", "25"),
     "--audit-every", os.environ.get("AUDIT_EVERY", "25"),
+    # The base image ships torch+cu124; pip-installing vllm on top tends to
+    # pull cu13 nvidia wheels and break the runtime. Skip vllm entirely —
+    # H200 is fast enough that eager inference still meets the 4h budget.
+    "--no-fast-inference",
 ]
 log(f"launching trainer: {' '.join(c for c in cmd if not c.startswith('hf_'))}")
 
