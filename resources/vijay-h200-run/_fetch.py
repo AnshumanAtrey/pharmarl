@@ -159,20 +159,26 @@ step = history.get("step")
 if step is None:
     print("[plots] no 'step' column — skipping plots")
 else:
-    # Mean reward over GRPO steps + max reward
+    # Mean + max reward per GRPO step. The discontinuity at step 100 is
+    # the trivial→easy curriculum tier change (max_steps and reward
+    # weights both shift), not a learning event.
     if "mean_reward" in history.columns:
         fig, ax = plt.subplots(figsize=(10, 4))
         ax.plot(step, history["mean_reward"], color="#10b981", linewidth=2, label="mean reward")
         if "max_reward" in history.columns:
             ax.plot(step, history["max_reward"], color="#22d3ee", linewidth=1, alpha=0.7, label="max reward")
+        ax.axvline(100, color="#94a3b8", linestyle="--", alpha=0.4, linewidth=1)
+        ax.text(100, ax.get_ylim()[1] * 0.98, " trivial → easy", color="#94a3b8",
+                fontsize=9, va="top")
         ax.set_xlabel("GRPO step")
         ax.set_ylabel("reward")
-        ax.set_title("vijay-h200 — reward over GRPO steps")
+        ax.set_title("vijay-h200 — mean + max reward per GRPO step "
+                     "(curriculum shift at step 100)")
         ax.grid(alpha=0.2)
         ax.legend()
-        _save(fig, "01_reward_over_steps")
+        _save(fig, "01-reward-mean-and-max-per-grpo-step")
 
-    # Policy loss + KL — proves pol≈0 (no learning)
+    # Policy loss flat at zero (smoking gun for no-learning) + KL drift.
     if "policy_loss" in history.columns and "kl" in history.columns:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
         ax1.plot(step, history["policy_loss"], color="#a855f7", linewidth=1.5)
@@ -180,24 +186,24 @@ else:
         ax1.set_title("policy loss — pol≈0 throughout (no learning signal)")
         ax1.grid(alpha=0.2)
         ax2.plot(step, history["kl"], color="#f59e0b", linewidth=1.5)
-        ax2.set_xlabel("GRPO step"); ax2.set_ylabel("KL")
+        ax2.set_xlabel("GRPO step"); ax2.set_ylabel("KL divergence")
         ax2.set_title("KL — drifts 0.74 → 0.40 (optimizer momentum, not learning)")
         ax2.grid(alpha=0.2)
-        _save(fig, "02_policy_kl")
+        _save(fig, "02-policy-loss-zero-and-kl-divergence")
 
-    # Parse rate — the reason for pol=0
+    # Parse rate stuck at zero — the root cause of pol=0.
     if "parse_rate" in history.columns:
         fig, ax = plt.subplots(figsize=(10, 3.5))
         ax.plot(step, history["parse_rate"], color="#ef4444", linewidth=2)
         ax.fill_between(step, 0, history["parse_rate"], color="#ef4444", alpha=0.18)
-        ax.set_xlabel("GRPO step"); ax.set_ylabel("parse rate")
+        ax.set_xlabel("GRPO step"); ax.set_ylabel("parse rate (fraction of rollouts emitting valid JSON)")
         ax.set_ylim(-0.05, 1.05)
-        ax.set_title("parse rate — flat 0% across 200 steps "
-                     "(model never emitted valid JSON; rollouts hit fallback action)")
+        ax.set_title("parse rate stuck at zero — model never emitted valid JSON; "
+                     "all 8 rollouts hit the ADD_FRAGMENT fallback")
         ax.grid(alpha=0.2)
-        _save(fig, "03_parse_rate")
+        _save(fig, "03-parse-rate-stuck-at-zero")
 
-    # Per-component reward over time — shows the env's composite is working
+    # Per-component oracle scores — composite breakdown over the episode.
     comps = [c for c in ("reward_component/qed", "reward_component/docking",
                          "reward_component/sa", "reward_component/toxicity_clean")
              if c in history.columns]
@@ -205,18 +211,22 @@ else:
         fig, ax = plt.subplots(figsize=(10, 4))
         for c, col in zip(comps, ["#10b981", "#06b6d4", "#f59e0b", "#a855f7"]):
             ax.plot(step, history[c], label=c.split("/")[1], color=col, linewidth=1.6)
-        ax.set_xlabel("GRPO step"); ax.set_ylabel("oracle component (0–1)")
-        ax.set_title("reward component decomposition — composite oracle per step")
+        ax.axvline(100, color="#94a3b8", linestyle="--", alpha=0.4, linewidth=1)
+        ax.set_xlabel("GRPO step"); ax.set_ylabel("oracle component score (0–1)")
+        ax.set_title("oracle component decomposition — qed (drug-likeness), "
+                     "docking (DRD2 binding), sa (synthesizability), toxicity_clean")
         ax.grid(alpha=0.2); ax.legend()
-        _save(fig, "04_reward_components")
+        _save(fig, "04-oracle-components-qed-docking-sa-toxicity")
 
-    # SFT loss
+    # GRPO total loss. With pol≈0, this is dominated by kl_coef × KL
+    # (kl_coef=0.04 × KL≈0.4 ≈ 0.016 — matches the plot's y-range).
     if "loss" in history.columns:
         fig, ax = plt.subplots(figsize=(10, 3.5))
         ax.plot(step, history["loss"], color="#22d3ee", linewidth=1.5)
-        ax.set_xlabel("step"); ax.set_ylabel("loss")
-        ax.set_title("SFT-warmup + GRPO loss")
+        ax.set_xlabel("GRPO step"); ax.set_ylabel("total loss")
+        ax.set_title("GRPO total loss per step — KL-dominated "
+                     "(policy contribution ≈ 0; loss ≈ kl_coef × KL = 0.04 × KL)")
         ax.grid(alpha=0.2)
-        _save(fig, "05_loss")
+        _save(fig, "05-grpo-total-loss-kl-dominated")
 
 print("\n✅ done. Bundle ready in resources/vijay-h200-run/")

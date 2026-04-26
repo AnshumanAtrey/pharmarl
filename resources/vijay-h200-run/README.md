@@ -52,11 +52,11 @@ resources/vijay-h200-run/
 │   ├── run_metadata.json      ← Job metadata + GPU info
 │   └── RUN_SUMMARY.md         ← the in-container summary the entry script wrote
 └── plots/
-    ├── 01_reward_over_steps.png       ← mean + max reward across 200 steps
-    ├── 02_policy_kl.png               ← shows pol≈0, KL drift
-    ├── 03_parse_rate.png              ← flat 0% (the smoking gun)
-    ├── 04_reward_components.png       ← qed/docking/sa/toxicity per step
-    └── 05_loss.png                    ← SFT + GRPO loss
+    ├── 01-reward-mean-and-max-per-grpo-step.png       ← mean (green) + max (cyan) reward per GRPO step. Curriculum shift at step 100 visible (trivial → easy tier)
+    ├── 02-policy-loss-zero-and-kl-divergence.png      ← two panels: policy_loss flat at ~0 (no learning), KL drifts 0.74 → 0.40
+    ├── 03-parse-rate-stuck-at-zero.png                ← parse_rate flat at 0% across all 200 steps — the smoking gun
+    ├── 04-oracle-components-qed-docking-sa-toxicity.png ← per-step qed / docking / sa / toxicity_clean. docking ≈ 0 (long alkyl chains don't bind D2)
+    └── 05-grpo-total-loss-kl-dominated.png            ← total loss; with pol≈0 it's just kl_coef × KL ≈ 0.04 × 0.4 ≈ 0.016
 ```
 
 ## Headline numbers (from `wandb/run_summary.json`)
