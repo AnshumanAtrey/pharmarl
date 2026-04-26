@@ -146,6 +146,17 @@ class MoleculeObservation(Observation):
         ),
     )
 
+    final_oracle_scores: Optional[Dict[str, float]] = Field(
+        default=None,
+        description=(
+            "Per-component oracle breakdown of the terminal reward. Populated "
+            "only when done=True (TERMINATE or step-cap). Top-level field (not "
+            "metadata) so it survives HTTP serialization — same pattern as "
+            "critique/oversight per issue #8. Trainers and dashboards read this "
+            "for per-component reward observability (FAQ §17 monitoring set)."
+        ),
+    )
+
 
 class MoleculeState(State):
     """Full episode state. Persists across step calls within one episode."""
