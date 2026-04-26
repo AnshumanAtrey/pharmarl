@@ -157,21 +157,21 @@ def run_sft_warmup(model, tokenizer, env_url: str, n_steps: int, use_fp16: bool 
         [p for p in model.parameters() if p.requires_grad], lr=2e-4
     )
     device = next(model.parameters()).device
-    scaler = torch.amp.GradScaler("cuda", enabled=use_fp16)
+    # No GradScaler: Unsloth's fast_lora kernel needs LoRA params in fp16 to
+    # match the compute dtype, but GradScaler only accepts fp32 gradients.
+    # AdamW directly on fp16 params is what Unsloth's own SFTTrainer does
+    # on T4; lr=2e-4 is high enough that grad underflow isn't a concern.
     step = 0
     for batch in loader:
         if step >= n_steps:
             break
         batch = {k: v.to(device) for k, v in batch.items()}
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_fp16):
-            out = model(**batch)
-        scaler.scale(out.loss).backward()
-        scaler.unscale_(optim)
+        out = model(**batch)
+        out.loss.backward()
         torch.nn.utils.clip_grad_norm_(
             [p for p in model.parameters() if p.requires_grad], 1.0
         )
-        scaler.step(optim)
-        scaler.update()
+        optim.step()
         optim.zero_grad()
         if step % 10 == 0:
             print(f"[sft] step={step:3d}  loss={out.loss.item():.4f}")
@@ -214,7 +214,8 @@ def run_grpo(model, tokenizer, env_url: str, *,
     optim = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad], lr=lr
     )
-    scaler = torch.amp.GradScaler("cuda", enabled=use_fp16)
+    # See SFT-loop comment: no GradScaler on fp16 path (incompatible with
+    # fp16 LoRA params required by unsloth's fast_lora kernel).
     has_disable_adapter = hasattr(model, "disable_adapter")
 
     adaptive = None
@@ -422,17 +423,14 @@ def run_grpo(model, tokenizer, env_url: str, *,
         pol_acc = kl_acc = loss_acc = 0.0
         for r, adv in zip(rollouts, advs):
             for t in r["transitions"]:
-                with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_fp16):
-                    loss, pol, kl = loss_for(t, adv)
-                scaler.scale(loss / n_trans).backward()
+                loss, pol, kl = loss_for(t, adv)
+                (loss / n_trans).backward()
                 pol_acc += pol.item(); kl_acc += kl.item(); loss_acc += loss.item()
 
-        scaler.unscale_(optim)
         grad_norm = torch.nn.utils.clip_grad_norm_(
             [p for p in model.parameters() if p.requires_grad], 1.0
         )
-        scaler.step(optim)
-        scaler.update()
+        optim.step()
 
         if use_wandb:
             # Hackathon FAQ §17 monitoring set — overall reward, per-component, format
