@@ -1,5 +1,9 @@
 # ─── Strategy & private materials — never commit ──────────────────────
 research/
+# Exception: paper/research/ holds the literature notes for the paper
+# submission; tracked alongside paper/main.tex.
+!paper/research/
+!paper/research/**
 
 # ─── Python bytecode and packaging ─────────────────────────────────────
 __pycache__/

@@ -247,3 +247,26 @@ bhaskar raj — 10:51
 We are live.
 bhaskar raj — 11:11
 You will get your goodies/merch by the end of the day.
+bhaskar raj — 26/04/2026, 12:09
+These submissions will be mapped against the respective team leaders who have registered at the on-campus registration desk/are present on campus.
+
+If you are not present on campus and still submit the form, you will be disqualified.
+burtenshaw — 26/04/2026, 12:16
+WINNING TIP: If you use small models and iterate on training runs, you have a way higher chance of winning than struggling to get a huge model into memory with a 1 or a few succesful runs. Focus on the quality of your envs, reward signals, use qlora, budget your available compute.
+bhaskar raj — 26/04/2026, 12:27
+The form issue has been a corrected, pls refresh and submit.
+bhaskar raj — 26/04/2026, 12:46
+Github repo is not required: checked from the technical team.
+bhaskar raj — 26/04/2026, 13:13
+Multiple submissions will not be allowed under any conditions. NOTE 1: These are non-negotiable. Submissions missing any of these are at a serious disadvantage.
+
+Use OpenEnv (latest release). Build on top of the framework; don't reinvent the wheel.
+A working training script using Unsloth or Hugging Face TRL or any other RL framework, ideally as a Colab notebook so judges can re-run it.
+Evidence that you actually trained; at minimum, loss and reward plots from a real run.
+A short writeup/video: a mini-blog on Hugging Face OR a < 2 minute video on YouTube explaining what your environment does and what you trained. Please make sure that all materials are linked from your README file so that judges can access them easily.
+You MUST Push your environment to a Hugging Face Space so it's discoverable and runnable.
+A README that motivates the problem, explains how the env works, and shows results.
+README.md MUST have a link to the environment in the Hugging Face Space. It should also have all additional references to other materials (e.g. videos, blog posts, slides, presentations, etc.) that you want to include.
+Please DO NOT include big video files in your environment submission on HF Hub as we would like to have a small size for each env (Please include public URLs to any additional materials you want to add to your repository).
+
+Please refer to what judges look for: https://docs.google.com/document/d/1Odznuzwtb1ecDOm2t6ToZd4MuMXXfO6vWUGcxbC6mFs/edit?tab=t.0#bookmark=kix.2dz0x0nie3me
