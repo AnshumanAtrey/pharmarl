@@ -17,28 +17,30 @@ short_description: OpenEnv-native LLM-as-policy molecular optimization.
 ### *Then we figured out exactly why.*
 
 ```mermaid
----
-config:
-    xyChart:
-        width: 900
-        height: 380
-    themeVariables:
-        xyChart:
-            backgroundColor: "transparent"
-            titleColor: "#e2e8f0"
-            xAxisLabelColor: "#94a3b8"
-            yAxisLabelColor: "#94a3b8"
-            yAxisTitleColor: "#94a3b8"
-            plotColorPalette: "#6366f1"
----
-xychart-beta
-    title "Mean PharmaRL reward — bigger Llama, worse score"
-    x-axis ["Random uniform", "Llama 3.2 3B", "Llama 3.1 8B", "Llama 3.3 70B"]
-    y-axis "Mean reward across DRD2 · GSK3B · JNK3" 0 --> 3
-    bar [2.30, 1.67, 2.45, 1.19]
-```
+flowchart LR
+    THESIS("<b>PharmaRL</b> is an <b>OpenEnv-native benchmark</b> for evaluating <b>LLMs as policies</b><br/>on <b>iterative molecular optimization</b>, with <b>verifiable RLVE rewards</b><br/>and <b>three reward-hacking defenses</b> validated by <b>inverted-scaling probe data</b>.")
 
-> *Llama 70B confidently chains eight fragments into one 700-dalton monstrosity. Lipinski's Rule of 5 trips. Reward halved. Llama 8B edits one fragment at a time — like a junior medicinal chemist who knows what they don't know — and wins. **Discipline beats capacity.** That's the finding, and it's only visible because the env's reward function refuses to be gamed.*
+    A("Meta's open standard contract<br/>FastAPI · Docker · pip<br/>Live on HF Spaces today")
+    B("Same TDC oracles the field<br/>has used since 2017<br/>DRD2 · GSK3B · JNK3")
+    C("Chat agent emits JSON actions<br/>Not GNN · RNN · diffusion<br/>First time on this benchmark")
+    D("10–20 step trajectory of<br/>ADD · REMOVE · SUBSTITUTE<br/>State persists per episode")
+    E("Deterministic & reproducible<br/>pip install pytdc to verify<br/>No LLM judge in the loop")
+    F("Composite oracle dilution<br/>Lipinski terminal gate<br/>14 redteam regression tests")
+    G("Llama 70B fell below random<br/>Six baselines for $0.16<br/>Discipline beats capacity")
+
+    THESIS -->|"OpenEnv-native"| A
+    THESIS -->|"benchmark"| B
+    THESIS -->|"LLMs as policies"| C
+    THESIS -->|"iterative molecular optimization"| D
+    THESIS -->|"verifiable RLVE rewards"| E
+    THESIS -->|"three reward-hacking defenses"| F
+    THESIS -->|"inverted-scaling probe data"| G
+
+    classDef thesis fill:#1e293b,stroke:#6366f1,stroke-width:2px,color:#f1f5f9,rx:18,ry:18;
+    classDef leaf fill:#0f172a,stroke:#475569,stroke-width:1px,color:#cbd5e1,rx:12,ry:12;
+    class THESIS thesis;
+    class A,B,C,D,E,F,G leaf;
+```
 
 [**🤗 Live env**](https://huggingface.co/spaces/anshumanatrey/pharmarl) · [**💻 Code**](https://github.com/AnshumanAtrey/pharmarl) · [**📓 Train it yourself**](colab/train_pharmarl.ipynb) · [**🎙️ 90s pitch**](#materials) · [**🧪 Trained model**](#materials)
 
@@ -47,6 +49,18 @@ xychart-beta
 </div>
 
 ---
+
+## The headline finding
+
+```mermaid
+xychart-beta
+    title "Mean PharmaRL reward — bigger Llama, worse score"
+    x-axis ["Random uniform", "Llama 3.2 3B", "Llama 3.1 8B", "Llama 3.3 70B"]
+    y-axis "Mean reward across DRD2 · GSK3B · JNK3" 0 --> 3
+    bar [2.30, 1.67, 2.45, 1.19]
+```
+
+> *Llama 70B confidently chains eight fragments into one 700-dalton monstrosity. Lipinski's Rule of 5 trips. Reward halved. Llama 8B edits one fragment at a time — like a junior medicinal chemist who knows what they don't know — and wins. **Discipline beats capacity.** That's the finding, and it's only visible because the env's reward function refuses to be gamed.*
 
 ## The setup
 
@@ -84,7 +98,7 @@ Three structural defenses, all in the reward — not in the prompt:
 2. **Lipinski terminal gate.** Final molecule violates Rule of 5? `composite × 0.5`. *This is what halves Llama 70B.*
 3. **Anti-degenerate guards.** Empty Mol → 0.0. Parse failure → −0.5. Cannot TERMINATE on step 1.
 
-Fourteen redteam tests pin this surface — empty SMILES, polyaromatic blobs, single-carbon spam, disconnected fragments, charged species, the exact bloated molecules 70B produced when it failed. The chart up top is the empirical proof: capacity meets these defenses, capacity loses.
+Fourteen redteam tests pin this surface — empty SMILES, polyaromatic blobs, single-carbon spam, disconnected fragments, charged species, the exact bloated molecules 70B produced when it failed.
 
 ## You don't have to trust our scoring
 
@@ -122,11 +136,11 @@ Whatever the data shows, we ship. Null result is a null result — **null > over
 ```bash
 git clone https://github.com/AnshumanAtrey/pharmarl && cd pharmarl
 pip install -e . && python scripts/validate_stack.py
-uvicorn server.app:app --port 8000                # serve env locally
-python examples/demo.py --policies random scripted    # smoke test, no LLM needed
+uvicorn server.app:app --port 8000                   # serve env locally
+python examples/demo.py --policies random scripted       # smoke test, no LLM needed
 ```
 
-State is keyed by `episode_id` — pass the same id to `/reset` and every `/step` of one rollout. Different rollouts (e.g. GRPO group members) use different ids and proceed concurrently. The HF Space link above runs the same image; you can swap `127.0.0.1:8000` for the Space URL and everything works unchanged.
+State is keyed by `episode_id` — pass the same id to `/reset` and every `/step` of one rollout. Different rollouts (e.g. GRPO group members) use different ids and proceed concurrently. The HF Space link above runs the same image; swap `127.0.0.1:8000` for the Space URL and everything works unchanged.
 
 ## Hackathon themes hit
 
