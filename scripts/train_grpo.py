@@ -221,8 +221,18 @@ def run_grpo(model, tokenizer, env_url: str, *,
 
     @torch.no_grad()
     def rollout(difficulty: str):
-        obs = requests.post(f"{env_url}/reset",
-                            json={"difficulty": difficulty}).json()["observation"]
+        import uuid as _uuid
+        eid = f"rollout-{_uuid.uuid4().hex[:12]}"
+        reset_resp = requests.post(
+            f"{env_url}/reset",
+            json={"episode_id": eid, "difficulty": difficulty},
+            timeout=30,
+        )
+        if reset_resp.status_code != 200:
+            raise RuntimeError(
+                f"/reset failed: {reset_resp.status_code} {reset_resp.text[:200]}"
+            )
+        obs = reset_resp.json()["observation"]
         transitions, cum = [], 0.0
         parse_ok = parse_total = 0
         invalid = 0
@@ -264,7 +274,18 @@ def run_grpo(model, tokenizer, env_url: str, *,
             # Track action-type histogram (FAQ §17: format adherence + diversity of strategies)
             at = str(action.get("action_type", "UNKNOWN"))
             action_type_counts[at] = action_type_counts.get(at, 0) + 1
-            step = requests.post(f"{env_url}/step", json=action).json()
+            step_resp = requests.post(
+                f"{env_url}/step",
+                json={"episode_id": eid, "action": action},
+                timeout=30,
+            )
+            if step_resp.status_code != 200:
+                # Bad action (422) or session error — apply parse-penalty and stop
+                # the rollout. Better than crashing the entire training step.
+                cum += -0.5
+                invalid += 1
+                break
+            step = step_resp.json()
             cum += step["reward"]
             step_obs = step["observation"]
             if not step_obs.get("last_action_valid", True):
