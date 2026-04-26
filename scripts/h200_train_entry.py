@@ -237,6 +237,12 @@ cmd = [
     # H200 has 141GB so we drop both: full bf16 base + no GC = ~10GB peak.
     "--no-4bit",
     "--no-gradient-checkpointing",
+    # Default --gen-temp 0.7 destroys JSON format adherence under sampling:
+    # SFT loss converges fine (~0.1) but at temp=0.7 random tokens accumulate
+    # over 80 max_new_tokens → output never parses → all 8 rollouts hit the
+    # ADD_FRAGMENT C fallback → reward variance is ~0 → pol=0. 0.3 keeps
+    # enough exploration for GRPO while preserving the structure SFT taught.
+    "--gen-temp", os.environ.get("GEN_TEMP", "0.3"),
 ]
 log(f"launching trainer: {' '.join(c for c in cmd if not c.startswith('hf_'))}")
 
