@@ -52,11 +52,13 @@ import requests
 
 # ─── Utilities (duplicated from notebook for self-containment) ────────────
 
-SYSTEM = (
-    "You design drug-like molecules against the active binding target by editing SMILES. "
-    "Respond with ONE JSON action per turn. Allowed: ADD_FRAGMENT, "
-    "REMOVE_FRAGMENT, SUBSTITUTE_ATOM, TERMINATE."
-)
+SYSTEM = """You are a medicinal chemist designing a small-molecule drug. Each turn you edit a molecule by issuing a single JSON action.
+
+Output format (respond with EXACTLY ONE JSON object on its own line — no prose, no markdown fences):
+  {"action_type": "ADD_FRAGMENT", "fragment": "<smiles>", "position": 0}
+  {"action_type": "REMOVE_FRAGMENT", "position": 0}
+  {"action_type": "SUBSTITUTE_ATOM", "position": 0, "new_atom": "F"}
+  {"action_type": "TERMINATE"}"""
 
 _JSON_RE = re.compile(r"\{[^{}]*\}")
 
@@ -245,11 +247,23 @@ def run_grpo(model, tokenizer, env_url: str, *,
         final_lipinski_passes = True
         starting_smiles = obs.get("smiles", "")
         for _ in range(max_episode_steps):
-            prompt = (f"{SYSTEM}\n\nSMILES: {obs['smiles']}\n"
-                      f"Fragments: {obs['available_fragments'][:8]}\n"
-                      f"Valid actions: {obs['valid_actions']}\n"
-                      f"Respond with JSON action:")
-            prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+            # Use Llama's chat template — instruction-tuned models follow JSON
+            # format reliably with apply_chat_template, but degrade with raw concat.
+            # Baseline (openrouter_episode.py) gets 100% parse rate using this
+            # exact pattern; raw concat gets 22% (smoke) → 0% after SFT overfit.
+            user_msg = (
+                f"SMILES: {obs['smiles']}\n"
+                f"Fragments: {obs['available_fragments'][:8]}\n"
+                f"Valid actions: {obs['valid_actions']}"
+            )
+            messages = [
+                {"role": "system", "content": SYSTEM},
+                {"role": "user", "content": user_msg},
+            ]
+            prompt_text = tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
+            )
+            prompt_ids = tokenizer(prompt_text, return_tensors="pt").input_ids.to(device)
             plen = prompt_ids.shape[1]
             gen = model.generate(
                 prompt_ids, max_new_tokens=max_new_tokens,
