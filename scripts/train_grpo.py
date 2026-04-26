@@ -221,8 +221,16 @@ def run_grpo(model, tokenizer, env_url: str, *,
 
     @torch.no_grad()
     def rollout(difficulty: str):
-        obs = requests.post(f"{env_url}/reset",
-                            json={"difficulty": difficulty}).json()["observation"]
+        # The session-keyed env contract (server/app.py): /reset returns
+        # observation.episode_id; every /step call MUST send
+        # {"action": {...}, "episode_id": <id>}, NOT the raw action. The
+        # original notebook path called OpenEnv's stateless /step which
+        # accepted raw actions; the standalone trainer never wrapped, so
+        # /step always 422'd and step["reward"] KeyError'd at GRPO step 0.
+        reset_resp = requests.post(f"{env_url}/reset",
+                                   json={"difficulty": difficulty}).json()
+        obs = reset_resp["observation"]
+        episode_id = obs.get("episode_id") or reset_resp.get("episode_id", "")
         transitions, cum = [], 0.0
         parse_ok = parse_total = 0
         invalid = 0
@@ -264,7 +272,21 @@ def run_grpo(model, tokenizer, env_url: str, *,
             # Track action-type histogram (FAQ §17: format adherence + diversity of strategies)
             at = str(action.get("action_type", "UNKNOWN"))
             action_type_counts[at] = action_type_counts.get(at, 0) + 1
-            step = requests.post(f"{env_url}/step", json=action).json()
+            step = requests.post(
+                f"{env_url}/step",
+                json={"action": action, "episode_id": episode_id},
+            ).json()
+            # Defensive: env may 422 on validation, or return an HTTPException
+            # body like {"detail": "..."} instead of the observation payload.
+            # Treat as a parse failure for this step rather than crashing the
+            # whole G=8 rollout batch (and the H200 minutes spent so far).
+            if "reward" not in step or "observation" not in step:
+                print(f"[warn] /step returned malformed payload "
+                      f"(keys={list(step)}; first 200 chars: {str(step)[:200]}) — "
+                      "treating as parse failure and ending this rollout")
+                cum += -0.5
+                invalid += 1
+                break
             cum += step["reward"]
             step_obs = step["observation"]
             if not step_obs.get("last_action_valid", True):

@@ -135,7 +135,53 @@ def _build_command(code_repo: str, branch: str) -> list[str]:
     return ["bash", "-c", script]
 
 
+def _preflight_sanity(repo_root: Path) -> int:
+    """Catch dumb bugs locally before burning H200 minutes.
+
+    Each prior failed run ate ~30s of pip install + git clone + model load
+    before the actual error surfaced. Anything we can validate on the laptop
+    in <2s is pure win.
+    """
+    import py_compile
+    files = [
+        "scripts/h200_train_entry.py",
+        "scripts/launch_h200_job.py",
+        "scripts/train_grpo.py",
+        "server/app.py",
+    ]
+    for rel in files:
+        path = repo_root / rel
+        if not path.exists():
+            print(f"  preflight: skipping {rel} (not found)")
+            continue
+        try:
+            py_compile.compile(str(path), doraise=True)
+        except py_compile.PyCompileError as e:
+            print(f"  preflight FAIL: {rel} — {e}")
+            return 1
+    print(f"  preflight: py_compile OK ({len(files)} files)")
+
+    # Contract sanity — confirm trainer's /step request shape matches
+    # server/app.py:_StepBody. Without this check, the GRPO step-0 KeyError
+    # would only surface 7 minutes into an H200 run.
+    train_grpo = (repo_root / "scripts/train_grpo.py").read_text()
+    if "/step" in train_grpo:
+        if '"action": action' not in train_grpo or "episode_id" not in train_grpo:
+            print("  preflight FAIL: train_grpo.py /step call must wrap action and pass "
+                  "episode_id to match server/app.py:_StepBody schema")
+            return 1
+    print("  preflight: /step request shape OK")
+    return 0
+
+
 def cmd_launch(args: argparse.Namespace) -> int:
+    repo_root = Path(__file__).resolve().parent.parent
+    print("[launch] running preflight checks…")
+    rc = _preflight_sanity(repo_root)
+    if rc != 0:
+        print("[launch] preflight failed — aborting submission")
+        return rc
+
     try:
         from huggingface_hub import run_job
     except ImportError:
