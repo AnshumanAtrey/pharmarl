@@ -541,6 +541,23 @@ def main(argv=None) -> int:
         random_state=42,
     )
 
+    # On Hopper, unsloth==2025.2.15's fast_lora kernel does
+    #   d_downA = h.t() @ (dY @ downB.t())
+    # under autocast, where dY arrives as bf16 but downB defaults to fp32 —
+    # blowing up with `expected mat1 and mat2 to have the same dtype,
+    # but got: c10::BFloat16 != float`. Cast trainable LoRA params to bf16
+    # so the matmul dtypes line up. Only do this when --no-4bit (and so
+    # the base is already in bf16) so we don't accidentally downcast a
+    # quantized base model's compute dtype.
+    if args.no_4bit:
+        import torch
+        n_cast = 0
+        for p in model.parameters():
+            if p.requires_grad and p.dtype == torch.float32:
+                p.data = p.data.to(torch.bfloat16)
+                n_cast += 1
+        print(f"[main] cast {n_cast} trainable params fp32→bf16 (Hopper fast_lora workaround)")
+
     if args.sft_warmup_steps > 0:
         ok = run_sft_warmup(model, tokenizer, args.env_url, args.sft_warmup_steps)
         if not ok:
