@@ -526,7 +526,7 @@ def main(argv=None) -> int:
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                         "gate_proj", "up_proj", "down_proj"],
         lora_alpha=args.lora_rank,
-        use_gradient_checkpointing="unsloth",
+        use_gradient_checkpointing=True,
         random_state=42,
     )
 
