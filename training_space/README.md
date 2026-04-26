@@ -1,23 +1,23 @@
 ---
-title: PharmaRL Training (Fallback)
-emoji: 🧪
+title: PharmaRL Training (H200)
+emoji: 🚀
 colorFrom: yellow
 colorTo: red
 sdk: docker
 app_port: 7860
-hardware: t4-small
+hardware: h200
 pinned: false
 license: bsd-3-clause
 ---
 
-# PharmaRL training Space — Path C fallback
+# PharmaRL training Space — H200 parallel run
 
-**This Space exists as a backup for if Colab dies during training.** It is NOT
-the primary training path. Sahil's free Colab is. Spin this up only when:
+**Faster-finish insurance for the deadline.** This Space runs the same GRPO
+training as the Colab / a10g paths, but on a single H200 (Hopper, 141 GB
+VRAM). Wall time ≈ 1.7 h, cost ≈ $5/hr, expected finish ≈ 3 h before deadline.
 
-- Colab disconnects three times in a row
-- Colab GPU quota is exhausted
-- HF deadline is <8h away and Colab is unstable
+This is the H200 sibling to the original t4-small / a10g fallback. It exists
+in parallel — Anshuman's a10g run is the primary; this is the parachute.
 
 ## What it does
 
@@ -26,43 +26,67 @@ via the `PHARMARL_ENV_URL` Space secret. SFT format priming → GRPO training �
 pushes the trained LoRA to HF Hub. A minimal HTTP server stays up so the
 Space doesn't show as "Crashed."
 
-## How to deploy (5 minutes when you need it)
+## Why a different image vs. the t4-small fallback
 
-1. **Create the Space**:
+The headline t4 / a10g fallback uses `nvidia/cuda:12.1.1-cudnn8` + PyTorch
+2.4. That stack will **not** run on H200 — sm_90 needs xformers ≥ 0.0.30 and
+bitsandbytes ≥ 0.45.5, neither of which is present in the older image. This
+Dockerfile pins the Hopper-compatible matrix:
+
+| Component | Version | Why |
+|---|---|---|
+| Base image | `pytorch:2.6.0-cuda12.4-cudnn9-devel` | Hopper-aware CUDA + cuDNN |
+| `bitsandbytes` | `>=0.45.5` | LLM.int8 on Hopper (older versions ignore sm_90) |
+| `xformers` | `>=0.0.30` | sm_90 attention kernels (0.0.27 lacks them) |
+| `transformers` | `==4.46.3` | tested-good with unsloth 2025.2.15 |
+| `trl` | `==0.13.0` | GRPOTrainer signature this trainer expects |
+| `unsloth` | `==2025.2.15` | matched against transformers 4.46.3 |
+
+## Sanity signals (in order, as the Space starts)
+
+1. `GPU: NVIDIA H200`, capability `(9, 0)` — confirms hardware
+2. `unsloth import OK` — confirms stack is consistent
+3. First training step prints `parse=100%` — confirms env reachable
+4. Every 25 steps logs without error — confirms run is stable
+5. Adapter pushed to `$HF_REPO` at end (e.g. `vijay2776/pharmarl-llama-3b-trained-vijay-h200`)
+
+## How to deploy
+
+1. **Create the Space** (or push to existing one):
    ```bash
-   # From the pharmarl repo root
-   huggingface-cli repo create pharmarl-training --type space --space_sdk docker
-   git clone https://huggingface.co/spaces/YOUR-USER/pharmarl-training /tmp/pharmarl-training
-   cp -r training_space/* /tmp/pharmarl-training/
-   cp -r scripts server pyproject.toml /tmp/pharmarl-training/
-   cd /tmp/pharmarl-training
-   git add -A && git commit -m "deploy" && git push
+   # From the pharmarl repo root, on the vijay-h200 branch
+   huggingface-cli repo create pharmarl-training-h200 --type space --space_sdk docker
+   git clone https://huggingface.co/spaces/YOUR-USER/pharmarl-training-h200 /tmp/pharmarl-h200
+   cp -r training_space/* /tmp/pharmarl-h200/
+   cp -r scripts server pyproject.toml /tmp/pharmarl-h200/
+   cd /tmp/pharmarl-h200
+   git add -A && git commit -m "deploy h200" && git push
    ```
 
 2. **Set secrets in the Space settings**:
-   - `PHARMARL_ENV_URL` = your env Space URL (e.g. `https://YOUR-USER-pharmarl.hf.space`)
+   - `PHARMARL_ENV_URL` = `https://anshumanatrey-pharmarl.hf.space` (the deployed env Space)
    - `HF_TOKEN` = a write-scoped HF token
    - `WANDB_API_KEY` = (optional) your W&B key
-   - `HF_REPO` = `YOUR-USER/pharmarl-llama-trained`
-   - `MAX_STEPS` = `200` (default; bump if more time)
+   - `HF_REPO` = `YOUR-USER/pharmarl-llama-3b-trained-vijay-h200`
+   - `MAX_STEPS` = `200` (default; the issue's reference is 200)
 
-3. **Upgrade hardware to T4 Small** in Space settings → Hardware. Confirms
-   ~$0.40/hr billing against your $30 hackathon credit.
+3. **Confirm hardware = H200** in Space settings → Hardware. Frontmatter
+   above already requests it; double-check the Space billing page reads
+   `H200 ($5/hr)`. Set timeout = 4 h.
 
 4. The Space starts, training runs, LoRA pushes to Hub, Space sits idle until
-   you delete it. Total cost for a 200-step run: ~$2-3 of credit.
+   you delete it. Total cost for a 200-step run: ~$8.50.
 
 5. **Tear down when done**: Settings → Delete Space (or downgrade hardware to
    "CPU basic" to stop billing while keeping the trained adapter URL).
 
 ## Cost ceiling
 
-T4 Small at $0.40/hr × 6h = **$2.40**. If you run for 12h: **$4.80**.
-Your $30 budget covers ~75 hours of T4 — far more than needed.
+H200 at $5/hr × 1.7h = **$8.50** expected. Hard cap with 4 h timeout = **$20**.
 
-## What if I want faster?
+## Fallback if the H200 image fails to build
 
-Upgrade hardware to A10G Small ($1.05/hr) — roughly 2× throughput on the
-forward passes. 200 GRPO steps drops from ~6h to ~3h. Cost: ~$3.
-
-Don't use A100 ($4.13/hr) — overkill for a 1B model.
+Drop back to a100-large with the older proven image
+(`nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04` + torch 2.4). Wall time goes
+to ~2.8 h, cost ≈ $4 × 2.8 = $11.20, but the stack is battle-tested. The
+older `Dockerfile` for that path lives on `main`.

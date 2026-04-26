@@ -38,6 +38,28 @@ def _required(key: str) -> str:
     return val
 
 
+def _gpu_sanity_check(logf) -> None:
+    """Issue #14 acceptance: log GPU + unsloth import OK before training starts."""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            name = torch.cuda.get_device_name(0)
+            cap = torch.cuda.get_device_capability(0)
+            logf.write(f"[{time.strftime('%H:%M:%S')}] GPU: {name} capability={cap}\n")
+            STATE["gpu"] = name
+            STATE["gpu_capability"] = list(cap)
+        else:
+            logf.write(f"[{time.strftime('%H:%M:%S')}] GPU: NONE (cuda.is_available()=False)\n")
+            STATE["gpu"] = None
+        import unsloth  # noqa: F401
+        logf.write(f"[{time.strftime('%H:%M:%S')}] unsloth import OK\n")
+        STATE["unsloth_ok"] = True
+    except Exception as e:
+        logf.write(f"[{time.strftime('%H:%M:%S')}] sanity check FAILED: {e}\n")
+        STATE["unsloth_ok"] = False
+    logf.flush()
+
+
 def _train_in_background():
     try:
         env_url = _required("PHARMARL_ENV_URL")
@@ -62,6 +84,7 @@ def _train_in_background():
         STATE["phase"] = "training"
         STATE["cmd"] = " ".join(cmd)
         with open(LOG_PATH, "a") as logf:
+            _gpu_sanity_check(logf)
             logf.write(f"[{time.strftime('%H:%M:%S')}] starting: {' '.join(cmd)}\n")
             logf.flush()
             proc = subprocess.Popen(
