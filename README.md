@@ -100,6 +100,18 @@ python scripts/smoke_notebook_locally.py
 
 Multi-step episode state is keyed by `episode_id` — pass the same `episode_id` to `/reset` and every `/step` in a rollout. Different rollouts (e.g. GRPO group members) use different `episode_id`s and proceed concurrently.
 
+## Training note (Kaggle / free GPU)
+
+For Kaggle free GPU runs, use the standalone trainer as the primary path:
+
+```bash
+python -m scripts.train_grpo --env-url "https://YOUR-USER-pharmarl.hf.space" --output-dir "/kaggle/working/trained"
+```
+
+`colab/train_pharmarl.ipynb` includes demo and analysis cells, but its custom training loop contains partial/stub logic and should not be treated as the primary GRPO training path.
+
+On Kaggle, save outputs/checkpoints under `/kaggle/working/...` and keep frequent checkpoint cadence (for example `--save-every 25` or `--save-every 50`) so interrupted sessions can be resumed from the latest saved adapter.
+
 ## Themes hit
 
 - **Theme 3.1 Professional Tasks** — a scientific workflow loop (SELFIES editing → oracle scoring → reward-shaped optimization) directly mapping to the medicinal-chemistry hit-finding pipeline.
