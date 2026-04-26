@@ -322,7 +322,11 @@ def build_parser() -> argparse.ArgumentParser:
     pl.add_argument("--model", default="unsloth/Llama-3.2-1B-Instruct")
     pl.add_argument("--max-steps", type=int, default=200)
     pl.add_argument("--num-generations", type=int, default=8)
-    pl.add_argument("--sft-warmup-steps", type=int, default=60)
+    pl.add_argument("--sft-warmup-steps", type=int, default=120,
+                    help="SFT format-priming steps before GRPO. The 60 default in train_grpo "
+                         "leaves a 1B Llama unable to emit parseable JSON; rollouts then all "
+                         "hit the hard-coded fallback action and GRPO gets zero advantage signal "
+                         "(pol≈0). 120 is the value the trainer's own post-SFT warning recommends.")
     pl.add_argument("--save-every", type=int, default=25)
     pl.add_argument("--audit-every", type=int, default=25)
     pl.add_argument("--wandb-project", default="pharmarl")
