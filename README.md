@@ -13,12 +13,12 @@ short_description: OpenEnv-native LLM-as-policy molecular optimization.
 
 # 💊 PharmaRL
 
-### **A 70-billion-parameter language model lost to random noise on our env.**
-### *Then we figured out exactly why.*
+### *Same canonical drug-discovery RL benchmark since 2017.*
+### *New question — can a chat agent solve it?*
 
 ```mermaid
 flowchart LR
-    THESIS("<b>PharmaRL</b> is an <b>OpenEnv-native benchmark</b> for evaluating <b>LLMs as policies</b><br/>on <b>iterative molecular optimization</b>, with <b>verifiable RLVE rewards</b><br/>and <b>three reward-hacking defenses</b> validated by <b>inverted-scaling probe data</b>.")
+    THESIS("<b>PharmaRL</b> is the first <b>OpenEnv-native benchmark</b> for evaluating <b>LLMs as policies</b><br/>on <b>iterative molecular optimization</b>, with <b>verifiable RLVE rewards</b><br/>and <b>three structural reward-hacking defenses</b>.")
 
     A("Meta's open standard contract<br/>FastAPI · Docker · pip<br/>Live on HF Spaces today")
     B("Same TDC oracles the field<br/>has used since 2017<br/>DRD2 · GSK3B · JNK3")
@@ -26,15 +26,15 @@ flowchart LR
     D("10–20 step trajectory of<br/>ADD · REMOVE · SUBSTITUTE<br/>State persists per episode")
     E("Deterministic & reproducible<br/>pip install pytdc to verify<br/>No LLM judge in the loop")
     F("Composite oracle dilution<br/>Lipinski terminal gate<br/>14 redteam regression tests")
-    G("Llama 70B fell below random<br/>Six baselines for $0.16<br/>Discipline beats capacity")
+    G("Held-out JNK3 transfer test<br/>Train DRD2 + GSK3B<br/>Measure cross-target lift")
 
     THESIS -->|"OpenEnv-native"| A
     THESIS -->|"benchmark"| B
     THESIS -->|"LLMs as policies"| C
     THESIS -->|"iterative molecular optimization"| D
     THESIS -->|"verifiable RLVE rewards"| E
-    THESIS -->|"three reward-hacking defenses"| F
-    THESIS -->|"inverted-scaling probe data"| G
+    THESIS -->|"reward-hacking defenses"| F
+    THESIS -->|"held-out generalization"| G
 
     classDef thesis fill:#1e293b,stroke:#6366f1,stroke-width:2px,color:#f1f5f9,rx:18,ry:18;
     classDef leaf fill:#0f172a,stroke:#475569,stroke-width:1px,color:#cbd5e1,rx:12,ry:12;
