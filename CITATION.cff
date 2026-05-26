@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use PharmaRL in your research, please cite the manuscript and software via the Zenodo DOIs below."
+title: "PharmaRL: An OpenEnv-Native Benchmark for LLM-as-Policy Molecular Optimization"
+abstract: >-
+  PharmaRL is an OpenEnv-native benchmark for evaluating large language models as policies
+  on iterative molecular optimization, with verifiable RLVE rewards on Therapeutics Data
+  Commons oracles (DRD2, GSK3B, JNK3) and three structural reward-hacking defenses.
+  Companion manuscript: "AI Alchemy in Medicine: A Vision for LLM-as-Policy Molecular
+  Design via OpenEnv."
+type: software
+authors:
+  - family-names: Atrey
+    given-names: Anshuman
+    affiliation: "AI Mafias"
+  - family-names: Shah
+    given-names: Sahil
+    affiliation: "AI Mafias"
+  - family-names: Kota
+    given-names: Vijay
+    affiliation: "AI Mafias"
+repository-code: "https://github.com/AnshumanAtrey/pharmarl"
+url: "https://huggingface.co/spaces/anshumanatrey/pharmarl"
+license: BSD-3-Clause
+keywords:
+  - reinforcement-learning
+  - large-language-models
+  - drug-discovery
+  - molecular-optimization
+  - openenv
+  - rlve
+  - therapeutics-data-commons
+  - grpo
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.19953133
+    description: "Manuscript and software, version 3 (current)"
+  - type: doi
+    value: 10.5281/zenodo.19788569
+    description: "Concept DOI (always resolves to the latest version)"
+preferred-citation:
+  type: article
+  title: "AI Alchemy in Medicine: A Vision for LLM-as-Policy Molecular Design via OpenEnv"
+  authors:
+    - family-names: Atrey
+      given-names: Anshuman
+    - family-names: Shah
+      given-names: Sahil
+    - family-names: Kota
+      given-names: Vijay
+  year: 2026
+  doi: 10.5281/zenodo.19953133
+  url: "https://doi.org/10.5281/zenodo.19953133"
+  notes: "Preprint deposited on Zenodo; manuscript under preparation for journal submission."

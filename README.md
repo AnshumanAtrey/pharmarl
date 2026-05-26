@@ -42,7 +42,7 @@ flowchart LR
     class A,B,C,D,E,F,G leaf;
 ```
 
-[**🤗 Live env**](https://huggingface.co/spaces/anshumanatrey/pharmarl) · [**💻 Code**](https://github.com/AnshumanAtrey/pharmarl) · [**📓 Train it yourself**](colab/train_pharmarl.ipynb) · [**🎙️ 90s pitch**](#materials) · [**🧪 Trained model**](#materials)
+[**🤗 Live env**](https://huggingface.co/spaces/anshumanatrey/pharmarl) · [**💻 Code**](https://github.com/AnshumanAtrey/pharmarl) · [**📄 Manuscript (Zenodo DOI)**](https://doi.org/10.5281/zenodo.19953133) · [**📓 Train it yourself**](colab/train_pharmarl.ipynb) · [**🎙️ 90s pitch**](#materials) · [**🧪 Trained model**](#materials)
 
 > Built for the Meta PyTorch OpenEnv Hackathon · Apr '26 · by **AI Mafias** — Anshuman, Sahil, Vijay.
 
@@ -144,6 +144,14 @@ State is keyed by `episode_id` — pass the same id to `/reset` and every `/step
 - 🎙️ **90-second pitch video** — *added after recording*
 - 🧪 **Trained model on HF Hub** — *published after training run completes*
 - 📈 **Live W&B training run** — *added after kickoff*
+
+## Manuscript
+
+The manuscript (*AI Alchemy in Medicine: A Vision for LLM-as-Policy Molecular Design via OpenEnv*) is available on Zenodo:
+
+**DOI:** [10.5281/zenodo.19953133](https://doi.org/10.5281/zenodo.19953133) — citable, timestamped, CERN-backed.
+
+Currently under preparation for journal submission. To cite this work, use the metadata in `CITATION.cff` or the Zenodo record above. The LaTeX source has been moved to a private repository while the manuscript is in review; this repository continues to host the code, environment, training notebooks, and supplementary artifacts.
 
 ## Citations
 
