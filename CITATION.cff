@@ -33,10 +33,7 @@ keywords:
 identifiers:
   - type: doi
     value: 10.5281/zenodo.19953133
-    description: "Manuscript and software, version 3 (current)"
-  - type: doi
-    value: 10.5281/zenodo.19788569
-    description: "Concept DOI (always resolves to the latest version)"
+    description: "Manuscript and software, version 3 (latest, May 1 2026)"
 preferred-citation:
   type: article
   title: "AI Alchemy in Medicine: A Vision for LLM-as-Policy Molecular Design via OpenEnv"
